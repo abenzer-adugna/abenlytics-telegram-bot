@@ -48,13 +48,19 @@
       padding: 20px;
       backdrop-filter: blur(6px);
       box-shadow: 0 8px 20px rgba(0,0,0,0.5);
-      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      transition: transform 0.2s ease, box-shadow 0.2s ease, opacity 0.5s;
       cursor: pointer;
       position: relative;
+      opacity: 0;
+      transform: translateY(20px);
+    }
+
+    .card.show {
+      opacity: 1;
+      transform: translateY(0);
     }
 
     .card:hover {
-      transform: translateY(-4px);
       box-shadow: 0 12px 25px rgba(255, 203, 107, 0.3);
     }
 
@@ -64,9 +70,6 @@
 
     .dropdown-content {
       display: none;
-      position: absolute;
-      top: 100%;
-      left: 0;
       background-color: rgba(40, 40, 40, 0.9);
       border-radius: 10px;
       padding: 10px;
@@ -82,7 +85,7 @@
       padding-left: 8px;
     }
 
-    .card.dropdown:hover .dropdown-content {
+    .dropdown.open .dropdown-content {
       display: block;
     }
 
@@ -125,7 +128,7 @@
       <h2>📑 Prospectus Review</h2>
     </div>
 
-    <div class="card dropdown">
+    <div class="card dropdown" id="roadmap-card">
       <h2>🗺️ Roadmap for Investing</h2>
       <ul class="dropdown-content">
         <li>📈 Long-Term Investment Roadmap</li>
@@ -146,5 +149,25 @@
   <footer>
     &copy; 2025 Abenlytics Club — All rights reserved
   </footer>
+
+  <script>
+    // Show cards when they enter the viewport
+    const cards = document.querySelectorAll('.card');
+    const observer = new IntersectionObserver(entries => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('show');
+        }
+      });
+    }, {
+      threshold: 0.2
+    });
+    cards.forEach(card => observer.observe(card));
+
+    // Toggle dropdown on click
+    document.getElementById("roadmap-card").addEventListener("click", () => {
+      document.getElementById("roadmap-card").classList.toggle("open");
+    });
+  </script>
 </body>
 </html>
