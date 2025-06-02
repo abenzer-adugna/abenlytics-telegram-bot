@@ -1,30 +1,106 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Abenlytics Web App</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            padding: 20px;
-            text-align: center;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Abenlytics Club</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #6C63FF;
+      --dark: #2F2E41;
+      --light: #F8F9FA;
+    }
+    body {
+      font-family: 'Poppins', sans-serif;
+      background-color: var(--light);
+      color: var(--dark);
+      margin: 0;
+      padding: 0;
+    }
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 2rem;
+    }
+    header {
+      background: linear-gradient(135deg, var(--primary), #4A42E6);
+      color: white;
+      padding: 3rem 0;
+      text-align: center;
+      border-radius: 0 0 20px 20px;
+    }
+    h1 {
+      font-weight: 700;
+      font-size: 2.5rem;
+      margin-bottom: 1rem;
+    }
+    .cta {
+      background-color: white;
+      color: var(--primary);
+      padding: 12px 24px;
+      border-radius: 50px;
+      text-decoration: none;
+      font-weight: 500;
+      display: inline-block;
+      margin-top: 1rem;
+      box-shadow: 0 4px 15px rgba(108, 99, 255, 0.3);
+    }
+    .features {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 2rem;
+      margin: 3rem 0;
+    }
+    .feature-card {
+      background: white;
+      padding: 1.5rem;
+      border-radius: 12px;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+      transition: transform 0.3s ease;
+    }
+    .feature-card:hover {
+      transform: translateY(-5px);
+    }
+  </style>
 </head>
 <body>
-    <h1>Welcome to Abenlytics!</h1>
-    <p>This is your Telegram Web App.</p>
-    
-    <script>
-        // Initialize Telegram Web App
-        Telegram.WebApp.ready();
-        Telegram.WebApp.expand();
-        
-        // Optional: Send data back to bot
-        document.body.addEventListener('click', () => {
-            Telegram.WebApp.sendData('Hello from web app!');
-        });
-    </script>
+  <header>
+    <div class="container">
+      <h1>Abenlytics Club</h1>
+      <p>Master data science and analytics with our curated resources</p>
+      <a href="#features" class="cta">Explore Features</a>
+    </div>
+  </header>
+
+  <div class="container">
+    <section id="features" class="features">
+      <div class="feature-card">
+        <h3>📚 Courses</h3>
+        <p>Structured learning paths for all skill levels</p>
+      </div>
+      <div class="feature-card">
+        <h3>🧭 Roadmaps</h3>
+        <p>Step-by-step guides to career mastery</p>
+      </div>
+      <div class="feature-card">
+        <h3>👨‍💻 Mentorship</h3>
+        <p>Get personalized guidance from experts</p>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    // Telegram Web App integration
+    if (window.Telegram.WebApp) {
+      Telegram.WebApp.expand();
+      Telegram.WebApp.MainButton.text = "Join Club";
+      Telegram.WebApp.MainButton.show();
+      
+      Telegram.WebApp.MainButton.onClick(() => {
+        Telegram.WebApp.openTelegramLink('https://t.me/your_group_link');
+      });
+    }
+  </script>
 </body>
 </html>
