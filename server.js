@@ -5,27 +5,26 @@ const app = express();
 const token = process.env.BOT_TOKEN;
 const bot = new TelegramBot(token, { polling: true });
 
-// Command: /start
 bot.onText(/\/start/, (msg) => {
-  bot.sendMessage(msg.chat.id, 👋 Welcome to *Abenlytics Club*!
+  const welcomeMessage = 
+👋 Welcome to *Abenlytics Club!*
 
 Here’s what you can access:
-📚 Book Reviews  
-🧭 Roadmaps  
-📩 Weekly Newsletter  
-🔎 Prospectus Reviews  
+📚 Book Reviews
+🧭 Roadmaps
+📩 Newsletter
+🔎 Prospectus Review
 👥 1-on-1 Help
 
-Join our community and start learning together!);
+Join our Telegram group for live discussion!
+  ;
+  bot.sendMessage(msg.chat.id, welcomeMessage, { parse_mode: "Markdown" });
 });
 
-// Web interface
 app.get('/', (req, res) => {
-  res.send('✅ Abenlytics Bot is Running!');
+  res.send('Abenlytics Club Bot is running!');
 });
 
-// Keep alive
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-  console.log(Server is live at http://localhost:${PORT});
+app.listen(process.env.PORT || 3000, () => {
+  console.log('✅ Server is running on port', process.env.PORT || 3000);
 });
