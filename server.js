@@ -8,27 +8,50 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 const TOKEN = process.env.BOT_TOKEN;
 
-// Initialize bot based on environment
-const bot = process.env.NODE_ENV === 'production' 
-  ? new TelegramBot(TOKEN)
-  : new TelegramBot(TOKEN, { polling: true });
+// Initialize bot
+const bot = new TelegramBot(TOKEN, { polling: true });
 
-// Webhook setup for production
+// Error handling middleware
+app.use((err, req, res, next) => {
+  console.error(err.stack);
+  res.status(500).send('Something broke!');
+});
+
+// Webhook setup for production (optional)
 if (process.env.NODE_ENV === 'production') {
   const webhookUrl = `https://${process.env.RENDER_EXTERNAL_HOSTNAME}/bot${TOKEN}`;
-  bot.setWebHook(webhookUrl);
+  bot.setWebHook(webhookUrl).catch(err => {
+    console.error('Webhook setup failed:', err);
+  });
+
   app.post(`/bot${TOKEN}`, (req, res) => {
-    bot.processUpdate(req.body);
-    res.sendStatus(200);
+    try {
+      bot.processUpdate(req.body);
+      res.sendStatus(200);
+    } catch (err) {
+      console.error('Error processing update:', err);
+      res.sendStatus(200); // Still return 200 to prevent Telegram from retrying
+    }
   });
 }
 
-// Bot commands
+// Basic command handler with error handling
 bot.onText(/\/start/, (msg) => {
-  bot.sendMessage(msg.chat.id, 'Welcome to Abenlytics!');
+  try {
+    const chatId = msg.chat.id;
+    bot.sendMessage(chatId, 'Welcome to Abenlytics Bot!').catch(err => {
+      console.error('Error sending welcome message:', err);
+    });
+  } catch (err) {
+    console.error('Error in /start handler:', err);
+  }
 });
 
-// Health check
-app.get('/', (req, res) => res.send('Bot is running!'));
+// Health check endpoint
+app.get('/', (req, res) => {
+  res.send('Bot is running!');
+});
 
-app.listen(PORT, () => console.log(`Server running on ${PORT}`));
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
+});
