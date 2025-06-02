@@ -1,57 +1,43 @@
 const express = require('express');
+const path = require('path'); // Don't forget to require path
 const TelegramBot = require('node-telegram-bot-api');
-
-// Load .env only in development
-if (process.env.NODE_ENV !== 'production') require('dotenv').config();
 
 const app = express();
 const PORT = process.env.PORT || 3000;
-const TOKEN = process.env.BOT_TOKEN;
 
-// Initialize bot
+// ===== FIX 1: PROPER STATIC FILE HANDLING =====
+app.use(express.static(path.join(__dirname, 'public')));
+app.use('/public', express.static(path.join(__dirname, 'public')));
+
+// ===== FIX 2: EXPLICIT WEB APP ROUTE =====
+app.get('/webapp', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
+
+// ===== FIX 3: FALLBACK FOR ALL ROUTES =====
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
+
+// (Keep your existing bot code here)
+const TOKEN = process.env.BOT_TOKEN;
 const bot = new TelegramBot(TOKEN, { polling: true });
 
-// Error handling middleware
-app.use((err, req, res, next) => {
-  console.error(err.stack);
-  res.status(500).send('Something broke!');
-});
-
-// Webhook setup for production (optional)
-if (process.env.NODE_ENV === 'production') {
-  const webhookUrl = `https://${process.env.RENDER_EXTERNAL_HOSTNAME}/bot${TOKEN}`;
-  bot.setWebHook(webhookUrl).catch(err => {
-    console.error('Webhook setup failed:', err);
-  });
-
-  app.post(`/bot${TOKEN}`, (req, res) => {
-    try {
-      bot.processUpdate(req.body);
-      res.sendStatus(200);
-    } catch (err) {
-      console.error('Error processing update:', err);
-      res.sendStatus(200); // Still return 200 to prevent Telegram from retrying
-    }
-  });
-}
-
-// Basic command handler with error handling
 bot.onText(/\/start/, (msg) => {
-  try {
-    const chatId = msg.chat.id;
-    bot.sendMessage(chatId, 'Welcome to Abenlytics Bot!').catch(err => {
-      console.error('Error sending welcome message:', err);
-    });
-  } catch (err) {
-    console.error('Error in /start handler:', err);
-  }
+  const options = {
+    reply_markup: {
+      inline_keyboard: [
+        [{
+          text: '📘 Open Web App', 
+          web_app: { 
+            // ===== FIX 4: USE THE EXPLICIT ROUTE =====
+            url: 'https://abenlytics-telegram-bot.onrender.com/webapp'
+          }
+        }]
+      ]
+    }
+  };
+  bot.sendMessage(msg.chat.id, 'Try our web app:', options);
 });
 
-// Health check endpoint
-app.get('/', (req, res) => {
-  res.send('Bot is running!');
-});
-
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-});
+app.listen(PORT, () => console.log(`Server running on ${PORT}`));
