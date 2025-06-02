@@ -17,9 +17,9 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 // Webhook setup (for production)
 if (process.env.NODE_ENV === 'production') {
-  const WEBHOOK_URL = https://${process.env.RENDER_EXTERNAL_HOSTNAME}/bot${TOKEN};
+  const WEBHOOK_URL = `https://${process.env.RENDER_EXTERNAL_HOSTNAME}/bot${TOKEN}`; // ✅ Fixed: Use backticks
   bot.setWebHook(WEBHOOK_URL);
-  app.post(/bot${TOKEN}, (req, res) => {
+  app.post(`/bot${TOKEN}`, (req, res) => {
     bot.processUpdate(req.body);
     res.sendStatus(200);
   });
@@ -27,14 +27,14 @@ if (process.env.NODE_ENV === 'production') {
 
 // Telegram bot commands
 bot.onText(/\/start/, (msg) => {
-  const welcomeMessage = 👋 Welcome to *Abenlytics Club!*\n\nChoose an option below to get started.;
+  const welcomeMessage = `👋 Welcome to *Abenlytics Club!*\n\nChoose an option below to get started.`;
   const options = {
     parse_mode: 'Markdown',
     reply_markup: {
       inline_keyboard: [
         [{
           text: '📘 Courses', 
-          web_app: { url: https://${process.env.RENDER_EXTERNAL_HOSTNAME} } 
+          web_app: { url: `https://${process.env.RENDER_EXTERNAL_HOSTNAME}` } // ✅ Fixed: Use backticks
         }],
         [{
           text: '📩 Contact', 
@@ -47,4 +47,11 @@ bot.onText(/\/start/, (msg) => {
 });
 
 // Health check route
-app.get('/', (req, res)
+app.get('/', (req, res) => {
+  res.send('Abenlytics Bot is running!');
+});
+
+// Start server
+app.listen(PORT, () => {
+  console.log(`🚀 Server running on port ${PORT}`);
+});
