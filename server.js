@@ -1,27 +1,23 @@
-const TelegramBot = require('node-telegram-bot-api');
 const express = require('express');
-const app = express();
+const path = require('path');
+const TelegramBot = require('node-telegram-bot-api');
 
-const token = process.env.BOT_TOKEN;
+const app = express();
+const port = process.env.PORT || 3000;
+
+// Serve static files from the "public" folder
+app.use(express.static(path.join(__dirname, 'public')));
+
+// Telegram bot setup
+const token = process.env.BOT_TOKEN; // Make sure this is set in your environment variables
 const bot = new TelegramBot(token, { polling: true });
 
 bot.onText(/\/start/, (msg) => {
-  const welcomeMessage = `👋 Welcome to *Abenlytics Club!*
-
-Here's what you can access:
-📚 Book Reviews  
-🧭 Roadmaps  
-📩 Newsletter  
-🔎 Prospectus Review  
-👥 1-on-1 Help  
-
-Join our Telegram group for live discussion!`;
-
-  bot.sendMessage(msg.chat.id, welcomeMessage, { parse_mode: 'Markdown' });
+  const welcomeMessage = "👋 Welcome to *Abenlytics Club!*";
+  bot.sendMessage(msg.chat.id, welcomeMessage, { parse_mode: "Markdown" });
 });
 
-app.get('/', (req, res) => {
-  res.send('Abenlytics Club Bot is running!');
+// Start the server
+app.listen(port, () => {
+  console.log(Server is running on port ${port});
 });
-
-app.listen(process.env.PORT || 3000);
