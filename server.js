@@ -39,11 +39,11 @@ app.post('/api/service', async (req, res) => {
         await bot.sendMessage(userData.id, '📚 Download your book here:\nhttps://example.com/books.zip');
         break;
       case 'one_on_one':
-        await bot.sendMessage('1139124574', 📞 New 1-on-1 request:\n\n${JSON.stringify(userData, null, 2)});
-        await bot.sendMessage(userData.id, ✅ Got it! We'll reach out to you within 24 hrs.);
+        await bot.sendMessage('1139124574', '📞 New 1-on-1 request:\n\n${JSON.stringify(userData, null, 2)}');
+        await bot.sendMessage(userData.id, '✅ Got it! We'll reach out to you within 24 hrs.');
         break;
       case 'newsletter':
-        await bot.sendMessage(userData.id, 📬 You're now subscribed to the Abenlytics Newsletter.);
+        await bot.sendMessage(userData.id, '📬 You're now subscribed to the Abenlytics Newsletter.');
         break;
       default:
         throw new Error('❌ Invalid serviceType');
@@ -60,7 +60,7 @@ app.post('/api/service', async (req, res) => {
 // Telegram /start
 bot.onText(/\/start/, (msg) => {
   const chatId = msg.chat.id;
-  const text = 👋 Welcome to Abenlytics Club!\n\nUse the menu below to access investing tools, roadmaps, books, and more.;
+  const text = '👋 Welcome to Abenlytics Club!\n\nUse the menu below to access investing tools, roadmaps, books, and more.;'
 
   bot.sendMessage(chatId, text, {
     reply_markup: {
