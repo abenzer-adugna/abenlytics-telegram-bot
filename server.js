@@ -18,7 +18,7 @@ bot.setWebHook('${webAppUrl}/bot${token}')
   .catch(console.error);
 
 // Telegram webhook handler
-app.post(/bot${token}, (req, res) => {
+app.post('/bot${token}', (req, res) => {
   bot.processUpdate(req.body);
   res.sendStatus(200);
 });
