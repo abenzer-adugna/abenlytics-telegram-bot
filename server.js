@@ -1,4 +1,3 @@
-// server.js
 require('dotenv').config();
 const express = require('express');
 const TelegramBot = require('node-telegram-bot-api');
@@ -14,10 +13,10 @@ const bot = new TelegramBot(TOKEN, { polling: true });
 // Serve static files
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Handle /start command with interactive menu
+// Handle /start command
 bot.onText(/\/start/, (msg) => {
   const chatId = msg.chat.id;
-  const welcomeMessage = 👋 Welcome to *Abenlytics Club!*\n\nYour premier stock and crypto investment hub.;
+  const welcomeMessage = `👋 Welcome to *Abenlytics Club!*\n\nYour premier stock and crypto investment hub.`;
   
   const menuOptions = {
     parse_mode: 'Markdown',
@@ -42,12 +41,12 @@ bot.onText(/\/resources/, (msg) => {
   bot.sendMessage(msg.chat.id, 'Explore our resources: ' + process.env.WEB_APP_URL);
 });
 
-// Webhook for production (if needed)
+// Webhook for production
 if (process.env.NODE_ENV === 'production') {
-  const WEBHOOK_URL = ${process.env.BASE_URL}/bot${TOKEN};
+  const WEBHOOK_URL = `${process.env.BASE_URL}/bot${TOKEN}`;
   bot.setWebHook(WEBHOOK_URL);
   
-  app.post(/bot${TOKEN}, (req, res) => {
+  app.post(`/bot${TOKEN}`, (req, res) => {
     bot.processUpdate(req.body);
     res.sendStatus(200);
   });
@@ -60,6 +59,6 @@ app.get('/', (req, res) => {
 
 // Start server
 app.listen(PORT, () => {
-  console.log(🚀 Server running on port ${PORT});
-  console.log(🌐 Web App: ${process.env.WEB_APP_URL || 'Set WEB_APP_URL in .env'});
+  console.log(`🚀 Server running on port ${PORT}`);
+  console.log(`🌐 Web App: ${process.env.WEB_APP_URL || 'Set WEB_APP_URL in .env'}`);
 });
