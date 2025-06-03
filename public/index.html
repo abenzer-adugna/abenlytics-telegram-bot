@@ -5,6 +5,17 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Abenlytics Club</title>
   <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+  
+  <!-- Telegram Web App SDK -->
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  
+  <!-- Security-focused CSP -->
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; 
+    script-src 'self' https://telegram.org https://cdn.jsdelivr.net; 
+    style-src 'self' https://cdn.jsdelivr.net 'unsafe-inline'; 
+    img-src 'self' data: https://*.coingecko.com; 
+    connect-src 'self' https://api.coingecko.com">
+  
   <script defer src="app.js"></script>
 </head>
 <body class="bg-gray-100 text-gray-800">
@@ -31,35 +42,104 @@
 
   <!-- Hero Section -->
   <section class="text-center py-10 px-4">
-    <h2 class="text-3xl font-bold mb-4">📊 Your Gateway to Smarter Investing</h2>
+    <h2 class="text-3xl font-bold mb-4" id="welcomeMessage">📊 Your Gateway to Smarter Investing</h2>
     <p class="text-gray-600 max-w-xl mx-auto">Access top investing tools, book reviews, weekly newsletters, and more — all in one place.</p>
+    
+    <!-- User status indicator -->
+    <div id="userStatus" class="mt-4 p-3 bg-blue-50 rounded-lg hidden">
+      <span class="text-blue-700">✅ Signed in via Telegram</span>
+    </div>
   </section>
 
   <!-- Live Crypto Feed -->
   <section id="crypto" class="bg-white p-6 shadow-lg max-w-4xl mx-auto my-10 rounded-lg">
     <h3 class="text-xl font-semibold mb-4">💹 Live Crypto Prices</h3>
     <div id="cryptoFeed" class="grid grid-cols-1 md:grid-cols-3 gap-6">
-      <!-- Live prices will be injected here -->
+      <div class="animate-pulse bg-gray-100 p-4 rounded-lg">
+        <div class="h-4 bg-gray-300 rounded w-3/4 mb-2"></div>
+        <div class="h-6 bg-gray-300 rounded w-1/2"></div>
+      </div>
+      <div class="animate-pulse bg-gray-100 p-4 rounded-lg">
+        <div class="h-4 bg-gray-300 rounded w-3/4 mb-2"></div>
+        <div class="h-6 bg-gray-300 rounded w-1/2"></div>
+      </div>
+      <div class="animate-pulse bg-gray-100 p-4 rounded-lg">
+        <div class="h-4 bg-gray-300 rounded w-3/4 mb-2"></div>
+        <div class="h-6 bg-gray-300 rounded w-1/2"></div>
+      </div>
     </div>
   </section>
 
   <!-- Services -->
   <section id="services" class="p-6 max-w-4xl mx-auto">
     <h3 class="text-xl font-semibold mb-4">🧩 Our Services</h3>
-    <ul class="space-y-4">
-      <li>✅ 1-on-1 Help</li>
-      <li>📘 Essential Investing Books</li>
-      <li>🧠 Book Reviews & Insights</li>
-      <li>👥 Community Group</li>
-      <li>📄 Prospectus Review</li>
-      <li>🗞️ Weekly Investing Newsletter</li>
-      <li>🗺️ Roadmaps: Long-term, Swing, Short-term</li>
-    </ul>
+    
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <button id="bookDownloadBtn" class="service-btn bg-blue-500 hover:bg-blue-600">
+        📘 Download Essential Books
+      </button>
+      
+      <button id="oneOnOneBtn" class="service-btn bg-green-500 hover:bg-green-600">
+        👥 Request 1-on-1 Help
+      </button>
+      
+      <button id="newsletterBtn" class="service-btn bg-purple-500 hover:bg-purple-600 md:col-span-2">
+        📩 Subscribe to Newsletter
+      </button>
+    </div>
+    
+    <div class="mt-6 bg-yellow-50 p-4 rounded-lg">
+      <p class="text-yellow-700">ℹ️ Open this app in Telegram to access all services</p>
+    </div>
   </section>
 
   <!-- Footer -->
   <footer class="text-center text-sm text-gray-500 py-6">
     &copy; 2025 Abenlytics Club — All rights reserved.
   </footer>
+
+  <!-- Service Modals -->
+  <div id="oneOnOneModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center p-4 z-50">
+    <div class="bg-white rounded-lg max-w-md w-full p-6">
+      <h3 class="text-xl font-bold mb-4">👥 1-on-1 Consultation</h3>
+      <form id="consultationForm">
+        <div class="mb-4">
+          <label class="block text-gray-700 mb-2" for="name">Name</label>
+          <input type="text" id="name" required 
+                 class="w-full px-3 py-2 border rounded-lg">
+        </div>
+        <div class="mb-4">
+          <label class="block text-gray-700 mb-2" for="email">Email</label>
+          <input type="email" id="email" required 
+                 class="w-full px-3 py-2 border rounded-lg">
+        </div>
+        <div class="mb-4">
+          <label class="block text-gray-700 mb-2" for="topic">Topic</label>
+          <select id="topic" class="w-full px-3 py-2 border rounded-lg">
+            <option>Portfolio Review</option>
+            <option>Investment Strategy</option>
+            <option>Stock Analysis</option>
+            <option>Crypto Guidance</option>
+          </select>
+        </div>
+        <div class="flex justify-end space-x-3">
+          <button type="button" id="cancelConsultation" 
+                  class="px-4 py-2 bg-gray-300 rounded-lg hover:bg-gray-400">
+            Cancel
+          </button>
+          <button type="submit" 
+                  class="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600">
+            Submit Request
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <style>
+    .service-btn {
+      @apply text-white py-3 px-4 rounded-lg transition duration-300 transform hover:scale-105;
+    }
+  </style>
 </body>
-</html>
+            </html>
