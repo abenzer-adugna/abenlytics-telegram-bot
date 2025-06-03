@@ -1,148 +1,57 @@
-/**
- * Handles POST requests from Telegram Web App
- * @param {Object} e - Event object containing POST data
- */
-function doPost(e) {
-  let response;
-  
-  try {
-    // Validate request has data
-    if (!e  !e.postData  !e.postData.contents) {
-      throw new Error("Invalid request: No data received");
-    }
+const express = require('express');
+const path = require('path');
+const TelegramBot = require('node-telegram-bot-api');
+require('dotenv').config();
 
-    // Parse incoming JSON data
-    const data = JSON.parse(e.postData.contents);
-    const service = data.service;
-    const user = data.user || {};
-    
-    // Validate required fields
-    if (!service) {
-      throw new Error("Service type not specified");
-    }
+const app = express();
+const PORT = process.env.PORT || 3000;
+const TOKEN = process.env.BOT_TOKEN;
 
-    // Process different service requests
-    switch(service) {
-      case "book_download":
-        response = handleBookDownload(user);
-        break;
-      case "one_on_one":
-        response = handleOneOnOneRequest(user);
-        break;
-      case "newsletter":
-        response = handleNewsletterSignup(user);
-        break;
-      default:
-        throw new Error("Unknown service requested");
-    }
-    
-    // Log successful request
-    logRequest(user, service, "success");
-    
-  } catch (error) {
-    // Log error
-    logRequest(user  {}, service  "unknown", "error: " + error.message);
-    
-    // Return error response
-    response = {
-      status: "error",
-      message: error.message
-    };
-  }
-  
-  // Return JSON response
-  return ContentService
-    .createTextOutput(JSON.stringify(response))
-    .setMimeType(ContentService.MimeType.JSON);
-}
+// Initialize bot (switch to webhook if deployed)
+const bot = process.env.NODE_ENV === 'production' 
+  ? new TelegramBot(TOKEN) 
+  : new TelegramBot(TOKEN, { polling: true });
 
-/**
- * Handles book download requests
- */
-function handleBookDownload(user) {
-  const fileName = "Essential_Investing_Books.zip";
-  const file = DriveApp.getFilesByName(fileName).next();
-  
-  return {
-    status: "success",
-    action: "download",
-    url: file.getDownloadUrl(),
-    user: user.id
-  };
-}
+// Serve static files (for web app)
+app.use(express.static(path.join(__dirname, 'public')));
 
-/**
- * Handles 1:1 help requests
- */
-function handleOneOnOneRequest(user) {
-  const botToken = PropertiesService.getScriptProperties().getProperty('BOT_TOKEN');
-  const message = New 1:1 request from ${user.first_name} (${user.username || 'no username'});
-  
-  UrlFetchApp.fetch(https://api.telegram.org/bot${botToken}/sendMessage, {
-    method: "post",
-    contentType: "application/json",
-    payload: JSON.stringify({
-      chat_id: user.id,
-      text: "Your 1:1 request has been received! We'll contact you soon."
-    })
+// Webhook setup (for production)
+if (process.env.NODE_ENV === 'production') {
+  const WEBHOOK_URL = https://${process.env.RENDER_EXTERNAL_HOSTNAME}/bot${TOKEN};
+  bot.setWebHook(WEBHOOK_URL);
+  app.post(/bot${TOKEN}, (req, res) => {
+    bot.processUpdate(req.body);
+    res.sendStatus(200);
   });
-  
-  // Notify admin
-  const adminChatId = "YOUR_ADMIN_CHAT_ID";
-  UrlFetchApp.fetch(https://api.telegram.org/bot${botToken}/sendMessage, {
-    method: "post",
-    contentType: "application/json",
-    payload: JSON.stringify({
-      chat_id: adminChatId,
-      text: message
-    })
-  });
-  
-  return {
-    status: "success",
-    message: "1:1 request submitted"
-  };
 }
 
-/**
- * Logs all requests to Google Sheets
- */
-function logRequest(user, service, status) {
-  const sheet = SpreadsheetApp.openById("YOUR_SHEET_ID")
-    .getSheetByName("Requests");
-  
-  sheet.appendRow([
-    new Date(),
-    user.id || "unknown",
-    user.first_name || "unknown",
-    service || "unknown",
-    status
-  ]);
-}
-
-/**
- * Handles newsletter signups
- */
-function handleNewsletterSignup(user) {
-  const sheet = SpreadsheetApp.openById("YOUR_SHEET_ID")
-    .getSheetByName("Newsletter");
-  
-  // Check if user already exists
-  const emails = sheet.getRange("B:B").getValues().flat();
-  if (emails.includes(user.email)) {
-    throw new Error("You're already subscribed!");
-  }
-  
-  // Add new subscriber
-  sheet.appendRow([
-    new Date(),
-    user.email,
-    user.first_name,
-    user.id
-  ]);
-  
-  return {
-    status: "success",
-    message: "Newsletter subscription confirmed"
+// Telegram bot commands
+bot.onText(/\/start/, (msg) => {
+  const welcomeMessage = 👋 Welcome to *Abenlytics Club!*\n\nChoose an option below to get started.;
+  const options = {
+    parse_mode: 'Markdown',
+    reply_markup: {
+      inline_keyboard: [
+        [{
+          text: '📘 Courses', 
+          web_app: { url: https://${process.env.RENDER_EXTERNAL_HOSTNAME} } 
+        }],
+        [{
+          text: '📩 Contact', 
+          url: 'https://t.me/YOUR_TELEGRAM_USERNAME' 
+        }]
+      ]
+    }
   };
-}
+  bot.sendMessage(msg.chat.id, welcomeMessage, options);
+});
+
+// Health check route
+app.get('/', (req, res) => {
+  res.send('Abenlytics Bot is running!');
+});
+
+// Start server
+app.listen(PORT, () => {
+  console.log(🚀 Server running on port ${PORT});
+});
