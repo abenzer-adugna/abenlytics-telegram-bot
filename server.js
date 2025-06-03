@@ -1,40 +1,30 @@
-require('dotenv').config(); // Load environment variables
+// server.js
 const express = require('express');
 const bodyParser = require('body-parser');
 const path = require('path');
 const TelegramBot = require('node-telegram-bot-api');
-const helmet = require('helmet');
-const rateLimit = require('express-rate-limit');
 
+// Initialize app
 const app = express();
 
-// Environment variables
+// Get environment variables (use Render.com environment variables)
 const token = process.env.TELEGRAM_TOKEN;
 const webAppUrl = process.env.WEBAPP_URL;
 const adminId = process.env.ADMIN_CHAT_ID;
 
+// Validate environment variables
 if (!token || !webAppUrl || !adminId) {
-  throw new Error('❌ Missing required environment variables');
+  console.error('❌ Missing required environment variables');
+  process.exit(1);
 }
 
 const bot = new TelegramBot(token, { polling: false });
 
-// Security middleware
-app.use(helmet({
-  contentSecurityPolicy: {
-    directives: {
-      defaultSrc: ["'self'"],
-      scriptSrc: ["'self'", "'unsafe-inline'"],
-      styleSrc: ["'self'", "'unsafe-inline'"]
-    }
-  }
-}));
-
-// Rate limiting (100 requests per 15 minutes)
-const apiLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000,
-  max: 100,
-  message: 'Too many requests, please try again later.'
+// Basic security headers middleware
+app.use((req, res, next) => {
+  res.setHeader('X-Content-Type-Options', 'nosniff');
+  res.setHeader('X-Frame-Options', 'DENY');
+  next();
 });
 
 // Application middleware
@@ -57,8 +47,8 @@ app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
-// Protected API endpoint
-app.post('/api/service', apiLimiter, async (req, res) => {
+// API endpoint with basic validation
+app.post('/api/service', async (req, res) => {
   const { serviceType, userData } = req.body;
 
   // Input validation
@@ -66,14 +56,6 @@ app.post('/api/service', apiLimiter, async (req, res) => {
     return res.status(400).json({ 
       status: 'error', 
       message: 'Missing required parameters' 
-    });
-  }
-
-  // Validate Telegram ID format
-  if (!/^\d+$/.test(userData.id)) {
-    return res.status(403).json({ 
-      status: 'error', 
-      message: 'Invalid user identifier' 
     });
   }
 
@@ -87,10 +69,10 @@ app.post('/api/service', apiLimiter, async (req, res) => {
         break;
 
       case 'one_on_one':
-        // Sanitize user data before sending
+        // Basic data sanitization
         const safeUserData = {
-          name: userData.name?.substring(0, 100) || 'N/A',
-          email: userData.email?.substring(0, 100) || 'N/A',
+          name: (userData.name || '').substring(0, 100),
+          email: (userData.email || '').substring(0, 100),
           id: userData.id
         };
         
@@ -100,7 +82,7 @@ app.post('/api/service', apiLimiter, async (req, res) => {
         );
         await bot.sendMessage(
           userData.id, 
-          '✅ Got it! We\'ll reach out to you within 24 hrs.'
+          '✅ Got it! We\'ll reach out within 24 hrs.'
         );
         break;
 
@@ -132,9 +114,7 @@ app.post('/api/service', apiLimiter, async (req, res) => {
 // Telegram command handlers
 bot.onText(/\/start/, (msg) => {
   const chatId = msg.chat.id;
-  const text = '👋 Welcome to Abenlytics Club!\n\nUse the menu below to access investing tools, roadmaps, books, and more.';
-
-  bot.sendMessage(chatId, text, {
+  bot.sendMessage(chatId, '👋 Welcome to Abenlytics Club!', {
     reply_markup: {
       inline_keyboard: [[{
         text: "🚀 Open Web App",
@@ -151,14 +131,12 @@ bot.onText(/\/services/, (msg) => {
                    `3. 🛣️ Follow Roadmaps\n` +
                    `4. 📩 Weekly Newsletter\n` +
                    `5. 👥 1-on-1 Consultations`;
-
   bot.sendMessage(msg.chat.id, services);
 });
 
 // Start server
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-  console.log(`✅ Server running at http://localhost:${PORT}`);
-  console.log(`🌐 Web App URL: ${webAppUrl}`);
-  console.log(`📩 Webhook URL: ${webAppUrl}/bot${token}`);
+  console.log(`✅ Server running on port ${PORT}`);
+  console.log(`🌐 Webhook URL: ${webAppUrl}/bot${token}`);
 });
