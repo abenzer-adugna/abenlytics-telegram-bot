@@ -6,25 +6,27 @@ const TelegramBot = require('node-telegram-bot-api');
 const fs = require('fs');
 const multer = require('multer');
 const rateLimit = require('express-rate-limit');
-const basicAuth = require('express-basic-auth'); // Added for admin auth
+const basicAuth = require('express-basic-auth');
 
-// Initialize app
 const app = express();
 
-// Environment variables
+// Debugging environment variables
+console.log('Environment Variables:');
+console.log(`- TELEGRAM_TOKEN: ${process.env.TELEGRAM_TOKEN ? 'SET' : 'MISSING'}`);
+console.log(`- WEBAPP_URL: ${process.env.WEBAPP_URL || 'MISSING'}`);
+console.log(`- ADMIN_CHAT_ID: ${process.env.ADMIN_CHAT_ID || 'MISSING'}`);
+console.log(`- ADMIN_USER: ${process.env.ADMIN_USER || 'admin (default)'}`);
+console.log(`- ADMIN_PASS: ${process.env.ADMIN_PASS ? 'SET' : 'admin123 (default)'}`);
+
+// Validate environment variables
 const token = process.env.TELEGRAM_TOKEN;
 const webAppUrl = process.env.WEBAPP_URL;
 const adminId = process.env.ADMIN_CHAT_ID;
 const ADMIN_USER = process.env.ADMIN_USER || 'admin';
 const ADMIN_PASS = process.env.ADMIN_PASS || 'admin123';
 
-// Validate environment variables
 if (!token || !webAppUrl || !adminId) {
-  console.error('❌ Missing required environment variables:');
-  console.error(`- TELEGRAM_TOKEN: ${token ? '✅' : '❌'}`);
-  console.error(`- WEBAPP_URL: ${webAppUrl ? '✅' : '❌'}`);
-  console.error(`- ADMIN_CHAT_ID: ${adminId ? '✅' : '❌'}`);
-  console.error('Please set these in your .env file or Render.com environment');
+  console.error('❌ Missing required environment variables!');
   process.exit(1);
 }
 
@@ -39,7 +41,7 @@ app.use((req, res, next) => {
 
 // Rate limiting
 const apiLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
+  windowMs: 15 * 60 * 1000,
   max: 200,
   message: 'Too many requests, please try again later.'
 });
@@ -48,17 +50,16 @@ const apiLimiter = rateLimit({
 app.use(bodyParser.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Create uploads directory if not exists
+// Create uploads directory
 const uploadDir = path.join(__dirname, 'uploads');
 if (!fs.existsSync(uploadDir)) {
   fs.mkdirSync(uploadDir);
+  console.log('Created uploads directory');
 }
 
-// Multer configuration for file uploads
+// Multer configuration
 const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, uploadDir);
-  },
+  destination: uploadDir,
   filename: (req, file, cb) => {
     const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
     cb(null, uniqueSuffix + path.extname(file.originalname));
@@ -67,7 +68,7 @@ const storage = multer.diskStorage({
 
 const upload = multer({ 
   storage: storage,
-  limits: { fileSize: 10 * 1024 * 1024 } // 10MB limit
+  limits: { fileSize: 10 * 1024 * 1024 }
 });
 
 // ========================
@@ -83,62 +84,35 @@ const authMiddleware = basicAuth({
 
 // File upload endpoint
 app.post('/admin/upload', apiLimiter, upload.single('file'), authMiddleware, (req, res) => {
-  const { title, description, category, accessLevel } = req.body;
-  const file = req.file;
-  
-  if (!file) {
-    return res.status(400).json({ error: 'No file uploaded' });
-  }
-  
-  // Create file metadata
-  const fileData = {
-    id: Date.now(),
-    title: title || file.originalname,
-    description: description || '',
-    category: category || 'General',
-    accessLevel: accessLevel || 'All Users',
-    filename: file.originalname,
-    path: file.path,
-    size: file.size,
-    uploadedAt: new Date(),
-    downloadUrl: `/downloads/${file.filename}`
-  };
-  
-  // Save file metadata
-  const uploadsDb = path.join(__dirname, 'uploads.json');
-  let files = [];
-  
   try {
-    if (fs.existsSync(uploadsDb)) {
-      files = JSON.parse(fs.readFileSync(uploadsDb));
+    if (!req.file) {
+      return res.status(400).json({ error: 'No file uploaded' });
     }
-    files.push(fileData);
-    fs.writeFileSync(uploadsDb, JSON.stringify(files, null, 2));
+    
+    const fileData = {
+      id: Date.now(),
+      title: req.body.title || req.file.originalname,
+      filename: req.file.filename,
+      originalname: req.file.originalname,
+      size: req.file.size,
+      uploadedAt: new Date(),
+      downloadUrl: `/downloads/${req.file.filename}`
+    };
+    
+    res.json({ 
+      success: true, 
+      message: 'File uploaded successfully',
+      file: fileData
+    });
   } catch (err) {
-    console.error('Error saving file metadata:', err);
-    return res.status(500).json({ error: 'Error saving file data' });
+    console.error('Upload error:', err);
+    res.status(500).json({ error: 'File upload failed' });
   }
-  
-  // Notify admin via Telegram
-  bot.sendMessage(
-    adminId, 
-    `📁 New file uploaded!\n\n` +
-    `Title: ${fileData.title}\n` +
-    `Category: ${fileData.category}\n` +
-    `Size: ${(fileData.size / 1024 / 1024).toFixed(2)}MB`
-  ).catch(console.error);
-  
-  res.json({ 
-    success: true, 
-    message: 'File uploaded successfully',
-    file: fileData
-  });
 });
 
 // File download endpoint
 app.get('/downloads/:filename', (req, res) => {
   const file = path.join(uploadDir, req.params.filename);
-  
   if (fs.existsSync(file)) {
     res.download(file);
   } else {
@@ -146,68 +120,28 @@ app.get('/downloads/:filename', (req, res) => {
   }
 });
 
-// Get uploaded files
-app.get('/admin/files', apiLimiter, authMiddleware, (req, res) => {
-  try {
-    const uploadsDb = path.join(__dirname, 'uploads.json');
-    if (fs.existsSync(uploadsDb)) {
-      const files = JSON.parse(fs.readFileSync(uploadsDb));
-      return res.json(files);
+// Serve admin panel
+app.get('/admin', authMiddleware, (req, res) => {
+  const adminPath = path.join(__dirname, 'public', 'admin.html');
+  
+  // Debug file existence
+  fs.access(adminPath, fs.constants.F_OK, (err) => {
+    if (err) {
+      console.error(`Admin file not found at: ${adminPath}`);
+      return res.status(404).send('Admin panel not found');
     }
-    res.json([]);
-  } catch (err) {
-    console.error('Error reading files:', err);
-    res.status(500).json({ error: 'Internal server error' });
-  }
-});
-
-// Newsletter sending endpoint
-app.post('/admin/newsletter', apiLimiter, authMiddleware, (req, res) => {
-  const { subject, content, recipientGroup } = req.body;
-  
-  if (!subject || !content) {
-    return res.status(400).json({ error: 'Subject and content are required' });
-  }
-  
-  // In a real implementation, you would:
-  // 1. Get all users who should receive this newsletter
-  // 2. Send via Telegram bot or email
-  
-  // For demo purposes, we'll just log and send to admin
-  console.log(`Sending newsletter: ${subject}`);
-  
-  // Send notification to admin
-  bot.sendMessage(
-    adminId, 
-    `📬 Newsletter sent!\n\n` +
-    `Subject: ${subject}\n` +
-    `Recipients: ${recipientGroup || 'All Users'}\n` +
-    `Preview: ${content.substring(0, 100)}...`
-  ).catch(console.error);
-  
-  res.json({ 
-    success: true, 
-    message: 'Newsletter sent successfully',
-    stats: {
-      recipients: 1842, // Example count
-      sentAt: new Date()
-    }
+    res.sendFile(adminPath);
   });
 });
 
-// Serve admin panel
-app.get('/admin', authMiddleware, (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'admin.html'));
-});
-
 // ========================
-// EXISTING TELEGRAM FUNCTIONALITY
+// TELEGRAM & APP FUNCTIONALITY
 // ========================
 
 // Webhook setup
 bot.setWebHook(`${webAppUrl}/bot${token}`)
   .then(() => console.log('✅ Telegram webhook set'))
-  .catch(console.error);
+  .catch(err => console.error('Webhook error:', err));
 
 // Telegram webhook handler
 app.post(`/bot${token}`, (req, res) => {
@@ -220,114 +154,60 @@ app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
-// API endpoint with validation
-app.post('/api/service', apiLimiter, async (req, res) => {
-  const { serviceType, userData } = req.body;
-
-  // Input validation
-  if (!serviceType || !userData || !userData.id) {
-    return res.status(400).json({ 
-      status: 'error', 
-      message: 'Missing required parameters' 
-    });
-  }
-
-  try {
-    switch (serviceType) {
-      case 'book_download':
-        // Get the latest book file
-        let downloadUrl = `${webAppUrl}/downloads/default-book.pdf`;
-        try {
-          const uploadsDb = path.join(__dirname, 'uploads.json');
-          if (fs.existsSync(uploadsDb)) {
-            const files = JSON.parse(fs.readFileSync(uploadsDb));
-            const bookFile = files.reverse().find(f => f.category === 'Books');
-            if (bookFile) {
-              downloadUrl = `${webAppUrl}${bookFile.downloadUrl}`;
-            }
-          }
-        } catch (err) {
-          console.error('Error getting book file:', err);
-        }
-        
-        await bot.sendMessage(
-          userData.id, 
-          `📚 Download your book here:\n${downloadUrl}`
-        );
-        break;
-
-      case 'one_on_one':
-        // Basic data sanitization
-        const safeUserData = {
-          name: (userData.name || '').substring(0, 100),
-          email: (userData.email || '').substring(0, 100),
-          id: userData.id
-        };
-        
-        await bot.sendMessage(
-          adminId, 
-          `📞 New 1-on-1 request:\n\n${JSON.stringify(safeUserData, null, 2)}`
-        );
-        await bot.sendMessage(
-          userData.id, 
-          '✅ Got it! We\'ll reach out within 24 hrs.'
-        );
-        break;
-
-      case 'newsletter':
-        await bot.sendMessage(
-          userData.id, 
-          '📬 You\'re now subscribed to the Abenlytics Newsletter.'
-        );
-        break;
-
-      default:
-        return res.status(400).json({ 
-          status: 'error', 
-          message: 'Invalid service type' 
-        });
-    }
-
-    res.json({ status: 'success' });
-
-  } catch (err) {
-    console.error('API Error:', err.message);
-    res.status(500).json({ 
-      status: 'error', 
-      message: 'Internal server error' 
-    });
-  }
-});
-
-// Telegram command handlers
-bot.onText(/\/start/, (msg) => {
-  const chatId = msg.chat.id;
-  bot.sendMessage(chatId, '👋 Welcome to Abenlytics Club!', {
-    reply_markup: {
-      inline_keyboard: [[{
-        text: "🚀 Open Web App",
-        web_app: { url: webAppUrl }
-      }]]
-    }
+// Debug endpoint
+app.get('/debug', (req, res) => {
+  res.json({
+    status: 'online',
+    time: new Date(),
+    webAppUrl,
+    adminPanel: `${webAppUrl}/admin`,
+    uploadDirExists: fs.existsSync(uploadDir),
+    publicDir: fs.readdirSync(path.join(__dirname, 'public'))
   });
 });
 
-bot.onText(/\/services/, (msg) => {
-  const services = `🛠️ Available Services:\n\n` +
-                   `1. 📘 Download Investing Books\n` +
-                   `2. 🧠 Read Book Reviews\n` +
-                   `3. 🛣️ Follow Roadmaps\n` +
-                   `4. 📩 Weekly Newsletter\n` +
-                   `5. 👥 1-on-1 Consultations`;
-  bot.sendMessage(msg.chat.id, services);
+// API endpoint
+app.post('/api/service', apiLimiter, async (req, res) => {
+  console.log('Service request:', req.body);
+  
+  try {
+    const { serviceType, userData } = req.body;
+    
+    if (!serviceType || !userData?.id) {
+      return res.status(400).json({ error: 'Invalid request' });
+    }
+    
+    switch (serviceType) {
+      case 'book_download':
+        await bot.sendMessage(userData.id, '📚 Download your book here: (URL)');
+        break;
+        
+      case 'one_on_one':
+        await bot.sendMessage(adminId, `📞 New 1-on-1 request from ${userData.id}`);
+        await bot.sendMessage(userData.id, '✅ Got it! We\'ll reach out soon.');
+        break;
+        
+      case 'newsletter':
+        await bot.sendMessage(userData.id, '📬 You\'re subscribed!');
+        break;
+        
+      default:
+        return res.status(400).json({ error: 'Invalid service' });
+    }
+    
+    res.json({ status: 'success' });
+  } catch (err) {
+    console.error('Service error:', err);
+    res.status(500).json({ error: 'Internal server error' });
+  }
 });
 
 // Start server
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-  console.log(`✅ Server running on port ${PORT}`);
-  console.log(`🌐 Web App URL: ${webAppUrl}`);
-  console.log(`📩 Webhook URL: ${webAppUrl}/bot${token}`);
+  console.log(`\n✅ Server running on port ${PORT}`);
+  console.log(`🌐 Web App: ${webAppUrl}`);
   console.log(`🔐 Admin Panel: ${webAppUrl}/admin`);
   console.log(`👤 Admin Credentials: ${ADMIN_USER} / ${ADMIN_PASS}`);
+  console.log(`📩 Webhook: ${webAppUrl}/bot${token}\n`);
 });
