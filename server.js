@@ -6,6 +6,7 @@ const TelegramBot = require('node-telegram-bot-api');
 const fs = require('fs');
 const multer = require('multer');
 const rateLimit = require('express-rate-limit');
+const basicAuth = require('express-basic-auth'); // Added for admin auth
 
 // Initialize app
 const app = express();
@@ -15,7 +16,7 @@ const token = process.env.TELEGRAM_TOKEN;
 const webAppUrl = process.env.WEBAPP_URL;
 const adminId = process.env.ADMIN_CHAT_ID;
 const ADMIN_USER = process.env.ADMIN_USER || 'admin';
-const ADMIN_PASS = process.env.ADMIN_PASS || 'securepassword123';
+const ADMIN_PASS = process.env.ADMIN_PASS || 'admin123';
 
 // Validate environment variables
 if (!token || !webAppUrl || !adminId) {
@@ -73,28 +74,15 @@ const upload = multer({
 // ADMIN FUNCTIONALITY
 // ========================
 
-// Admin authentication middleware
-const authenticateAdmin = (req, res, next) => {
-  const authHeader = req.headers.authorization;
-  
-  // Basic auth: "Basic base64(username:password)"
-  if (!authHeader || !authHeader.startsWith('Basic ')) {
-    return res.status(401).set('WWW-Authenticate', 'Basic realm="Admin Access"').send('Unauthorized');
-  }
-  
-  const base64Credentials = authHeader.split(' ')[1];
-  const credentials = Buffer.from(base64Credentials, 'base64').toString('utf-8');
-  const [username, password] = credentials.split(':');
-  
-  if (username === ADMIN_USER && password === ADMIN_PASS) {
-    return next();
-  }
-  
-  res.status(401).set('WWW-Authenticate', 'Basic realm="Admin Access"').send('Unauthorized');
-};
+// Basic Auth middleware
+const authMiddleware = basicAuth({
+  users: { [ADMIN_USER]: ADMIN_PASS },
+  challenge: true,
+  realm: 'Admin Access'
+});
 
 // File upload endpoint
-app.post('/admin/upload', apiLimiter, upload.single('file'), authenticateAdmin, (req, res) => {
+app.post('/admin/upload', apiLimiter, upload.single('file'), authMiddleware, (req, res) => {
   const { title, description, category, accessLevel } = req.body;
   const file = req.file;
   
@@ -159,7 +147,7 @@ app.get('/downloads/:filename', (req, res) => {
 });
 
 // Get uploaded files
-app.get('/admin/files', apiLimiter, authenticateAdmin, (req, res) => {
+app.get('/admin/files', apiLimiter, authMiddleware, (req, res) => {
   try {
     const uploadsDb = path.join(__dirname, 'uploads.json');
     if (fs.existsSync(uploadsDb)) {
@@ -174,7 +162,7 @@ app.get('/admin/files', apiLimiter, authenticateAdmin, (req, res) => {
 });
 
 // Newsletter sending endpoint
-app.post('/admin/newsletter', apiLimiter, authenticateAdmin, (req, res) => {
+app.post('/admin/newsletter', apiLimiter, authMiddleware, (req, res) => {
   const { subject, content, recipientGroup } = req.body;
   
   if (!subject || !content) {
@@ -208,7 +196,7 @@ app.post('/admin/newsletter', apiLimiter, authenticateAdmin, (req, res) => {
 });
 
 // Serve admin panel
-app.get('/admin', authenticateAdmin, (req, res) => {
+app.get('/admin', authMiddleware, (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'admin.html'));
 });
 
