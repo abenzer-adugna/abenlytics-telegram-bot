@@ -36,7 +36,7 @@ app.post('/api/service', async (req, res) => {
 
     switch (serviceType) {
       case 'book_download':
-        await bot.sendMessage(userData.id, 📚 Download your book here:\nhttps://example.com/books.zip);
+        await bot.sendMessage(userData.id, '📚 Download your book here:\nhttps://example.com/books.zip');
         break;
       case 'one_on_one':
         await bot.sendMessage('1139124574', 📞 New 1-on-1 request:\n\n${JSON.stringify(userData, null, 2)});
