@@ -1,4 +1,4 @@
-// server.js
+require('dotenv').config(); // Load environment variables
 const express = require('express');
 const bodyParser = require('body-parser');
 const path = require('path');
@@ -7,14 +7,18 @@ const TelegramBot = require('node-telegram-bot-api');
 // Initialize app
 const app = express();
 
-// Get environment variables (use Render.com environment variables)
+// Get environment variables
 const token = process.env.TELEGRAM_TOKEN;
 const webAppUrl = process.env.WEBAPP_URL;
 const adminId = process.env.ADMIN_CHAT_ID;
 
 // Validate environment variables
 if (!token || !webAppUrl || !adminId) {
-  console.error('❌ Missing required environment variables');
+  console.error('❌ Missing required environment variables:');
+  console.error(`- TELEGRAM_TOKEN: ${token ? '✅' : '❌'}`);
+  console.error(`- WEBAPP_URL: ${webAppUrl ? '✅' : '❌'}`);
+  console.error(`- ADMIN_CHAT_ID: ${adminId ? '✅' : '❌'}`);
+  console.error('Please set these in your .env file or Render.com environment');
   process.exit(1);
 }
 
@@ -47,7 +51,7 @@ app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
-// API endpoint with basic validation
+// API endpoint with validation
 app.post('/api/service', async (req, res) => {
   const { serviceType, userData } = req.body;
 
@@ -138,5 +142,6 @@ bot.onText(/\/services/, (msg) => {
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`✅ Server running on port ${PORT}`);
-  console.log(`🌐 Webhook URL: ${webAppUrl}/bot${token}`);
+  console.log(`🌐 Web App URL: ${webAppUrl}`);
+  console.log(`📩 Webhook URL: ${webAppUrl}/bot${token}`);
 });
