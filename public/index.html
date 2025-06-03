@@ -1,148 +1,808 @@
-<!DOCTYPE html><html lang="en">
+<!DOCTYPE html>
+<html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Investing Platform</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
-  <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-      font-family: 'Inter', sans-serif;
-    }body {
-  background: #f9f9f9;
-  color: #111;
-}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Abenlytics Club - Stock Market & Crypto Insights</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Montserrat:wght@700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-header {
-  position: fixed;
-  width: 100%;
-  top: 0;
-  left: 0;
-  background: white;
-  padding: 1rem 2rem;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  z-index: 1000;
-}
+        :root {
+            --primary: #2563eb;
+            --primary-dark: #1d4ed8;
+            --secondary: #0ea5e9;
+            --dark: #1e293b;
+            --darker: #0f172a;
+            --light: #f8fafc;
+            --accent: #8b5cf6;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --gray: #94a3b8;
+        }
 
-.brand {
-  font-weight: 700;
-  font-size: 1.5rem;
-}
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, var(--darker), var(--dark));
+            color: var(--light);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
 
-.menu-icon {
-  cursor: pointer;
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
-}
+        /* Header Styles */
+        header {
+            background: rgba(15, 23, 42, 0.8);
+            backdrop-filter: blur(10px);
+            padding: 1rem 2rem;
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            border-bottom: 1px solid rgba(148, 163, 184, 0.2);
+        }
 
-.menu-icon span {
-  width: 25px;
-  height: 3px;
-  background: #111;
-  transition: all 0.3s ease;
-}
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: white;
+        }
 
-nav {
-  position: fixed;
-  top: 70px;
-  right: -300px;
-  background: white;
-  width: 250px;
-  height: 100vh;
-  padding: 2rem;
-  transition: right 0.3s ease;
-  box-shadow: -2px 0 8px rgba(0, 0, 0, 0.1);
-}
+        .logo i {
+            color: var(--secondary);
+        }
 
-nav.open {
-  right: 0;
-}
+        /* Hamburger Menu */
+        .menu-toggle {
+            display: none;
+            flex-direction: column;
+            justify-content: space-around;
+            width: 2rem;
+            height: 2rem;
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            z-index: 1001;
+        }
 
-nav ul {
-  list-style: none;
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-}
+        .menu-toggle span {
+            width: 2rem;
+            height: 0.25rem;
+            background: var(--light);
+            border-radius: 10px;
+            transition: all 0.3s ease;
+        }
 
-nav a {
-  text-decoration: none;
-  color: #111;
-  font-weight: 500;
-}
+        /* Navigation Menu */
+        .nav-menu {
+            position: fixed;
+            top: 0;
+            right: -300px;
+            width: 280px;
+            height: 100vh;
+            background: var(--darker);
+            padding: 6rem 1.5rem 2rem;
+            transition: right 0.4s ease;
+            overflow-y: auto;
+            z-index: 999;
+            box-shadow: -5px 0 15px rgba(0, 0, 0, 0.2);
+        }
 
-nav .submenu {
-  margin-left: 1rem;
-  font-size: 0.95rem;
-}
+        .nav-menu.active {
+            right: 0;
+        }
 
-main {
-  padding: 100px 20px 40px;
-  max-width: 1200px;
-  margin: auto;
-}
+        .menu-items {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
 
-.crypto-data {
-  background: #fff;
-  border-radius: 8px;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-  padding: 1rem;
-  margin-top: 2rem;
-}
+        .menu-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem 1.25rem;
+            border-radius: 10px;
+            color: var(--light);
+            text-decoration: none;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
 
-  </style>
+        .menu-item:hover {
+            background: rgba(37, 99, 235, 0.2);
+            transform: translateX(5px);
+        }
+
+        .menu-item i {
+            width: 24px;
+            text-align: center;
+            color: var(--secondary);
+        }
+
+        .menu-divider {
+            height: 1px;
+            background: rgba(148, 163, 184, 0.3);
+            margin: 1rem 0;
+        }
+
+        /* Hero Section */
+        .hero {
+            padding: 8rem 2rem 4rem;
+            text-align: center;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+      .hero h1 {
+            font-family: 'Montserrat', sans-serif;
+            font-size: 3.5rem;
+            margin-bottom: 1.5rem;
+            background: linear-gradient(to right, var(--secondary), var(--accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            line-height: 1.2;
+        }
+
+        .hero p {
+            font-size: 1.25rem;
+            color: var(--gray);
+            max-width: 700px;
+            margin: 0 auto 2rem;
+            line-height: 1.6;
+        }
+
+        .cta-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+
+        .btn {
+            padding: 0.9rem 1.75rem;
+            border-radius: 50px;
+            font-weight: 600;
+            font-size: 1rem;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-primary {
+            background: linear-gradient(to right, var(--primary), var(--secondary));
+            color: white;
+            box-shadow: 0 4px 15px rgba(37, 99, 235, 0.4);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(37, 99, 235, 0.6);
+        }
+
+        .btn-outline {
+            border: 2px solid var(--secondary);
+            color: var(--secondary);
+        }
+
+        .btn-outline:hover {
+            background: rgba(14, 165, 233, 0.1);
+            transform: translateY(-3px);
+        }
+
+        /* Crypto Section */
+        .crypto-section {
+            padding: 3rem 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        .section-title {
+            font-size: 2rem;
+            font-weight: 700;
+            background: linear-gradient(to right, var(--secondary), var(--accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .refresh-btn {
+            background: rgba(14, 165, 233, 0.1);
+            border: none;
+            color: var(--secondary);
+            padding: 0.5rem 1rem;
+            border-radius: 50px;
+            font-weight: 500;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .refresh-btn:hover {
+            background: rgba(14, 165, 233, 0.2);
+        }
+
+        .crypto-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .crypto-card {
+            background: rgba(30, 41, 59, 0.6);
+            border-radius: 16px;
+            padding: 1.5rem;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(148, 163, 184, 0.1);
+            backdrop-filter: blur(10px);
+        }
+
+        .crypto-card:hover {
+            transform: translateY(-5px);
+            background: rgba(30, 41, 59, 0.8);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+        }
+
+        .crypto-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 1.25rem;
+        }
+
+        .crypto-icon {
+            width: 48px;
+            height: 48px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 1rem;
+            font-size: 1.5rem;
+        }
+
+        .crypto-name {
+            font-weight: 600;
+            font-size: 1.25rem;
+        }
+
+        .crypto-symbol {
+            color: var(--gray);
+            font-size: 0.9rem;
+        }
+      .crypto-price {
+            font-size: 1.75rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .price-change {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.25rem 0.75rem;
+            border-radius: 50px;
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+
+        .price-change.positive {
+            background: rgba(16, 185, 129, 0.15);
+            color: var(--success);
+        }
+
+        .price-change.negative {
+            background: rgba(239, 68, 68, 0.15);
+            color: var(--danger);
+        }
+
+        .crypto-chart {
+            height: 80px;
+            margin-top: 1.25rem;
+        }
+
+        /* Features Section */
+        .features {
+            padding: 4rem 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        .feature-card {
+            background: rgba(30, 41, 59, 0.5);
+            border-radius: 16px;
+            padding: 2rem;
+            text-align: center;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(148, 163, 184, 0.1);
+        }
+
+        .feature-card:hover {
+            transform: translateY(-5px);
+            background: rgba(30, 41, 59, 0.8);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+        }
+
+        .feature-icon {
+            width: 70px;
+            height: 70px;
+            background: linear-gradient(to bottom right, var(--primary), var(--accent));
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1.5rem;
+            font-size: 1.75rem;
+        }
+
+        .feature-title {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            font-weight: 600;
+        }
+
+        .feature-desc {
+            color: var(--gray);
+            line-height: 1.6;
+        }
+
+        /* Footer */
+        footer {
+            background: var(--darker);
+            padding: 3rem 2rem 2rem;
+            text-align: center;
+            margin-top: 4rem;
+        }
+
+        .footer-logo {
+            font-size: 1.75rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            display: inline-block;
+        }
+
+        .social-links {
+            display: flex;
+            justify-content: center;
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .social-link {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.05);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+            color: var(--light);
+            transition: all 0.3s ease;
+        }
+
+        .social-link:hover {
+            background: var(--primary);
+            transform: translateY(-3px);
+        }
+
+        .copyright {
+            color: var(--gray);
+            font-size: 0.9rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid rgba(148, 163, 184, 0.1);
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 2.5rem;
+            }
+            
+            .menu-toggle {
+                display: flex;
+            }
+            
+            .cta-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .crypto-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
 </head>
 <body>
+    <!-- Header with Hamburger Menu -->
   <header>
-    <div class="brand">Investify</div>
-    <div class="menu-icon" onclick="toggleMenu()">
-      <span></span>
-      <span></span>
-      <span></span>
-    </div>
-  </header>  <nav id="mobileMenu">
-    <ul>
-      <li><a href="#">Essential Investing Books</a></li>
-      <li><a href="#">Book Reviews & Insights</a></li>
-      <li><a href="#">Prospectus Review</a></li>
-      <li>
-        <a href="#">Road Map for Investing</a>
-        <ul class="submenu">
-          <li><a href="#">Long-term Investment Road Map</a></li>
-          <li><a href="#">Short-term Investment Road Map</a></li>
-          <li><a href="#">Swing Trading Road Map</a></li>
-        </ul>
-      </li>
-      <li><a href="#">Community Group</a></li>
-      <li><a href="#">Weekly Newsletter</a></li>
-    </ul>
-  </nav>  <main>
-    <h1>Live Crypto Market</h1>
-    <div class="crypto-data" id="cryptoData">Loading...</div>
-  </main>  <script>
-    function toggleMenu() {
-      const menu = document.getElementById("mobileMenu");
-      menu.classList.toggle("open");
-    }
-
-    async function loadCryptoData() {
-      const res = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum,solana&vs_currencies=usd');
-      const data = await res.json();
-      const container = document.getElementById('cryptoData');
-      container.innerHTML = 
-        <p><strong>Bitcoin:</strong> $${data.bitcoin.usd}</p>
-        <p><strong>Ethereum:</strong> $${data.ethereum.usd}</p>
-        <p><strong>Solana:</strong> $${data.solana.usd}</p>
-      ;
-    }
-
-    loadCryptoData();
-    setInterval(loadCryptoData, 60000);
-  </script></body>
+        <div class="logo">
+            <i class="fas fa-chart-line"></i>
+            <span>Abenlytics Club</span>
+        </div>
+        
+        <button class="menu-toggle" id="menuToggle">
+            <span></span>
+            <span></span>
+            <span></span>
+        </button>
+        
+        <nav class="nav-menu" id="navMenu">
+            <div class="menu-items">
+                <a href="#" class="menu-item">
+                    <i class="fas fa-book"></i>
+                    <span>Essential Investing Books</span>
+                </a>
+                <a href="#" class="menu-item">
+                    <i class="fas fa-star"></i>
+                    <span>Book Reviews</span>
+                </a>
+                <a href="#" class="menu-item">
+                    <i class="fas fa-file-alt"></i>
+                    <span>Prospectus Review</span>
+                </a>
+                <a href="#" class="menu-item">
+                    <i class="fas fa-users"></i>
+                    <span>Group for Like-Minded People</span>
+                </a>
+                
+                <div class="menu-divider"></div>
+                
+                <a href="#" class="menu-item">
+                    <i class="fas fa-user-tie"></i>
+                    <span>The Warren Buffet Method</span>
+                </a>
+                <a href="#" class="menu-item">
+                    <i class="fas fa-clock"></i>
+                    <span>Short Term Investment</span>
+                </a>
+                <a href="#" class="menu-item">
+                    <i class="fas fa-exchange-alt"></i>
+                    <span>Swing Trading</span>
+                </a>
+                
+                <div class="menu-divider"></div>
+                
+                <a href="#" class="menu-item">
+                    <i class="fas fa-newspaper"></i>
+                    <span>Weekly Newsletter</span>
+                </a>
+                <a href="#" class="menu-item">
+                    <i class="fas fa-handshake"></i>
+                    <span>1 to 1 Help</span>
+                </a>
+                <a href="#" class="menu-item">
+                    <i class="fab fa-bitcoin"></i>
+                    <span>Weekly Crypto Market Breakdown</span>
+                </a>
+            </div>
+        </nav>
+    </header>
+    
+    <!-- Hero Section -->
+    <section class="hero">
+        <h1>Master the Markets with Abenlytics Club</h1>
+        <p>Your premier destination for stock market insights, crypto analysis, and investment strategies. Join our community of like-minded investors and elevate your financial journey.</p>
+        
+        <div class="cta-buttons">
+            <a href="#" class="btn btn-primary">
+                <i class="fas fa-rocket"></i> Join Our Community
+            </a>
+            <a href="#" class="btn btn-outline">
+                <i class="fas fa-book-open"></i> Explore Resources
+            </a>
+        </div>
+    </section>
+    
+    <!-- Live Crypto Data Section -->
+    <section class="crypto-section">
+        <div class="section-header">
+            <h2 class="section-title">Live Crypto Market Data</h2>
+            <button class="refresh-btn" id="refreshData">
+                <i class="fas fa-sync-alt"></i> Refresh
+            </button>
+        </div>
+        
+        <div class="crypto-grid" id="cryptoGrid">
+            <!-- Crypto data will be populated by JavaScript -->
+        </div>
+    </section>
+    
+    <!-- Features Section -->
+    <section class="features">
+        <h2 class="section-title" style="text-align: center; margin-bottom: 1rem;">Our Premium Offerings</h2>
+        <p style="text-align: center; max-width: 700px; margin: 0 auto 2rem; color: var(--gray);">
+            Access exclusive resources and tools designed to enhance your investment journey
+          </p>
+        
+        <div class="features-grid">
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-book"></i>
+                </div>
+                <h3 class="feature-title">Essential Investing Books</h3>
+                <p class="feature-desc">Curated collection of must-read books for every serious investor.</p>
+            </div>
+            
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-chart-line"></i>
+                </div>
+                <h3 class="feature-title">Prospectus Review</h3>
+                <p class="feature-desc">Detailed analysis of company prospectuses to uncover hidden insights.</p>
+            </div>
+            
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-users"></i>
+                </div>
+                <h3 class="feature-title">Investor Community</h3>
+                <p class="feature-desc">Connect with like-minded investors to share strategies and insights.</p>
+            </div>
+            
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-user-tie"></i>
+                </div>
+                <h3 class="feature-title">Warren Buffet Method</h3>
+                <p class="feature-desc">Learn value investing strategies from the Oracle of Omaha.</p>
+            </div>
+            
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-handshake"></i>
+                </div>
+                <h3 class="feature-title">1-on-1 Mentorship</h3>
+                <p class="feature-desc">Personalized guidance from experienced investors and traders.</p>
+            </div>
+            
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fab fa-bitcoin"></i>
+                </div>
+                <h3 class="feature-title">Crypto Market Analysis</h3>
+                <p class="feature-desc">Weekly breakdowns of the cryptocurrency market trends and opportunities.</p>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Footer -->
+    <footer>
+        <div class="footer-logo">Abenlytics Club</div>
+        
+        <div class="social-links">
+            <a href="#" class="social-link">
+                <i class="fab fa-telegram"></i>
+            </a>
+            <a href="#" class="social-link">
+                <i class="fab fa-twitter"></i>
+            </a>
+            <a href="#" class="social-link">
+                <i class="fab fa-youtube"></i>
+            </a>
+            <a href="#" class="social-link">
+                <i class="fab fa-discord"></i>
+            </a>
+        </div>
+        
+        <div class="copyright">
+            &copy; 2023 Abenlytics Club. All rights reserved.<br>
+            Empowering investors with data-driven insights.
+        </div>
+    </footer>
+    
+    <script>
+        // Menu Toggle Functionality
+        const menuToggle = document.getElementById('menuToggle');
+        const navMenu = document.getElementById('navMenu');
+        
+        menuToggle.addEventListener('click', () => {
+            navMenu.classList.toggle('active');
+            menuToggle.classList.toggle('active');
+        });
+        
+        // Crypto Data Fetching and Display
+        const cryptoData = [
+            {
+                id: "bitcoin",
+                name: "Bitcoin",
+                symbol: "BTC",
+                price: 45283.21,
+                change: 2.34,
+                color: "#F7931A",
+                chartData: [44000, 44500, 44800, 45000, 45200, 45300, 45283]
+            },
+            {
+              id: "ethereum",
+                name: "Ethereum",
+                symbol: "ETH",
+                price: 2385.67,
+                change: -1.23,
+                color: "#627EEA",
+                chartData: [2400, 2390, 2385, 2380, 2382, 2388, 2385]
+            },
+            {
+                id: "cardano",
+                name: "Cardano",
+                symbol: "ADA",
+                price: 0.5123,
+                change: 5.67,
+                color: "#0033AD",
+                chartData: [0.48, 0.49, 0.50, 0.505, 0.51, 0.515, 0.5123]
+            },
+            {
+                id: "solana",
+                name: "Solana",
+                symbol: "SOL",
+                price: 102.45,
+                change: 8.91,
+                color: "#00FFA3",
+                chartData: [95, 97, 99, 100, 101, 102, 102.45]
+            },
+            {
+                id: "ripple",
+                name: "Ripple",
+                symbol: "XRP",
+                price: 0.5789,
+                change: -0.56,
+                color: "#23292F",
+                chartData: [0.58, 0.579, 0.578, 0.577, 0.578, 0.579, 0.5789]
+            },
+            {
+                id: "polkadot",
+                name: "Polkadot",
+                symbol: "DOT",
+                price: 7.23,
+                change: 3.45,
+                color: "#E6007A",
+                chartData: [7.0, 7.05, 7.10, 7.15, 7.18, 7.20, 7.23]
+            }
+        ];
+        
+        // Render Crypto Cards
+        function renderCryptoCards() {
+            const cryptoGrid = document.getElementById('cryptoGrid');
+            cryptoGrid.innerHTML = '';
+            
+            cryptoData.forEach(crypto => {
+                const card = document.createElement('div');
+                card.className = 'crypto-card';
+                
+                const isPositive = crypto.change >= 0;
+                
+                card.innerHTML = 
+                    <div class="crypto-header">
+                        <div class="crypto-icon" style="background: ${crypto.color}22; color: ${crypto.color}">
+                            <i class="fab fa-${crypto.id}"></i>
+                        </div>
+                        <div>
+                            <div class="crypto-name">${crypto.name}</div>
+                            <div class="crypto-symbol">${crypto.symbol}</div>
+                        </div>
+                    </div>
+                    
+                    <div class="crypto-price">$${crypto.price.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</div>
+                    <div class="price-change ${isPositive ? 'positive' : 'negative'}">
+                        <i class="fas fa-${isPositive ? 'arrow-up' : 'arrow-down'}"></i>
+                        ${Math.abs(crypto.change).toFixed(2)}%
+                    </div>
+                    
+                    <div class="crypto-chart">
+                        <canvas id="chart-${crypto.id}"></canvas>
+                    </div>
+                ;
+                
+                cryptoGrid.appendChild(card);
+                
+                // Render chart after a short delay to allow DOM to update
+                setTimeout(() => {
+                    renderChart(crypto);
+                }, 100);
+            });
+        }
+        
+        // Render Mini Chart for Crypto
+        function renderChart(crypto) {
+            const ctx = document.getElementById(chart-${crypto.id}).getContext('2d');
+            
+            const gradient = ctx.createLinearGradient(0, 0, 0, 80);
+            gradient.addColorStop(0, ${crypto.color}33);
+            gradient.addColorStop(1, ${crypto.color}00);
+            
+            const isPositive = crypto.change >= 0;
+            
+            new Chart(ctx, {
+                type: 'line',
+              data: {
+                    labels: crypto.chartData.map((_, i) => i),
+                    datasets: [{
+                        data: crypto.chartData,
+                        borderColor: isPositive ? '#10b981' : '#ef4444',
+                        backgroundColor: gradient,
+                        borderWidth: 2,
+                        pointRadius: 0,
+                        tension: 0.4,
+                        fill: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        x: { display: false },
+                        y: { display: false }
+                    }
+                }
+            });
+        }
+        
+        // Simulate data refresh
+        document.getElementById('refreshData').addEventListener('click', () => {
+            // Update prices and changes randomly
+            cryptoData.forEach(crypto => {
+                const change = (Math.random() - 0.5) * 4;
+                crypto.change = parseFloat(change.toFixed(2));
+                
+                // Update price based on change
+                const changeFactor = 1 + (change / 100);
+                crypto.price = parseFloat((crypto.price * changeFactor).toFixed(2));
+                
+                // Update chart data
+                const lastValue = crypto.chartData[crypto.chartData.length - 1];
+                crypto.chartData.shift();
+                crypto.chartData.push(lastValue * changeFactor);
+            });
+            
+            renderCryptoCards();
+            
+            // Show refresh animation
+            const refreshBtn = document.getElementById('refreshData');
+            refreshBtn.innerHTML = '<i class="fas fa-check"></i> Updated';
+            refreshBtn.disabled = true;
+            
+            setTimeout(() => {
+                refreshBtn.innerHTML = '<i class="fas fa-sync-alt"></i> Refresh';
+                refreshBtn.disabled = false;
+            }, 1500);
+        });
+        
+        // Initialize the page
+        document.addEventListener('DOMContentLoaded', () => {
+            renderCryptoCards();
+        });
+    </script>
+</body>
 </html>
