@@ -3,143 +3,616 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Abenlytics Club</title>
+  <title>Abenlytics Club | Investing Intelligence</title>
   <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
-  
-  <!-- Telegram Web App SDK -->
-  <script src="https://telegram.org/js/telegram-web-app.js"></script>
-  
-  <!-- Security-focused CSP -->
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; 
-    script-src 'self' https://telegram.org https://cdn.jsdelivr.net; 
-    style-src 'self' https://cdn.jsdelivr.net 'unsafe-inline'; 
-    img-src 'self' data: https://*.coingecko.com; 
-    connect-src 'self' https://api.coingecko.com">
-  
-  <script defer src="app.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Roboto+Slab:wght@300;400;500;600;700&display=swap');
+    
+    :root {
+      --primary: #1a3a5f;
+      --secondary: #2c5282;
+      --accent: #0e9f6e;
+      --light: #f0f7ff;
+    }
+    
+    body {
+      font-family: 'Inter', sans-serif;
+      background: linear-gradient(rgba(10, 25, 47, 0.9), rgba(10, 25, 47, 0.9)), 
+                  url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="40" viewBox="0 0 100 40"><rect width="100" height="40" fill="%231a3a5f"/><path d="M0 20 Q 25 10, 50 20 T 100 20" stroke="%230e9f6e" fill="none" stroke-width="0.5"/><path d="M0 25 Q 25 15, 50 25 T 100 25" stroke="%23e53e3e" fill="none" stroke-width="0.5"/></svg>');
+      background-size: cover;
+      color: #e2e8f0;
+      min-height: 100vh;
+    }
+    
+    .candlestick-bg {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="400" height="300" viewBox="0 0 400 300"><rect width="400" height="300" fill="%230c162d" opacity="0.3"/><g stroke-opacity="0.1"><line x1="50" y1="250" x2="100" y2="150" stroke="%230e9f6e" stroke-width="10"/><line x1="100" y1="150" x2="100" y2="200" stroke="%230e9f6e" stroke-width="10"/><line x1="150" y1="200" x2="200" y2="100" stroke="%23e53e3e" stroke-width="10"/><line x1="200" y1="100" x2="200" y2="180" stroke="%23e53e3e" stroke-width="10"/><line x1="250" y1="180" x2="300" y2="120" stroke="%230e9f6e" stroke-width="10"/><line x1="300" y1="120" x2="300" y2="200" stroke="%230e9f6e" stroke-width="10"/></g></svg>');
+      background-size: 1200px 900px;
+      opacity: 0.4;
+      z-index: -1;
+    }
+    
+    .card {
+      background: rgba(26, 58, 95, 0.7);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(46, 91, 140, 0.5);
+      border-radius: 12px;
+      transition: all 0.3s ease;
+    }
+    
+    .card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+      border-color: rgba(14, 159, 110, 0.7);
+    }
+    
+    .service-card {
+      height: 100%;
+    }
+    
+    .crypto-card {
+      background: rgba(15, 30, 50, 0.85);
+      border-radius: 10px;
+      transition: all 0.3s ease;
+    }
+    
+    .crypto-card:hover {
+      transform: scale(1.02);
+      background: rgba(20, 40, 65, 0.9);
+    }
+    
+    .btn-primary {
+      background: linear-gradient(135deg, var(--accent), #0b8457);
+      color: white;
+      border-radius: 8px;
+      transition: all 0.3s ease;
+    }
+    
+    .btn-primary:hover {
+      background: linear-gradient(135deg, #0b8457, var(--accent));
+      transform: translateY(-2px);
+      box-shadow: 0 4px 15px rgba(14, 159, 110, 0.3);
+    }
+    
+    .hamburger-menu {
+      background: rgba(15, 30, 50, 0.95);
+      backdrop-filter: blur(10px);
+    }
+    
+    .price-up {
+      color: #0e9f6e;
+    }
+    
+    .price-down {
+      color: #e53e3e;
+    }
+    
+    h1, h2, h3, h4 {
+      font-family: 'Roboto Slab', serif;
+      font-weight: 600;
+    }
+    
+    .hero-content {
+      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+    }
+    
+    .chart-container {
+      height: 200px;
+      background: rgba(10, 25, 47, 0.6);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+    
+    .chart-line {
+      stroke-width: 2;
+      fill: none;
+    }
+    
+    .chart-up {
+      stroke: #0e9f6e;
+    }
+    
+    .chart-down {
+      stroke: #e53e3e;
+    }
+  </style>
 </head>
-<body class="bg-gray-100 text-gray-800">
+<body>
+  <div class="candlestick-bg"></div>
+  
   <!-- Navbar -->
-  <nav class="bg-white shadow p-4 flex justify-between items-center">
-    <h1 class="text-2xl font-bold">Abenlytics Club</h1>
-    <button id="menuBtn" class="md:hidden">
-      <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-              d="M4 6h16M4 12h16M4 18h16"/>
-      </svg>
+  <nav class="fixed top-0 left-0 right-0 bg-gray-900 bg-opacity-80 backdrop-filter backdrop-blur-lg z-50 p-4 flex justify-between items-center border-b border-gray-700">
+    <div class="flex items-center">
+      <div class="w-10 h-10 rounded-lg bg-gradient-to-br from-blue-500 to-cyan-400 flex items-center justify-center mr-3">
+        <i class="fas fa-chart-line text-white text-xl"></i>
+      </div>
+      <h1 class="text-xl md:text-2xl font-bold bg-gradient-to-r from-cyan-400 to-green-400 bg-clip-text text-transparent">Abenlytics Club</h1>
+    </div>
+    
+    <div class="hidden md:flex space-x-6 items-center">
+      <a href="#crypto" class="hover:text-cyan-300 transition">Live Crypto</a>
+      <a href="#services" class="hover:text-cyan-300 transition">Services</a>
+      <a href="#about" class="hover:text-cyan-300 transition">About</a>
+      <button class="btn-primary px-4 py-2 font-medium">Join Club</button>
+    </div>
+    
+    <button id="menuBtn" class="md:hidden text-gray-300">
+      <i class="fas fa-bars text-2xl"></i>
     </button>
-    <ul id="menu" class="hidden md:flex space-x-6">
-      <li><a href="#crypto" class="hover:text-blue-500">Live Crypto</a></li>
-      <li><a href="#services" class="hover:text-blue-500">Services</a></li>
-    </ul>
   </nav>
 
   <!-- Hamburger Menu -->
-  <ul id="dropdownMenu" class="md:hidden hidden flex-col space-y-4 bg-white px-4 py-2 shadow">
-    <li><a href="#crypto" class="block">Live Crypto</a></li>
-    <li><a href="#services" class="block">Services</a></li>
-  </ul>
+  <div id="dropdownMenu" class="fixed top-16 right-4 w-64 bg-gray-800 bg-opacity-90 backdrop-filter backdrop-blur-lg rounded-lg shadow-xl z-50 p-4 hidden transition-all duration-300 transform origin-top-right hamburger-menu">
+    <div class="text-center mb-4">
+      <div class="w-16 h-16 rounded-full bg-gradient-to-br from-blue-500 to-cyan-400 flex items-center justify-center mx-auto mb-2">
+        <i class="fas fa-chart-line text-white text-2xl"></i>
+      </div>
+      <h3 class="font-bold text-lg">Abenlytics Club</h3>
+    </div>
+    
+    <ul class="space-y-3">
+      <li><a href="#crypto" class="block py-2 px-4 hover:bg-gray-700 rounded-lg transition"><i class="fas fa-coins mr-3 text-yellow-400"></i>Live Crypto</a></li>
+      <li class="border-t border-gray-700 pt-3 mt-3"><span class="text-sm text-gray-400 uppercase tracking-wider pl-4">Services</span></li>
+      <li><a href="#one-to-one" class="block py-2 px-4 hover:bg-gray-700 rounded-lg transition"><i class="fas fa-handshake mr-3 text-blue-400"></i>1-to-1 Help</a></li>
+      <li><a href="#books" class="block py-2 px-4 hover:bg-gray-700 rounded-lg transition"><i class="fas fa-book mr-3 text-purple-400"></i>Essential Books</a></li>
+      <li><a href="#reviews" class="block py-2 px-4 hover:bg-gray-700 rounded-lg transition"><i class="fas fa-star mr-3 text-yellow-400"></i>Book Reviews</a></li>
+      <li><a href="#newsletter" class="block py-2 px-4 hover:bg-gray-700 rounded-lg transition"><i class="fas fa-newspaper mr-3 text-green-400"></i>Weekly Newsletter</a></li>
+      <li><a href="#roadmaps" class="block py-2 px-4 hover:bg-gray-700 rounded-lg transition"><i class="fas fa-map mr-3 text-red-400"></i>Trading Roadmaps</a></li>
+      <li><a href="#prospectus" class="block py-2 px-4 hover:bg-gray-700 rounded-lg transition"><i class="fas fa-file-alt mr-3 text-cyan-400"></i>Prospectus Review</a></li>
+      <li><a href="#community" class="block py-2 px-4 hover:bg-gray-700 rounded-lg transition"><i class="fas fa-users mr-3 text-pink-400"></i>Investor Community</a></li>
+    </ul>
+    
+    <div class="mt-4 pt-4 border-t border-gray-700">
+      <button class="btn-primary w-full py-2 font-medium">Join Club</button>
+    </div>
+  </div>
 
   <!-- Hero Section -->
-  <section class="text-center py-10 px-4">
-    <h2 class="text-3xl font-bold mb-4" id="welcomeMessage">📊 Your Gateway to Smarter Investing</h2>
-    <p class="text-gray-600 max-w-xl mx-auto">Access top investing tools, book reviews, weekly newsletters, and more — all in one place.</p>
-    
-    <!-- User status indicator -->
-    <div id="userStatus" class="mt-4 p-3 bg-blue-50 rounded-lg hidden">
-      <span class="text-blue-700">✅ Signed in via Telegram</span>
+  <section class="pt-28 pb-20 px-4 max-w-6xl mx-auto">
+    <div class="text-center max-w-3xl mx-auto hero-content">
+      <h1 class="text-4xl md:text-5xl font-bold mb-6">Elevate Your <span class="bg-gradient-to-r from-cyan-400 to-green-400 bg-clip-text text-transparent">Investing IQ</span></h1>
+      <p class="text-xl text-gray-300 mb-8">Professional guidance, curated resources, and strategic insights to help you navigate financial markets with confidence.</p>
+      
+      <div class="flex flex-col sm:flex-row justify-center gap-4">
+        <button class="btn-primary px-8 py-3 font-semibold text-lg">
+          <i class="fas fa-rocket mr-2"></i>Get Started
+        </button>
+        <button class="px-8 py-3 font-semibold text-lg border border-cyan-500 text-cyan-300 rounded-lg hover:bg-cyan-900 transition">
+          <i class="fas fa-book-open mr-2"></i>Learn More
+        </button>
+      </div>
     </div>
   </section>
 
   <!-- Live Crypto Feed -->
-  <section id="crypto" class="bg-white p-6 shadow-lg max-w-4xl mx-auto my-10 rounded-lg">
-    <h3 class="text-xl font-semibold mb-4">💹 Live Crypto Prices</h3>
-    <div id="cryptoFeed" class="grid grid-cols-1 md:grid-cols-3 gap-6">
-      <div class="animate-pulse bg-gray-100 p-4 rounded-lg">
-        <div class="h-4 bg-gray-300 rounded w-3/4 mb-2"></div>
-        <div class="h-6 bg-gray-300 rounded w-1/2"></div>
+  <section id="crypto" class="py-12 px-4 max-w-6xl mx-auto">
+    <div class="flex justify-between items-center mb-6">
+      <h2 class="text-2xl md:text-3xl font-bold">💹 Live Crypto Markets</h2>
+      <div class="text-sm text-gray-400">Updated just now</div>
+    </div>
+    
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
+      <!-- BTC Card -->
+      <div class="crypto-card p-5">
+        <div class="flex justify-between items-start mb-4">
+          <div class="flex items-center">
+            <div class="w-10 h-10 rounded-full bg-yellow-500 bg-opacity-20 flex items-center justify-center mr-3">
+              <i class="fab fa-bitcoin text-yellow-400 text-lg"></i>
+            </div>
+            <div>
+              <h3 class="font-bold">Bitcoin</h3>
+              <div class="text-sm text-gray-400">BTC/USD</div>
+            </div>
+          </div>
+          <div class="price-up text-lg font-bold">$61,245.78</div>
+        </div>
+        
+        <div class="flex justify-between items-center mb-3">
+          <div class="text-sm">24h Change</div>
+          <div class="price-up">+2.45% <i class="fas fa-arrow-up ml-1"></i></div>
+        </div>
+        
+        <div class="chart-container">
+          <svg viewBox="0 0 300 80" class="w-full h-full">
+            <path class="chart-line chart-up" d="M10,70 C50,40 100,60 150,30 C200,10 250,50 290,20"></path>
+          </svg>
+        </div>
       </div>
-      <div class="animate-pulse bg-gray-100 p-4 rounded-lg">
-        <div class="h-4 bg-gray-300 rounded w-3/4 mb-2"></div>
-        <div class="h-6 bg-gray-300 rounded w-1/2"></div>
+      
+      <!-- ETH Card -->
+      <div class="crypto-card p-5">
+        <div class="flex justify-between items-start mb-4">
+          <div class="flex items-center">
+            <div class="w-10 h-10 rounded-full bg-purple-500 bg-opacity-20 flex items-center justify-center mr-3">
+              <i class="fab fa-ethereum text-purple-400 text-lg"></i>
+            </div>
+            <div>
+              <h3 class="font-bold">Ethereum</h3>
+              <div class="text-sm text-gray-400">ETH/USD</div>
+            </div>
+          </div>
+          <div class="price-up text-lg font-bold">$3,412.65</div>
+        </div>
+        
+        <div class="flex justify-between items-center mb-3">
+          <div class="text-sm">24h Change</div>
+          <div class="price-up">+1.87% <i class="fas fa-arrow-up ml-1"></i></div>
+        </div>
+        
+        <div class="chart-container">
+          <svg viewBox="0 0 300 80" class="w-full h-full">
+            <path class="chart-line chart-up" d="M10,60 C50,40 100,70 150,50 C200,30 250,60 290,40"></path>
+          </svg>
+        </div>
       </div>
-      <div class="animate-pulse bg-gray-100 p-4 rounded-lg">
-        <div class="h-4 bg-gray-300 rounded w-3/4 mb-2"></div>
-        <div class="h-6 bg-gray-300 rounded w-1/2"></div>
+      
+      <!-- SOL Card -->
+      <div class="crypto-card p-5">
+        <div class="flex justify-between items-start mb-4">
+          <div class="flex items-center">
+            <div class="w-10 h-10 rounded-full bg-cyan-500 bg-opacity-20 flex items-center justify-center mr-3">
+              <i class="fas fa-coins text-cyan-400 text-lg"></i>
+            </div>
+            <div>
+              <h3 class="font-bold">Solana</h3>
+              <div class="text-sm text-gray-400">SOL/USD</div>
+            </div>
+          </div>
+          <div class="price-down text-lg font-bold">$142.36</div>
+        </div>
+        
+        <div class="flex justify-between items-center mb-3">
+          <div class="text-sm">24h Change</div>
+          <div class="price-down">-0.92% <i class="fas fa-arrow-down ml-1"></i></div>
+        </div>
+        
+        <div class="chart-container">
+          <svg viewBox="0 0 300 80" class="w-full h-full">
+            <path class="chart-line chart-down" d="M10,40 C50,60 100,30 150,50 C200,70 250,40 290,60"></path>
+          </svg>
+        </div>
+      </div>
+      
+      <!-- ADA Card -->
+      <div class="crypto-card p-5">
+        <div class="flex justify-between items-start mb-4">
+          <div class="flex items-center">
+            <div class="w-10 h-10 rounded-full bg-blue-500 bg-opacity-20 flex items-center justify-center mr-3">
+              <i class="fas fa-chart-line text-blue-400 text-lg"></i>
+            </div>
+            <div>
+              <h3 class="font-bold">Cardano</h3>
+              <div class="text-sm text-gray-400">ADA/USD</div>
+            </div>
+          </div>
+          <div class="price-up text-lg font-bold">$0.4621</div>
+        </div>
+        
+        <div class="flex justify-between items-center mb-3">
+          <div class="text-sm">24h Change</div>
+          <div class="price-up">+3.21% <i class="fas fa-arrow-up ml-1"></i></div>
+        </div>
+        
+        <div class="chart-container">
+          <svg viewBox="0 0 300 80" class="w-full h-full">
+            <path class="chart-line chart-up" d="M10,70 C50,50 100,70 150,40 C200,20 250,50 290,30"></path>
+          </svg>
+        </div>
       </div>
     </div>
   </section>
 
-  <!-- Services -->
-  <section id="services" class="p-6 max-w-4xl mx-auto">
-    <h3 class="text-xl font-semibold mb-4">🧩 Our Services</h3>
-    
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-      <button id="bookDownloadBtn" class="service-btn bg-blue-500 hover:bg-blue-600">
-        📘 Download Essential Books
-      </button>
-      
-      <button id="oneOnOneBtn" class="service-btn bg-green-500 hover:bg-green-600">
-        👥 Request 1-on-1 Help
-      </button>
-      
-      <button id="newsletterBtn" class="service-btn bg-purple-500 hover:bg-purple-600 md:col-span-2">
-        📩 Subscribe to Newsletter
-      </button>
+  <!-- Services Section -->
+  <section id="services" class="py-16 px-4 max-w-6xl mx-auto">
+    <div class="text-center mb-16">
+      <h2 class="text-3xl md:text-4xl font-bold mb-4">Premium <span class="bg-gradient-to-r from-cyan-400 to-green-400 bg-clip-text text-transparent">Investing Services</span></h2>
+      <p class="text-xl text-gray-300 max-w-2xl mx-auto">Access professional resources and personalized guidance to enhance your financial journey</p>
     </div>
     
-    <div class="mt-6 bg-yellow-50 p-4 rounded-lg">
-      <p class="text-yellow-700">ℹ️ Open this app in Telegram to access all services</p>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+      <!-- Service 1 -->
+      <div id="one-to-one" class="card p-6 service-card">
+        <div class="flex items-start mb-4">
+          <div class="w-12 h-12 rounded-lg bg-blue-500 bg-opacity-20 flex items-center justify-center mr-4">
+            <i class="fas fa-handshake text-blue-400 text-xl"></i>
+          </div>
+          <h3 class="text-xl font-bold">1-to-1 Personalized Help</h3>
+        </div>
+        <p class="text-gray-300 mb-4">Get tailored support and guidance on investing strategies, portfolio management, and trading techniques from experienced professionals.</p>
+        <button class="btn-primary px-4 py-2 text-sm font-medium">Request Consultation</button>
+      </div>
+      
+      <!-- Service 2 -->
+      <div id="books" class="card p-6 service-card">
+        <div class="flex items-start mb-4">
+          <div class="w-12 h-12 rounded-lg bg-purple-500 bg-opacity-20 flex items-center justify-center mr-4">
+            <i class="fas fa-book text-purple-400 text-xl"></i>
+          </div>
+          <h3 class="text-xl font-bold">Essential Investing Books</h3>
+        </div>
+        <p class="text-gray-300 mb-4">Access our curated library of must-read books for investors at all levels, carefully selected to build your financial knowledge foundation.</p>
+        <button class="btn-primary px-4 py-2 text-sm font-medium">Explore Library</button>
+      </div>
+      
+      <!-- Service 3 -->
+      <div id="reviews" class="card p-6 service-card">
+        <div class="flex items-start mb-4">
+          <div class="w-12 h-12 rounded-lg bg-yellow-500 bg-opacity-20 flex items-center justify-center mr-4">
+            <i class="fas fa-star text-yellow-400 text-xl"></i>
+          </div>
+          <h3 class="text-xl font-bold">Book Reviews & Insights</h3>
+        </div>
+        <p class="text-gray-300 mb-4">Get digestible summaries and practical applications from top investing books, saving you time while delivering actionable knowledge.</p>
+        <button class="btn-primary px-4 py-2 text-sm font-medium">Read Reviews</button>
+      </div>
+      
+      <!-- Service 4 -->
+      <div id="newsletter" class="card p-6 service-card">
+        <div class="flex items-start mb-4">
+          <div class="w-12 h-12 rounded-lg bg-green-500 bg-opacity-20 flex items-center justify-center mr-4">
+            <i class="fas fa-newspaper text-green-400 text-xl"></i>
+          </div>
+          <h3 class="text-xl font-bold">Weekly Investing Newsletter</h3>
+        </div>
+        <p class="text-gray-300 mb-4">Stay informed with our concise weekly updates featuring market trends, strategic insights, and distilled wisdom from financial literature.</p>
+        <button class="btn-primary px-4 py-2 text-sm font-medium">Subscribe Now</button>
+      </div>
+      
+      <!-- Service 5 -->
+      <div id="roadmaps" class="card p-6 service-card">
+        <div class="flex items-start mb-4">
+          <div class="w-12 h-12 rounded-lg bg-red-500 bg-opacity-20 flex items-center justify-center mr-4">
+            <i class="fas fa-map text-red-400 text-xl"></i>
+          </div>
+          <h3 class="text-xl font-bold">Trading & Investing Roadmaps</h3>
+        </div>
+        <p class="text-gray-300 mb-4">Follow our actionable roadmaps for different investment styles: long-term wealth building, swing trading strategies, and short-term opportunities.</p>
+        <button class="btn-primary px-4 py-2 text-sm font-medium">View Roadmaps</button>
+      </div>
+      
+      <!-- Service 6 -->
+      <div id="prospectus" class="card p-6 service-card">
+        <div class="flex items-start mb-4">
+          <div class="w-12 h-12 rounded-lg bg-cyan-500 bg-opacity-20 flex items-center justify-center mr-4">
+            <i class="fas fa-file-alt text-cyan-400 text-xl"></i>
+          </div>
+          <h3 class="text-xl font-bold">Prospectus Review Service</h3>
+        </div>
+        <p class="text-gray-300 mb-4">Get simplified analysis of complex company filings for IPOs and public companies, highlighting key information to inform your investment decisions.</p>
+        <button class="btn-primary px-4 py-2 text-sm font-medium">Request Review</button>
+      </div>
+      
+      <!-- Service 7 -->
+      <div id="community" class="card p-6 service-card">
+        <div class="flex items-start mb-4">
+          <div class="w-12 h-12 rounded-lg bg-pink-500 bg-opacity-20 flex items-center justify-center mr-4">
+            <i class="fas fa-users text-pink-400 text-xl"></i>
+          </div>
+          <h3 class="text-xl font-bold">Investor Community</h3>
+        </div>
+        <p class="text-gray-300 mb-4">Join our exclusive community of like-minded investors to share insights, discuss strategies, and network with fellow financial enthusiasts.</p>
+        <button class="btn-primary px-4 py-2 text-sm font-medium">Join Community</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Testimonials -->
+  <section id="about" class="py-16 px-4 max-w-6xl mx-auto">
+    <div class="text-center mb-12">
+      <h2 class="text-3xl md:text-4xl font-bold">Trusted by <span class="bg-gradient-to-r from-cyan-400 to-green-400 bg-clip-text text-transparent">Investors Worldwide</span></h2>
+    </div>
+    
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+      <div class="card p-6">
+        <div class="flex items-center mb-4">
+          <div class="w-12 h-12 rounded-full bg-gradient-to-br from-blue-500 to-cyan-400 mr-4"></div>
+          <div>
+            <h4 class="font-bold">Michael T.</h4>
+            <div class="text-sm text-gray-400">Portfolio Manager</div>
+          </div>
+        </div>
+        <p class="text-gray-300 italic">"The 1-on-1 sessions completely transformed my approach to portfolio diversification. Worth every penny!"</p>
+        <div class="flex mt-4 text-yellow-400">
+          <i class="fas fa-star"></i>
+          <i class="fas fa-star"></i>
+          <i class="fas fa-star"></i>
+          <i class="fas fa-star"></i>
+          <i class="fas fa-star"></i>
+        </div>
+      </div>
+      
+      <div class="card p-6">
+        <div class="flex items-center mb-4">
+          <div class="w-12 h-12 rounded-full bg-gradient-to-br from-purple-500 to-pink-400 mr-4"></div>
+          <div>
+            <h4 class="font-bold">Sarah K.</h4>
+            <div class="text-sm text-gray-400">Swing Trader</div>
+          </div>
+        </div>
+        <p class="text-gray-300 italic">"The trading roadmaps gave me the structure I needed to develop a profitable strategy. Highly recommended!"</p>
+        <div class="flex mt-4 text-yellow-400">
+          <i class="fas fa-star"></i>
+          <i class="fas fa-star"></i>
+          <i class="fas fa-star"></i>
+          <i class="fas fa-star"></i>
+          <i class="fas fa-star"></i>
+        </div>
+      </div>
+      
+      <div class="card p-6">
+        <div class="flex items-center mb-4">
+          <div class="w-12 h-12 rounded-full bg-gradient-to-br from-green-500 to-cyan-400 mr-4"></div>
+          <div>
+            <h4 class="font-bold">David R.</h4>
+            <div class="text-sm text-gray-400">Long-term Investor</div>
+          </div>
+        </div>
+        <p class="text-gray-300 italic">"The book summaries saved me hundreds of hours while delivering actionable insights. Essential for busy investors."</p>
+        <div class="flex mt-4 text-yellow-400">
+          <i class="fas fa-star"></i>
+          <i class="fas fa-star"></i>
+          <i class="fas fa-star"></i>
+          <i class="fas fa-star"></i>
+          <i class="fas fa-star"></i>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA Section -->
+  <section class="py-16 px-4">
+    <div class="max-w-4xl mx-auto card p-8 text-center">
+      <h2 class="text-3xl md:text-4xl font-bold mb-4">Ready to Elevate Your <span class="bg-gradient-to-r from-cyan-400 to-green-400 bg-clip-text text-transparent">Investing Journey?</span></h2>
+      <p class="text-xl text-gray-300 mb-8">Join Abenlytics Club today and unlock premium resources and personalized guidance</p>
+      
+      <div class="flex flex-col sm:flex-row justify-center gap-4">
+        <button class="btn-primary px-8 py-3 font-semibold text-lg">
+          <i class="fas fa-gem mr-2"></i>Premium Membership
+        </button>
+        <button class="px-8 py-3 font-semibold text-lg border border-cyan-500 text-cyan-300 rounded-lg hover:bg-cyan-900 transition">
+          <i class="fas fa-book mr-2"></i>Free Resources
+        </button>
+      </div>
     </div>
   </section>
 
   <!-- Footer -->
-  <footer class="text-center text-sm text-gray-500 py-6">
-    &copy; 2025 Abenlytics Club — All rights reserved.
+  <footer class="py-10 px-4 border-t border-gray-800">
+    <div class="max-w-6xl mx-auto">
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+        <div>
+          <div class="flex items-center mb-4">
+            <div class="w-10 h-10 rounded-lg bg-gradient-to-br from-blue-500 to-cyan-400 flex items-center justify-center mr-3">
+              <i class="fas fa-chart-line text-white"></i>
+            </div>
+            <h3 class="text-xl font-bold">Abenlytics Club</h3>
+          </div>
+          <p class="text-gray-400 mb-4">Your trusted partner in financial education and investment strategy.</p>
+          <div class="flex space-x-4">
+            <a href="#" class="text-gray-400 hover:text-cyan-400"><i class="fab fa-twitter"></i></a>
+            <a href="#" class="text-gray-400 hover:text-cyan-400"><i class="fab fa-linkedin"></i></a>
+            <a href="#" class="text-gray-400 hover:text-cyan-400"><i class="fab fa-telegram"></i></a>
+          </div>
+        </div>
+        
+        <div>
+          <h4 class="text-lg font-bold mb-4">Services</h4>
+          <ul class="space-y-2">
+            <li><a href="#one-to-one" class="text-gray-400 hover:text-cyan-400">1-to-1 Help</a></li>
+            <li><a href="#books" class="text-gray-400 hover:text-cyan-400">Essential Books</a></li>
+            <li><a href="#reviews" class="text-gray-400 hover:text-cyan-400">Book Reviews</a></li>
+            <li><a href="#newsletter" class="text-gray-400 hover:text-cyan-400">Weekly Newsletter</a></li>
+          </ul>
+        </div>
+        
+        <div>
+          <h4 class="text-lg font-bold mb-4">Resources</h4>
+          <ul class="space-y-2">
+            <li><a href="#roadmaps" class="text-gray-400 hover:text-cyan-400">Trading Roadmaps</a></li>
+            <li><a href="#prospectus" class="text-gray-400 hover:text-cyan-400">Prospectus Review</a></li>
+            <li><a href="#community" class="text-gray-400 hover:text-cyan-400">Investor Community</a></li>
+            <li><a href="#crypto" class="text-gray-400 hover:text-cyan-400">Market Analysis</a></li>
+          </ul>
+        </div>
+        
+        <div>
+          <h4 class="text-lg font-bold mb-4">Contact Us</h4>
+          <ul class="space-y-2">
+            <li class="text-gray-400"><i class="fas fa-envelope mr-2"></i> support@abenlytics.com</li>
+            <li class="text-gray-400"><i class="fab fa-telegram mr-2"></i> @abenlytics_support</li>
+          </ul>
+        </div>
+      </div>
+      
+      <div class="border-t border-gray-800 mt-10 pt-6 text-center text-gray-500">
+        <p>&copy; 2025 Abenlytics Club. All rights reserved.</p>
+      </div>
+    </div>
   </footer>
 
-  <!-- Service Modals -->
-  <div id="oneOnOneModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center p-4 z-50">
-    <div class="bg-white rounded-lg max-w-md w-full p-6">
-      <h3 class="text-xl font-bold mb-4">👥 1-on-1 Consultation</h3>
-      <form id="consultationForm">
-        <div class="mb-4">
-          <label class="block text-gray-700 mb-2" for="name">Name</label>
-          <input type="text" id="name" required 
-                 class="w-full px-3 py-2 border rounded-lg">
-        </div>
-        <div class="mb-4">
-          <label class="block text-gray-700 mb-2" for="email">Email</label>
-          <input type="email" id="email" required 
-                 class="w-full px-3 py-2 border rounded-lg">
-        </div>
-        <div class="mb-4">
-          <label class="block text-gray-700 mb-2" for="topic">Topic</label>
-          <select id="topic" class="w-full px-3 py-2 border rounded-lg">
-            <option>Portfolio Review</option>
-            <option>Investment Strategy</option>
-            <option>Stock Analysis</option>
-            <option>Crypto Guidance</option>
-          </select>
-        </div>
-        <div class="flex justify-end space-x-3">
-          <button type="button" id="cancelConsultation" 
-                  class="px-4 py-2 bg-gray-300 rounded-lg hover:bg-gray-400">
-            Cancel
-          </button>
-          <button type="submit" 
-                  class="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600">
-            Submit Request
-          </button>
-        </div>
-      </form>
-    </div>
-  </div>
-
-  <style>
-    .service-btn {
-      @apply text-white py-3 px-4 rounded-lg transition duration-300 transform hover:scale-105;
+  <script>
+    // Mobile menu toggle
+    document.getElementById('menuBtn').addEventListener('click', function() {
+      const dropdownMenu = document.getElementById('dropdownMenu');
+      dropdownMenu.classList.toggle('hidden');
+      dropdownMenu.classList.toggle('animate-fadeIn');
+    });
+    
+    // Close menu when clicking outside
+    document.addEventListener('click', function(event) {
+      const dropdownMenu = document.getElementById('dropdownMenu');
+      const menuBtn = document.getElementById('menuBtn');
+      
+      if (!dropdownMenu.contains(event.target) {
+        dropdownMenu.classList.add('hidden');
+      }
+    });
+    
+    // Update crypto prices every 30 seconds (simulated)
+    function updateCryptoPrices() {
+      const coins = [
+        { id: 'btc', element: document.querySelector('[data-crypto="btc"]') },
+        { id: 'eth', element: document.querySelector('[data-crypto="eth"]') },
+        { id: 'sol', element: document.querySelector('[data-crypto="sol"]') },
+        { id: 'ada', element: document.querySelector('[data-crypto="ada"]') }
+      ];
+      
+      coins.forEach(coin => {
+        // Simulate price changes
+        const change = (Math.random() - 0.5) * 4; // -2% to +2%
+        const priceElement = coin.element.querySelector('.price');
+        const changeElement = coin.element.querySelector('.change');
+        const chart = coin.element.querySelector('.chart-line');
+        
+        // Update price with animation
+        const currentPrice = parseFloat(priceElement.textContent.replace('$', '').replace(',', ''));
+        const newPrice = currentPrice * (1 + change/100);
+        
+        priceElement.textContent = '$' + newPrice.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
+        
+        // Update change indicator
+        if (change >= 0) {
+          changeElement.innerHTML = `+${change.toFixed(2)}% <i class="fas fa-arrow-up ml-1"></i>`;
+          changeElement.className = 'price-up';
+          chart.classList.remove('chart-down');
+          chart.classList.add('chart-up');
+        } else {
+          changeElement.innerHTML = `${change.toFixed(2)}% <i class="fas fa-arrow-down ml-1"></i>`;
+          changeElement.className = 'price-down';
+          chart.classList.remove('chart-up');
+          chart.classList.add('chart-down');
+        }
+      });
     }
-  </style>
+    
+    // Initialize crypto prices
+    setTimeout(updateCryptoPrices, 500);
+    
+    // Update prices periodically
+    setInterval(updateCryptoPrices, 30000);
+    
+    // Smooth scrolling for anchor links
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+      anchor.addEventListener('click', function (e) {
+        e.preventDefault();
+        
+        const target = document.querySelector(this.getAttribute('href'));
+        if (target) {
+          window.scrollTo({
+            top: target.offsetTop - 80,
+            behavior: 'smooth'
+          });
+          
+          // Close mobile menu after click
+          document.getElementById('dropdownMenu').classList.add('hidden');
+        }
+      });
+    });
+  </script>
 </body>
-            </html>
+  </html>
