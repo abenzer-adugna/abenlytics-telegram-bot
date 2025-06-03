@@ -1,3 +1,47 @@
+// public/app.js
+
+// ... existing code ...
+
+// Service request handler with better error handling
+async function requestService(serviceType, formData = null) {
+  if (!userData?.id) {
+    alert('Please open this app in Telegram to use our services.');
+    return;
+  }
+
+  try {
+    // Add form data to userData if provided
+    const requestData = {
+      serviceType,
+      userData: formData ? {...userData, ...formData} : userData
+    };
+
+    const response = await fetch('/api/service', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify(requestData)
+    });
+
+    // Handle HTTP errors
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+    }
+
+    const result = await response.json();
+    
+    if (result.status === 'success') {
+      alert('✅ Request successful! Check your Telegram for confirmation.');
+    } else {
+      throw new Error(result.message || 'Service request failed');
+    }
+  } catch (err) {
+    console.error('Service request error:', err);
+    alert(`❌ Error: ${err.message}`);
+  }
+}
+
+// ... existing code ...
 // Toggle mobile menu
 document.getElementById('menuBtn').addEventListener('click', function() {
   const dropdownMenu = document.getElementById('dropdownMenu');
