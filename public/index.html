@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Abenlytics Club - Stock Market & Crypto Insights</title>
+    <title>Abenlytics Club - Stock & Crypto Platform</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Montserrat:wght@700;800&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -36,7 +36,6 @@
             overflow-x: hidden;
         }
 
-        /* Header Styles */
         header {
             background: rgba(15, 23, 42, 0.8);
             backdrop-filter: blur(10px);
@@ -65,7 +64,6 @@
             color: var(--secondary);
         }
 
-        /* Hamburger Menu */
         .menu-toggle {
             display: none;
             flex-direction: column;
@@ -86,7 +84,6 @@
             transition: all 0.3s ease;
         }
 
-        /* Navigation Menu */
         .nav-menu {
             position: fixed;
             top: 0;
@@ -140,14 +137,14 @@
             margin: 1rem 0;
         }
 
-        /* Hero Section */
         .hero {
             padding: 8rem 2rem 4rem;
             text-align: center;
             max-width: 900px;
             margin: 0 auto;
         }
-      .hero h1 {
+
+        .hero h1 {
             font-family: 'Montserrat', sans-serif;
             font-size: 3.5rem;
             margin-bottom: 1.5rem;
@@ -205,7 +202,6 @@
             transform: translateY(-3px);
         }
 
-        /* Crypto Section */
         .crypto-section {
             padding: 3rem 2rem;
             max-width: 1200px;
@@ -293,7 +289,8 @@
             color: var(--gray);
             font-size: 0.9rem;
         }
-      .crypto-price {
+
+        .crypto-price {
             font-size: 1.75rem;
             font-weight: 700;
             margin-bottom: 0.5rem;
@@ -323,7 +320,6 @@
             margin-top: 1.25rem;
         }
 
-        /* Features Section */
         .features {
             padding: 4rem 2rem;
             max-width: 1200px;
@@ -375,7 +371,60 @@
             line-height: 1.6;
         }
 
-        /* Footer */
+        .resources {
+            padding: 4rem 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .resource-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        .resource-card {
+            background: rgba(30, 41, 59, 0.6);
+            border-radius: 16px;
+            padding: 2rem;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(148, 163, 184, 0.1);
+        }
+
+        .resource-card:hover {
+            transform: translateY(-5px);
+            background: rgba(30, 41, 59, 0.8);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+        }
+
+        .resource-icon {
+            font-size: 2.5rem;
+            color: var(--secondary);
+            margin-bottom: 1.5rem;
+        }
+
+        .resource-title {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            font-weight: 600;
+        }
+
+        .resource-desc {
+            color: var(--gray);
+            line-height: 1.6;
+            margin-bottom: 1.5rem;
+        }
+
+        .resource-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--secondary);
+            font-weight: 500;
+            text-decoration: none;
+        }
+
         footer {
             background: var(--darker);
             padding: 3rem 2rem 2rem;
@@ -422,7 +471,6 @@
             border-top: 1px solid rgba(148, 163, 184, 0.1);
         }
 
-        /* Responsive Design */
         @media (max-width: 768px) {
             .hero h1 {
                 font-size: 2.5rem;
@@ -444,8 +492,7 @@
     </style>
 </head>
 <body>
-    <!-- Header with Hamburger Menu -->
-  <header>
+    <header>
         <div class="logo">
             <i class="fas fa-chart-line"></i>
             <span>Abenlytics Club</span>
@@ -459,49 +506,49 @@
         
         <nav class="nav-menu" id="navMenu">
             <div class="menu-items">
-                <a href="#" class="menu-item">
+                <a href="#books" class="menu-item">
                     <i class="fas fa-book"></i>
                     <span>Essential Investing Books</span>
                 </a>
-                <a href="#" class="menu-item">
+                <a href="#reviews" class="menu-item">
                     <i class="fas fa-star"></i>
                     <span>Book Reviews</span>
                 </a>
-                <a href="#" class="menu-item">
+                <a href="#prospectus" class="menu-item">
                     <i class="fas fa-file-alt"></i>
                     <span>Prospectus Review</span>
                 </a>
-                <a href="#" class="menu-item">
+                <a href="#community" class="menu-item">
                     <i class="fas fa-users"></i>
                     <span>Group for Like-Minded People</span>
                 </a>
                 
                 <div class="menu-divider"></div>
                 
-                <a href="#" class="menu-item">
+                <a href="#buffet" class="menu-item">
                     <i class="fas fa-user-tie"></i>
                     <span>The Warren Buffet Method</span>
                 </a>
-                <a href="#" class="menu-item">
+                <a href="#short-term" class="menu-item">
                     <i class="fas fa-clock"></i>
                     <span>Short Term Investment</span>
                 </a>
-                <a href="#" class="menu-item">
+                <a href="#swing" class="menu-item">
                     <i class="fas fa-exchange-alt"></i>
                     <span>Swing Trading</span>
                 </a>
                 
                 <div class="menu-divider"></div>
                 
-                <a href="#" class="menu-item">
+                <a href="#newsletter" class="menu-item">
                     <i class="fas fa-newspaper"></i>
                     <span>Weekly Newsletter</span>
                 </a>
-                <a href="#" class="menu-item">
+                <a href="#help" class="menu-item">
                     <i class="fas fa-handshake"></i>
                     <span>1 to 1 Help</span>
                 </a>
-                <a href="#" class="menu-item">
+                <a href="#crypto-breakdown" class="menu-item">
                     <i class="fab fa-bitcoin"></i>
                     <span>Weekly Crypto Market Breakdown</span>
                 </a>
@@ -509,23 +556,21 @@
         </nav>
     </header>
     
-    <!-- Hero Section -->
     <section class="hero">
         <h1>Master the Markets with Abenlytics Club</h1>
         <p>Your premier destination for stock market insights, crypto analysis, and investment strategies. Join our community of like-minded investors and elevate your financial journey.</p>
         
         <div class="cta-buttons">
-            <a href="#" class="btn btn-primary">
+            <a href="#community" class="btn btn-primary">
                 <i class="fas fa-rocket"></i> Join Our Community
             </a>
-            <a href="#" class="btn btn-outline">
+            <a href="#resources" class="btn btn-outline">
                 <i class="fas fa-book-open"></i> Explore Resources
             </a>
         </div>
     </section>
     
-    <!-- Live Crypto Data Section -->
-    <section class="crypto-section">
+    <section class="crypto-section" id="crypto">
         <div class="section-header">
             <h2 class="section-title">Live Crypto Market Data</h2>
             <button class="refresh-btn" id="refreshData">
@@ -534,69 +579,120 @@
         </div>
         
         <div class="crypto-grid" id="cryptoGrid">
-            <!-- Crypto data will be populated by JavaScript -->
+            <!-- Crypto cards will be inserted here -->
         </div>
     </section>
     
-    <!-- Features Section -->
-    <section class="features">
-        <h2 class="section-title" style="text-align: center; margin-bottom: 1rem;">Our Premium Offerings</h2>
-        <p style="text-align: center; max-width: 700px; margin: 0 auto 2rem; color: var(--gray);">
-            Access exclusive resources and tools designed to enhance your investment journey
-          </p>
+    <section class="resources" id="resources">
+        <h2 class="section-title" style="text-align: center; margin-bottom: 2rem;">Stock Market Resources</h2>
+        
+        <div class="resource-grid">
+            <div class="resource-card">
+                <div class="resource-icon">
+                    <i class="fas fa-book"></i>
+                </div>
+                <h3 class="resource-title">Essential Investing Books</h3>
+                <p class="resource-desc">Curated collection of must-read books for every serious investor. Master the principles of value investing and market analysis.</p>
+                <a href="#" class="resource-link">
+                    Explore Books <i class="fas fa-arrow-right"></i>
+                </a>
+            </div>
+            
+            <div class="resource-card">
+                <div class="resource-icon">
+                    <i class="fas fa-star"></i>
+                </div>
+                <h3 class="resource-title">Book Reviews</h3>
+                <p class="resource-desc">In-depth reviews of the most influential investment books. Discover which titles are worth your time and money.</p>
+                <a href="#" class="resource-link">
+                    Read Reviews <i class="fas fa-arrow-right"></i>
+                </a>
+            </div>
+            
+            <div class="resource-card">
+                <div class="resource-icon">
+                    <i class="fas fa-file-alt"></i>
+                </div>
+                <h3 class="resource-title">Prospectus Review</h3>
+                <p class="resource-desc">Expert analysis of company prospectuses to uncover hidden insights and investment opportunities.</p>
+                <a href="#" class="resource-link">
+                    See Analysis <i class="fas fa-arrow-right"></i>
+                </a>
+            </div>
+        </div>
+    </section>
+    
+    <section class="features" id="strategies">
+        <h2 class="section-title" style="text-align: center; margin-bottom: 2rem;">Investment Strategies</h2>
         
         <div class="features-grid">
             <div class="feature-card">
                 <div class="feature-icon">
-                    <i class="fas fa-book"></i>
-                </div>
-                <h3 class="feature-title">Essential Investing Books</h3>
-                <p class="feature-desc">Curated collection of must-read books for every serious investor.</p>
-            </div>
-            
-            <div class="feature-card">
-                <div class="feature-icon">
-                    <i class="fas fa-chart-line"></i>
-                </div>
-                <h3 class="feature-title">Prospectus Review</h3>
-                <p class="feature-desc">Detailed analysis of company prospectuses to uncover hidden insights.</p>
-            </div>
-            
-            <div class="feature-card">
-                <div class="feature-icon">
-                    <i class="fas fa-users"></i>
-                </div>
-                <h3 class="feature-title">Investor Community</h3>
-                <p class="feature-desc">Connect with like-minded investors to share strategies and insights.</p>
-            </div>
-            
-            <div class="feature-card">
-                <div class="feature-icon">
                     <i class="fas fa-user-tie"></i>
                 </div>
-                <h3 class="feature-title">Warren Buffet Method</h3>
-                <p class="feature-desc">Learn value investing strategies from the Oracle of Omaha.</p>
+                <h3 class="feature-title">The Warren Buffet Method</h3>
+                <p class="feature-desc">Learn value investing strategies from the Oracle of Omaha. Master long-term wealth building.</p>
             </div>
             
             <div class="feature-card">
                 <div class="feature-icon">
-                    <i class="fas fa-handshake"></i>
+                    <i class="fas fa-clock"></i>
                 </div>
-                <h3 class="feature-title">1-on-1 Mentorship</h3>
-                <p class="feature-desc">Personalized guidance from experienced investors and traders.</p>
+                <h3 class="feature-title">Short Term Investment</h3>
+                <p class="feature-desc">Strategies for capitalizing on short-term market movements and quick profit opportunities.</p>
             </div>
             
             <div class="feature-card">
                 <div class="feature-icon">
-                    <i class="fab fa-bitcoin"></i>
+                    <i class="fas fa-exchange-alt"></i>
                 </div>
-                <h3 class="feature-title">Crypto Market Analysis</h3>
-                <p class="feature-desc">Weekly breakdowns of the cryptocurrency market trends and opportunities.</p>
+                <h3 class="feature-title">Swing Trading</h3>
+                <p class="feature-desc">Capture gains in a stock within an overnight hold to several weeks. Perfect for active traders.</p>
             </div>
         </div>
     </section>
     
-    <!-- Footer -->
+    <section class="resources" id="community" style="background: rgba(15, 23, 42, 0.5);">
+        <div class="section-header" style="justify-content: center;">
+            <h2 class="section-title">Join Our Community</h2>
+        </div>
+        
+        <div class="resource-grid">
+            <div class="resource-card">
+                <div class="resource-icon">
+                    <i class="fas fa-users"></i>
+                </div>
+                <h3 class="resource-title">Like-Minded Investors</h3>
+                <p class="resource-desc">Connect with fellow investors to share strategies, insights, and market opportunities.</p>
+                <a href="#" class="resource-link">
+                    Join Group <i class="fas fa-arrow-right"></i>
+                </a>
+            </div>
+            
+            <div class="resource-card">
+                <div class="resource-icon">
+                    <i class="fas fa-newspaper"></i>
+                </div>
+                <h3 class="resource-title">Weekly Newsletter</h3>
+                <p class="resource-desc">Get the latest market insights, analysis, and investment opportunities delivered weekly.</p>
+                <a href="#" class="resource-link">
+                    Subscribe <i class="fas fa-arrow-right"></i>
+                </a>
+            </div>
+            
+            <div class="resource-card">
+                <div class="resource-icon">
+                    <i class="fas fa-handshake"></i>
+                </div>
+                <h3 class="resource-title">1-on-1 Help</h3>
+                <p class="resource-desc">Personalized guidance from experienced investors. Get answers to your specific questions.</p>
+                <a href="#" class="resource-link">
+                    Get Help <i class="fas fa-arrow-right"></i>
+                </a>
+            </div>
+        </div>
+    </section>
+    
     <footer>
         <div class="footer-logo">Abenlytics Club</div>
         
@@ -620,9 +716,9 @@
             Empowering investors with data-driven insights.
         </div>
     </footer>
-    
+
     <script>
-        // Menu Toggle Functionality
+        // Menu Toggle
         const menuToggle = document.getElementById('menuToggle');
         const navMenu = document.getElementById('navMenu');
         
@@ -631,65 +727,16 @@
             menuToggle.classList.toggle('active');
         });
         
-        // Crypto Data Fetching and Display
+        // Crypto Data
         const cryptoData = [
-            {
-                id: "bitcoin",
-                name: "Bitcoin",
-                symbol: "BTC",
-                price: 45283.21,
-                change: 2.34,
-                color: "#F7931A",
-                chartData: [44000, 44500, 44800, 45000, 45200, 45300, 45283]
-            },
-            {
-              id: "ethereum",
-                name: "Ethereum",
-                symbol: "ETH",
-                price: 2385.67,
-                change: -1.23,
-                color: "#627EEA",
-                chartData: [2400, 2390, 2385, 2380, 2382, 2388, 2385]
-            },
-            {
-                id: "cardano",
-                name: "Cardano",
-                symbol: "ADA",
-                price: 0.5123,
-                change: 5.67,
-                color: "#0033AD",
-                chartData: [0.48, 0.49, 0.50, 0.505, 0.51, 0.515, 0.5123]
-            },
-            {
-                id: "solana",
-                name: "Solana",
-                symbol: "SOL",
-                price: 102.45,
-                change: 8.91,
-                color: "#00FFA3",
-                chartData: [95, 97, 99, 100, 101, 102, 102.45]
-            },
-            {
-                id: "ripple",
-                name: "Ripple",
-                symbol: "XRP",
-                price: 0.5789,
-                change: -0.56,
-                color: "#23292F",
-                chartData: [0.58, 0.579, 0.578, 0.577, 0.578, 0.579, 0.5789]
-            },
-            {
-                id: "polkadot",
-                name: "Polkadot",
-                symbol: "DOT",
-                price: 7.23,
-                change: 3.45,
-                color: "#E6007A",
-                chartData: [7.0, 7.05, 7.10, 7.15, 7.18, 7.20, 7.23]
-            }
+            { id: "bitcoin", name: "Bitcoin", symbol: "BTC", price: 45283.21, change: 2.34, color: "#F7931A", chartData: [44000, 44500, 44800, 45000, 45200, 45300, 45283] },
+            { id: "ethereum", name: "Ethereum", symbol: "ETH", price: 2385.67, change: -1.23, color: "#627EEA", chartData: [2400, 2390, 2385, 2380, 2382, 2388, 2385] },
+            { id: "cardano", name: "Cardano", symbol: "ADA", price: 0.5123, change: 5.67, color: "#0033AD", chartData: [0.48, 0.49, 0.50, 0.505, 0.51, 0.515, 0.5123] },
+            { id: "solana", name: "Solana", symbol: "SOL", price: 102.45, change: 8.91, color: "#00FFA3", chartData: [95, 97, 99, 100, 101, 102, 102.45] },
+            { id: "ripple", name: "Ripple", symbol: "XRP", price: 0.5789, change: -0.56, color: "#23292F", chartData: [0.58, 0.579, 0.578, 0.577, 0.578, 0.579, 0.5789] },
+            { id: "polkadot", name: "Polkadot", symbol: "DOT", price: 7.23, change: 3.45, color: "#E6007A", chartData: [7.0, 7.05, 7.10, 7.15, 7.18, 7.20, 7.23] }
         ];
         
-        // Render Crypto Cards
         function renderCryptoCards() {
             const cryptoGrid = document.getElementById('cryptoGrid');
             cryptoGrid.innerHTML = '';
@@ -697,10 +744,9 @@
             cryptoData.forEach(crypto => {
                 const card = document.createElement('div');
                 card.className = 'crypto-card';
-                
                 const isPositive = crypto.change >= 0;
                 
-                card.innerHTML = 
+                card.innerHTML = `
                     <div class="crypto-header">
                         <div class="crypto-icon" style="background: ${crypto.color}22; color: ${crypto.color}">
                             <i class="fab fa-${crypto.id}"></i>
@@ -710,40 +756,34 @@
                             <div class="crypto-symbol">${crypto.symbol}</div>
                         </div>
                     </div>
-                    
                     <div class="crypto-price">$${crypto.price.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</div>
                     <div class="price-change ${isPositive ? 'positive' : 'negative'}">
                         <i class="fas fa-${isPositive ? 'arrow-up' : 'arrow-down'}"></i>
                         ${Math.abs(crypto.change).toFixed(2)}%
                     </div>
-                    
                     <div class="crypto-chart">
                         <canvas id="chart-${crypto.id}"></canvas>
                     </div>
-                ;
+                `;
                 
                 cryptoGrid.appendChild(card);
                 
-                // Render chart after a short delay to allow DOM to update
                 setTimeout(() => {
                     renderChart(crypto);
                 }, 100);
             });
         }
         
-        // Render Mini Chart for Crypto
         function renderChart(crypto) {
-            const ctx = document.getElementById(chart-${crypto.id}).getContext('2d');
-            
+            const ctx = document.getElementById(`chart-${crypto.id}`).getContext('2d');
             const gradient = ctx.createLinearGradient(0, 0, 0, 80);
-            gradient.addColorStop(0, ${crypto.color}33);
-            gradient.addColorStop(1, ${crypto.color}00);
-            
+            gradient.addColorStop(0, `${crypto.color}33`);
+            gradient.addColorStop(1, `${crypto.color}00`);
             const isPositive = crypto.change >= 0;
             
             new Chart(ctx, {
                 type: 'line',
-              data: {
+                data: {
                     labels: crypto.chartData.map((_, i) => i),
                     datasets: [{
                         data: crypto.chartData,
@@ -758,29 +798,18 @@
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
-                    plugins: {
-                        legend: { display: false }
-                    },
-                    scales: {
-                        x: { display: false },
-                        y: { display: false }
-                    }
+                    plugins: { legend: { display: false } },
+                    scales: { x: { display: false }, y: { display: false } }
                 }
             });
         }
         
-        // Simulate data refresh
         document.getElementById('refreshData').addEventListener('click', () => {
-            // Update prices and changes randomly
             cryptoData.forEach(crypto => {
                 const change = (Math.random() - 0.5) * 4;
                 crypto.change = parseFloat(change.toFixed(2));
-                
-                // Update price based on change
                 const changeFactor = 1 + (change / 100);
                 crypto.price = parseFloat((crypto.price * changeFactor).toFixed(2));
-                
-                // Update chart data
                 const lastValue = crypto.chartData[crypto.chartData.length - 1];
                 crypto.chartData.shift();
                 crypto.chartData.push(lastValue * changeFactor);
@@ -788,7 +817,6 @@
             
             renderCryptoCards();
             
-            // Show refresh animation
             const refreshBtn = document.getElementById('refreshData');
             refreshBtn.innerHTML = '<i class="fas fa-check"></i> Updated';
             refreshBtn.disabled = true;
@@ -799,7 +827,6 @@
             }, 1500);
         });
         
-        // Initialize the page
         document.addEventListener('DOMContentLoaded', () => {
             renderCryptoCards();
         });
