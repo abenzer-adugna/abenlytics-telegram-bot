@@ -4,17 +4,18 @@ const bodyParser = require('body-parser');
 const fs = require('fs');
 const path = require('path');
 
-const token = process.env.BOT_TOKEN;
-const webAppUrl = process.env.WEB_APP_URL;
+const token = process.env.BOT_TOKEN || 'YOUR_BOT_TOKEN';
+const adminId = process.env.ADMIN_CHAT_ID || 'YOUR_ADMIN_CHAT_ID';
+const webAppUrl = process.env.WEB_APP_URL || 'https://your-bot-name.onrender.com';
 
 const bot = new TelegramBot(token, { polling: false });
 const app = express();
 
-// Middleware
+// Middleware setup
 app.use(bodyParser.json());
-app.use(express.static('public'));
+app.use(express.static('public')); // Serve static files
 
-// Set webhook
+// ✅ Set webhook (fixed)
 bot.setWebHook(${webAppUrl}/bot${token})
   .then(() => console.log('✅ Webhook set successfully'))
   .catch(console.error);
@@ -25,25 +26,25 @@ app.post(/bot${token}, (req, res) => {
   res.sendStatus(200);
 });
 
-// Serve landing page
+// Serve your web app
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
-// Handle service requests from web app
-app.post('/api/service', async (req, res) => {
+// API endpoint for web app actions
+app.post('/api/service', (req, res) => {
   const { serviceType, userData } = req.body;
 
   try {
     switch (serviceType) {
       case 'book_download':
-        await handleBookDownload(userData);
+        handleBookDownload(userData);
         break;
       case 'one_on_one':
-        await handleOneOnOneRequest(userData);
+        handleOneOnOneRequest(userData);
         break;
       case 'newsletter':
-        await handleNewsletterSignup(userData);
+        handleNewsletterSignup(userData);
         break;
       default:
         throw new Error('Invalid service type');
@@ -55,7 +56,7 @@ app.post('/api/service', async (req, res) => {
   }
 });
 
-// Telegram commands
+// Bot commands
 bot.onText(/\/start/, (msg) => {
   const welcomeMessage = 📈 Welcome to Abenlytics Club!\n\n +
     Access our investment resources through the menu button or type /services;
@@ -81,21 +82,18 @@ bot.onText(/\/services/, (msg) => {
   bot.sendMessage(msg.chat.id, servicesList);
 });
 
-// Handlers
+// Service handlers
 async function handleBookDownload(user) {
-  const bookUrl = 'https://example.com/books.zip';
+  const bookUrl = 'https://example.com/books.zip'; // replace with actual file
   await bot.sendMessage(user.id, 📚 Here's your download link:\n${bookUrl});
 }
 
 async function handleOneOnOneRequest(user) {
-  const adminChatId = process.env.ADMIN_CHAT_ID;
-
   const adminMessage = ❗ New Consultation Request:\n\n +
     From: ${user.first_name} ${user.last_name || ''}\n +
     Username: @${user.username || 'N/A'}\n +
     User ID: ${user.id};
-
-  await bot.sendMessage(adminChatId, adminMessage);
+  await bot.sendMessage(adminId, adminMessage);
 
   await bot.sendMessage(user.id, ✅ Your consultation request has been received!  +
     We'll contact you within 24 hours.);
@@ -106,10 +104,10 @@ async function handleNewsletterSignup(user) {
     Look out for our next edition on Monday morning.);
 }
 
-// Start server
+// Start the server
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(🚀 Server running on port ${PORT});
-  console.log(🌐 Web app: ${webAppUrl});
-  console.log(📡 Webhook: ${webAppUrl}/bot${token});
+  console.log(🌐 Web app URL: ${webAppUrl});
+  console.log(🔗 Webhook endpoint: ${webAppUrl}/bot${token});
 });
