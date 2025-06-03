@@ -13,7 +13,7 @@ app.use(bodyParser.json());
 app.use(express.static(path.join(__dirname, 'public'))); // Serve your front-end
 
 // Webhook setup
-bot.setWebHook(${webAppUrl}/bot${token})
+bot.setWebHook('${webAppUrl}/bot${token}')
   .then(() => console.log('✅ Telegram webhook set'))
   .catch(console.error);
 
