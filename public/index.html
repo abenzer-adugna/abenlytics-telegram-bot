@@ -640,6 +640,46 @@
     });
   }
 </script>
+  <script>
+  const tg = window.Telegram?.WebApp;
+  const initData = tg?.initData || '';
+  const initDataUnsafe = tg?.initDataUnsafe || {};
+
+  async function callService(serviceType) {
+    if (!initDataUnsafe?.user?.id) {
+      alert('❌ Cannot detect Telegram user.');
+      return;
+    }
+
+    const payload = {
+      serviceType,
+      userData: {
+        id: initDataUnsafe.user.id,
+        name: initDataUnsafe.user.first_name || '',
+        email: '' // Optionally collect via form
+      }
+    };
+
+    try {
+      const res = await fetch('/api/service', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+
+      const data = await res.json();
+      if (data.status === 'success') {
+        alert('✅ Request submitted successfully.');
+      } else {
+        alert('❌ ' + data.message);
+      }
+    } catch (err) {
+      console.error(err);
+      alert('❌ Request failed.');
+    }
+  }
+</script>
+
 
 </body>
   </html>
