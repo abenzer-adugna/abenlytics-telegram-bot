@@ -1,251 +1,142 @@
-import dotenv from 'dotenv';
-import express from 'express';
-import bodyParser from 'body-parser';
-import path from 'path';
-import fs from 'fs';
-import basicAuth from 'express-basic-auth';
-import multer from 'multer';
-import { fileURLToPath } from 'url';
+// server.js
+const express = require('express');
+const bodyParser = require('body-parser');
+const path = require('path');
+const TelegramBot = require('node-telegram-bot-api');
 
-// Configure environment variables
-dotenv.config();
-
-// Get directory paths
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-const publicDir = path.join(__dirname, 'public');
-const uploadDir = path.join(__dirname, 'uploads');
-
-// Create directories if they don't exist
-if (!fs.existsSync(publicDir)) fs.mkdirSync(publicDir, { recursive: true });
-if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir, { recursive: true });
-
+// Initialize app
 const app = express();
 
-// Debug environment variables and paths
-console.log('===== ENVIRONMENT VARIABLES =====');
-console.log('WEBAPP_URL:', process.env.WEBAPP_URL || 'Not set');
-console.log('ADMIN_USER:', process.env.ADMIN_USER || 'admin (default)');
-console.log('ADMIN_PASS:', process.env.ADMIN_PASS ? '*****' : 'admin123 (default)');
-console.log('PORT:', process.env.PORT || 3000);
-console.log('=================================');
+// Get environment variables (use Render.com environment variables)
+const token = process.env.TELEGRAM_TOKEN;
+const webAppUrl = process.env.WEBAPP_URL;
+const adminId = process.env.ADMIN_CHAT_ID;
 
-console.log('===== PATHS =====');
-console.log('Root directory:', __dirname);
-console.log('Public directory:', publicDir);
-console.log('Upload directory:', uploadDir);
-console.log('=================================');
-
-console.log('===== PUBLIC DIRECTORY CONTENTS =====');
-try {
-  if (fs.existsSync(publicDir)) {
-    const files = fs.readdirSync(publicDir);
-    console.log(files.length > 0 ? files.join(', ') : 'Directory is empty');
-  } else {
-    console.log('Public directory does not exist');
-  }
-} catch (err) {
-  console.error('Error reading public directory:', err);
+// Validate environment variables
+if (!token || !webAppUrl || !adminId) {
+  console.error('❌ Missing required environment variables');
+  process.exit(1);
 }
-console.log('=====================================');
 
-// Middleware
+const bot = new TelegramBot(token, { polling: false });
+
+// Basic security headers middleware
+app.use((req, res, next) => {
+  res.setHeader('X-Content-Type-Options', 'nosniff');
+  res.setHeader('X-Frame-Options', 'DENY');
+  next();
+});
+
+// Application middleware
 app.use(bodyParser.json());
-app.use(express.static(publicDir));
+app.use(express.static(path.join(__dirname, 'public')));
 
-// Configure Multer
-const storage = multer.diskStorage({
-  destination: uploadDir,
-  filename: (req, file, cb) => {
-    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-    cb(null, uniqueSuffix + path.extname(file.originalname));
-  }
+// Webhook setup
+bot.setWebHook(`${webAppUrl}/bot${token}`)
+  .then(() => console.log('✅ Telegram webhook set'))
+  .catch(console.error);
+
+// Telegram webhook handler
+app.post(`/bot${token}`, (req, res) => {
+  bot.processUpdate(req.body);
+  res.sendStatus(200);
 });
 
-const upload = multer({ storage });
-
-// Admin authentication middleware
-const authMiddleware = basicAuth({
-  users: { 
-    [process.env.ADMIN_USER || 'admin']: process.env.ADMIN_PASS || 'admin123' 
-  },
-  challenge: true,
-  realm: 'Admin Access'
-});
-
-// File upload endpoint
-app.post('/admin/upload', authMiddleware, upload.single('file'), (req, res) => {
-  if (!req.file) {
-    return res.status(400).json({ error: 'No file uploaded' });
-  }
-  
-  res.json({
-    success: true,
-    message: 'File uploaded successfully',
-    filename: req.file.filename,
-    filePath: `/downloads/${req.file.filename}`
-  });
-});
-
-// File download endpoint
-app.get('/downloads/:filename', (req, res) => {
-  const file = path.join(uploadDir, req.params.filename);
-  
-  if (fs.existsSync(file)) {
-    res.download(file);
-  } else {
-    res.status(404).send('File not found');
-  }
-});
-
-// Newsletter endpoint
-app.post('/admin/newsletter', authMiddleware, (req, res) => {
-  const { message } = req.body;
-  
-  if (!message) {
-    return res.status(400).json({ error: 'Message is required' });
-  }
-  
-  res.json({
-    success: true,
-    message: 'Newsletter sent to users'
-  });
-});
-
-// Debug endpoint - shows server information
-app.get('/debug', (req, res) => {
-  try {
-    const debugInfo = {
-      status: 'online',
-      time: new Date().toISOString(),
-      paths: {
-        root: __dirname,
-        public: publicDir,
-        uploads: uploadDir
-      },
-      files: {
-        publicDir: fs.existsSync(publicDir) ? fs.readdirSync(publicDir) : [],
-        serverFile: path.basename(__filename)
-      },
-      environment: {
-        NODE_ENV: process.env.NODE_ENV || 'development',
-        PORT: process.env.PORT || 3000
-      }
-    };
-    
-    res.json(debugInfo);
-  } catch (error) {
-    res.status(500).json({ error: 'Debug error', details: error.message });
-  }
-});
-
-// Health check endpoint
-app.get('/health', (req, res) => {
-  res.status(200).send('OK');
-});
-
-// Admin panel route - creates file if missing
-app.get('/admin', authMiddleware, (req, res) => {
-  try {
-    const adminPath = path.join(publicDir, 'admin.html');
-    
-    // Create admin.html if it doesn't exist
-    if (!fs.existsSync(adminPath)) {
-      const htmlContent = `<!DOCTYPE html>
-<html>
-<head>
-  <title>Admin Panel | Abenlytics</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: #f0f2f5;
-      margin: 0;
-      padding: 20px;
-    }
-    .container {
-      max-width: 800px;
-      margin: 0 auto;
-      background: white;
-      padding: 30px;
-      border-radius: 10px;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-    }
-    h1 {
-      color: #1a3a5f;
-      text-align: center;
-    }
-    .status {
-      padding: 15px;
-      border-radius: 5px;
-      margin-bottom: 20px;
-      text-align: center;
-      background: #d4edda;
-      color: #155724;
-    }
-    .debug-info {
-      background: #e9ecef;
-      padding: 15px;
-      border-radius: 5px;
-      margin-top: 20px;
-      font-family: monospace;
-      white-space: pre-wrap;
-    }
-  </style>
-</head>
-<body>
-  <div class="container">
-    <h1>Abenlytics Admin Panel</h1>
-    <div class="status">✅ Admin panel is working!</div>
-    
-    <div class="debug-info" id="debugInfo">
-      Loading debug information...
-    </div>
-  </div>
-
-  <script>
-    document.addEventListener('DOMContentLoaded', () => {
-      fetch('/debug')
-        .then(response => response.json())
-        .then(data => {
-          document.getElementById('debugInfo').textContent = 
-            JSON.stringify(data, null, 2);
-        })
-        .catch(error => {
-          document.getElementById('debugInfo').textContent = 
-            'Error loading debug info: ' + error.message;
-        });
-    });
-  </script>
-</body>
-</html>`;
-      
-      fs.writeFileSync(adminPath, htmlContent);
-      console.log('Created admin.html file');
-    }
-    
-    res.sendFile(adminPath);
-  } catch (error) {
-    console.error('Admin panel error:', error);
-    res.status(500).send(`
-      <h1>Admin Panel Error</h1>
-      <p>${error.message}</p>
-      <p>Path: ${path.join(publicDir, 'admin.html')}</p>
-      <p><a href="/debug">View debug information</a></p>
-    `);
-  }
-});
-
-// Root route
+// Routes
 app.get('/', (req, res) => {
-  res.sendFile(path.join(publicDir, 'index.html'));
+  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
+
+// API endpoint with basic validation
+app.post('/api/service', async (req, res) => {
+  const { serviceType, userData } = req.body;
+
+  // Input validation
+  if (!serviceType || !userData || !userData.id) {
+    return res.status(400).json({ 
+      status: 'error', 
+      message: 'Missing required parameters' 
+    });
+  }
+
+  try {
+    switch (serviceType) {
+      case 'book_download':
+        await bot.sendMessage(
+          userData.id, 
+          '📚 Download your book here:\nhttps://example.com/books.zip'
+        );
+        break;
+
+      case 'one_on_one':
+        // Basic data sanitization
+        const safeUserData = {
+          name: (userData.name || '').substring(0, 100),
+          email: (userData.email || '').substring(0, 100),
+          id: userData.id
+        };
+        
+        await bot.sendMessage(
+          adminId, 
+          `📞 New 1-on-1 request:\n\n${JSON.stringify(safeUserData, null, 2)}`
+        );
+        await bot.sendMessage(
+          userData.id, 
+          '✅ Got it! We\'ll reach out within 24 hrs.'
+        );
+        break;
+
+      case 'newsletter':
+        await bot.sendMessage(
+          userData.id, 
+          '📬 You\'re now subscribed to the Abenlytics Newsletter.'
+        );
+        break;
+
+      default:
+        return res.status(400).json({ 
+          status: 'error', 
+          message: 'Invalid service type' 
+        });
+    }
+
+    res.json({ status: 'success' });
+
+  } catch (err) {
+    console.error('API Error:', err.message);
+    res.status(500).json({ 
+      status: 'error', 
+      message: 'Internal server error' 
+    });
+  }
+});
+
+// Telegram command handlers
+bot.onText(/\/start/, (msg) => {
+  const chatId = msg.chat.id;
+  bot.sendMessage(chatId, '👋 Welcome to Abenlytics Club!', {
+    reply_markup: {
+      inline_keyboard: [[{
+        text: "🚀 Open Web App",
+        web_app: { url: webAppUrl }
+      }]]
+    }
+  });
+});
+
+bot.onText(/\/services/, (msg) => {
+  const services = `🛠️ Available Services:\n\n` +
+                   `1. 📘 Download Investing Books\n` +
+                   `2. 🧠 Read Book Reviews\n` +
+                   `3. 🛣️ Follow Roadmaps\n` +
+                   `4. 📩 Weekly Newsletter\n` +
+                   `5. 👥 1-on-1 Consultations`;
+  bot.sendMessage(msg.chat.id, services);
 });
 
 // Start server
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-  console.log(`\n✅ Server running on port ${PORT}`);
-  console.log(`🔗 Main App: ${process.env.WEBAPP_URL || 'http://localhost:' + PORT}`);
-  console.log(`🔐 Admin Panel: ${process.env.WEBAPP_URL || 'http://localhost:' + PORT}/admin`);
-  console.log(`📊 Debug Info: ${process.env.WEBAPP_URL || 'http://localhost:' + PORT}/debug`);
-  console.log(`❤️ Health Check: ${process.env.WEBAPP_URL || 'http://localhost:' + PORT}/health`);
+  console.log(`✅ Server running on port ${PORT}`);
+  console.log(`🌐 Webhook URL: ${webAppUrl}/bot${token}`);
 });
