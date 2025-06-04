@@ -1,18 +1,17 @@
-// server.js
 const express = require('express');
 const bodyParser = require('body-parser');
 const path = require('path');
 const TelegramBot = require('node-telegram-bot-api');
+const crypto = require('crypto');
 
 // Initialize app
 const app = express();
 
-// Get environment variables (use Render.com environment variables)
+// Get environment variables (Render.com style)
 const token = process.env.TELEGRAM_TOKEN;
 const webAppUrl = process.env.WEBAPP_URL;
 const adminId = process.env.ADMIN_CHAT_ID;
 
-// Validate environment variables
 if (!token || !webAppUrl || !adminId) {
   console.error('❌ Missing required environment variables');
   process.exit(1);
@@ -20,42 +19,84 @@ if (!token || !webAppUrl || !adminId) {
 
 const bot = new TelegramBot(token, { polling: false });
 
-// Basic security headers middleware
+// Security headers
 app.use((req, res, next) => {
   res.setHeader('X-Content-Type-Options', 'nosniff');
   res.setHeader('X-Frame-Options', 'DENY');
   next();
 });
 
-// Application middleware
 app.use(bodyParser.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Webhook setup
+// Telegram webhook
 bot.setWebHook(`${webAppUrl}/bot${token}`)
   .then(() => console.log('✅ Telegram webhook set'))
   .catch(console.error);
 
-// Telegram webhook handler
+// Webhook handler
 app.post(`/bot${token}`, (req, res) => {
   bot.processUpdate(req.body);
   res.sendStatus(200);
 });
 
-// Routes
+// Serve frontend
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
-// API endpoint with basic validation
+// Parse query string into object
+function parseQueryString(query) {
+  return Object.fromEntries(new URLSearchParams(query));
+}
+
+// Validate Telegram initData using the bot token
+function verifyInitData(initData) {
+  const parsed = parseQueryString(initData);
+  const { hash } = parsed;
+  delete parsed.hash;
+
+  const dataCheckString = Object.keys(parsed)
+    .sort()
+    .map(k => `${k}=${parsed[k]}`)
+    .join('\n');
+
+  const secret = crypto
+    .createHash('sha256')
+    .update(token)
+    .digest();
+
+  const hmac = crypto
+    .createHmac('sha256', secret)
+    .update(dataCheckString)
+    .digest('hex');
+
+  return hmac === hash ? parsed : null;
+}
+
+// POST /verify-initdata for frontend auth
+app.post('/verify-initdata', (req, res) => {
+  const { initData } = req.body;
+  if (!initData) {
+    return res.status(400).json({ ok: false, error: 'Missing initData' });
+  }
+
+  const verified = verifyInitData(initData);
+  if (verified) {
+    return res.json({ ok: true, user: verified });
+  } else {
+    return res.status(403).json({ ok: false, error: 'Invalid initData' });
+  }
+});
+
+// API endpoint for service actions
 app.post('/api/service', async (req, res) => {
   const { serviceType, userData } = req.body;
 
-  // Input validation
   if (!serviceType || !userData || !userData.id) {
-    return res.status(400).json({ 
-      status: 'error', 
-      message: 'Missing required parameters' 
+    return res.status(400).json({
+      status: 'error',
+      message: 'Missing required parameters'
     });
   }
 
@@ -63,40 +104,39 @@ app.post('/api/service', async (req, res) => {
     switch (serviceType) {
       case 'book_download':
         await bot.sendMessage(
-          userData.id, 
+          userData.id,
           '📚 Download your book here:\nhttps://example.com/books.zip'
         );
         break;
 
       case 'one_on_one':
-        // Basic data sanitization
         const safeUserData = {
           name: (userData.name || '').substring(0, 100),
           email: (userData.email || '').substring(0, 100),
           id: userData.id
         };
-        
+
         await bot.sendMessage(
-          adminId, 
+          adminId,
           `📞 New 1-on-1 request:\n\n${JSON.stringify(safeUserData, null, 2)}`
         );
         await bot.sendMessage(
-          userData.id, 
+          userData.id,
           '✅ Got it! We\'ll reach out within 24 hrs.'
         );
         break;
 
       case 'newsletter':
         await bot.sendMessage(
-          userData.id, 
+          userData.id,
           '📬 You\'re now subscribed to the Abenlytics Newsletter.'
         );
         break;
 
       default:
-        return res.status(400).json({ 
-          status: 'error', 
-          message: 'Invalid service type' 
+        return res.status(400).json({
+          status: 'error',
+          message: 'Invalid service type'
         });
     }
 
@@ -104,14 +144,14 @@ app.post('/api/service', async (req, res) => {
 
   } catch (err) {
     console.error('API Error:', err.message);
-    res.status(500).json({ 
-      status: 'error', 
-      message: 'Internal server error' 
+    res.status(500).json({
+      status: 'error',
+      message: 'Internal server error'
     });
   }
 });
 
-// Telegram command handlers
+// Telegram bot commands
 bot.onText(/\/start/, (msg) => {
   const chatId = msg.chat.id;
   bot.sendMessage(chatId, '👋 Welcome to Abenlytics Club!', {
