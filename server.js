@@ -4,70 +4,92 @@ const bodyParser = require('body-parser');
 const path = require('path');
 const fs = require('fs');
 const basicAuth = require('express-basic-auth');
+const fileUpload = require('express-fileupload');
 
 const app = express();
 
 // Middleware
 app.use(bodyParser.json());
+app.use(fileUpload());
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Debug log
-console.log('Starting Abenlytics server...');
-console.log('Environment variables:');
-console.log(`- PORT: ${process.env.PORT || 3000}`);
-console.log(`- WEBAPP_URL: ${process.env.WEBAPP_URL || 'Not set'}`);
-console.log(`- ADMIN_USER: ${process.env.ADMIN_USER || 'admin (default)'}`);
-console.log(`- ADMIN_PASS: ${process.env.ADMIN_PASS ? '*****' : 'admin123 (default)'}`);
+// Debug environment variables
+console.log('===== ENVIRONMENT VARIABLES =====');
+console.log('WEBAPP_URL:', process.env.WEBAPP_URL || 'Not set');
+console.log('ADMIN_USER:', process.env.ADMIN_USER || 'admin (default)');
+console.log('ADMIN_PASS:', process.env.ADMIN_PASS ? '*****' : 'admin123 (default)');
+console.log('=================================');
 
-// ===========================================
-// DEBUG ENDPOINTS
-// ===========================================
-app.get('/debug', (req, res) => {
-  res.json({
-    status: 'online',
-    timestamp: new Date(),
-    environment: {
-      NODE_ENV: process.env.NODE_ENV,
-      PORT: process.env.PORT,
-      WEBAPP_URL: process.env.WEBAPP_URL,
-      ADMIN_USER: process.env.ADMIN_USER,
-      ADMIN_PASS: process.env.ADMIN_PASS ? '*****' : 'not set'
-    },
-    paths: {
-      publicDir: path.join(__dirname, 'public'),
-      adminHtml: path.join(__dirname, 'public', 'admin.html')
-    },
-    files: {
-      adminExists: fs.existsSync(path.join(__dirname, 'public', 'admin.html')),
-      serverFile: __filename
+// Create uploads directory
+const uploadDir = path.join(__dirname, 'uploads');
+if (!fs.existsSync(uploadDir)) {
+  fs.mkdirSync(uploadDir);
+  console.log('Created uploads directory:', uploadDir);
+}
+
+// Admin authentication middleware
+const authMiddleware = basicAuth({
+  users: { 
+    [process.env.ADMIN_USER || 'admin']: process.env.ADMIN_PASS || 'admin123' 
+  },
+  challenge: true,
+  realm: 'Admin Access'
+});
+
+// File upload endpoint
+app.post('/admin/upload', authMiddleware, (req, res) => {
+  if (!req.files || !req.files.file) {
+    return res.status(400).json({ error: 'No file uploaded' });
+  }
+  
+  const file = req.files.file;
+  const fileName = `${Date.now()}-${file.name}`;
+  const filePath = path.join(uploadDir, fileName);
+  
+  file.mv(filePath, (err) => {
+    if (err) {
+      console.error('File save error:', err);
+      return res.status(500).json({ error: 'Error saving file' });
     }
+    
+    res.json({
+      success: true,
+      message: 'File uploaded successfully',
+      filePath: `/downloads/${fileName}`
+    });
   });
 });
 
-app.get('/debug/auth', basicAuth({
-  users: { 
-    [process.env.ADMIN_USER || 'admin']: process.env.ADMIN_PASS || 'admin123' 
-  },
-  challenge: true,
-  realm: 'Admin Access'
-}), (req, res) => {
+// File download endpoint
+app.get('/downloads/:filename', (req, res) => {
+  const file = path.join(uploadDir, req.params.filename);
+  
+  if (fs.existsSync(file)) {
+    res.download(file);
+  } else {
+    res.status(404).send('File not found');
+  }
+});
+
+// Newsletter sending endpoint
+app.post('/admin/newsletter', authMiddleware, (req, res) => {
+  const { message } = req.body;
+  
+  if (!message) {
+    return res.status(400).json({ error: 'Message is required' });
+  }
+  
+  // In a real implementation, you would send to users
+  console.log('Newsletter message:', message);
+  
   res.json({
-    authenticated: true,
-    username: req.auth.user,
-    timestamp: new Date()
+    success: true,
+    message: 'Newsletter sent to users'
   });
 });
 
-// ===========================================
-// ADMIN PANEL
-// ===========================================
-app.get('/admin', basicAuth({
-  users: { 
-    [process.env.ADMIN_USER || 'admin']: process.env.ADMIN_PASS || 'admin123' 
-  },
-  challenge: true,
-  realm: 'Admin Access'
-}), (req, res) => {
+// Admin panel route
+app.get('/admin', authMiddleware, (req, res) => {
   const adminPath = path.join(__dirname, 'public', 'admin.html');
   
   if (fs.existsSync(adminPath)) {
@@ -76,30 +98,37 @@ app.get('/admin', basicAuth({
     res.status(404).send(`
       <h1>Admin Panel Not Found</h1>
       <p>File path: ${adminPath}</p>
-      <p>Create a file at <code>public/admin.html</code> to fix this issue.</p>
-      <p><a href="/debug">View debug information</a></p>
+      <p>Create a file at public/admin.html to fix this issue.</p>
+      <p>Current directory contents: ${fs.readdirSync(path.join(__dirname, 'public')).join(', ')}</p>
     `);
   }
 });
 
-// ===========================================
-// BASIC ROUTES
-// ===========================================
+// Debug endpoint
+app.get('/debug', (req, res) => {
+  const publicDir = path.join(__dirname, 'public');
+  
+  res.json({
+    status: 'online',
+    time: new Date().toISOString(),
+    adminPanel: {
+      path: path.join(publicDir, 'admin.html'),
+      exists: fs.existsSync(path.join(publicDir, 'admin.html'))
+    },
+    publicDirFiles: fs.existsSync(publicDir) ? fs.readdirSync(publicDir) : []
+  });
+});
+
+// Root route
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
-app.get('/test', (req, res) => {
-  res.send('Server is working!');
-});
-
-// ===========================================
-// START SERVER
-// ===========================================
+// Start server
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`\n✅ Server running on port ${PORT}`);
-  console.log(`🔗 Test endpoint: ${process.env.WEBAPP_URL || 'http://localhost:' + PORT}/test`);
-  console.log(`🔐 Admin panel: ${process.env.WEBAPP_URL || 'http://localhost:' + PORT}/admin`);
-  console.log(`📊 Debug info: ${process.env.WEBAPP_URL || 'http://localhost:' + PORT}/debug`);
+  console.log(`🔗 Main App: ${process.env.WEBAPP_URL || 'http://localhost:' + PORT}`);
+  console.log(`🔐 Admin Panel: ${process.env.WEBAPP_URL || 'http://localhost:' + PORT}/admin`);
+  console.log(`📊 Debug Info: ${process.env.WEBAPP_URL || 'http://localhost:' + PORT}/debug`);
 });
