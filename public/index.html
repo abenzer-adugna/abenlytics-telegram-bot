@@ -614,5 +614,32 @@
       });
     });
   </script>
+  <script>
+  // Telegram WebApp data
+  const tg = window.Telegram?.WebApp;
+  const initData = tg?.initData || '';
+  const initDataUnsafe = tg?.initDataUnsafe || {};
+
+  console.log("Telegram initData:", initData);
+  console.log("Parsed initData:", initDataUnsafe);
+
+  // Send it to backend for verification
+  if (initData) {
+    fetch('/verify-initdata', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ initData })
+    })
+    .then(res => res.json())
+    .then(data => {
+      if (data.ok) {
+        console.log('User verified:', data.user);
+      } else {
+        console.warn('Verification failed:', data.error);
+      }
+    });
+  }
+</script>
+
 </body>
   </html>
