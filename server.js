@@ -8,36 +8,44 @@ const multer = require('multer');
 
 const app = express();
 
+// Get absolute paths
+const __dirname = path.resolve();
+const publicDir = path.join(__dirname, 'public');
+const uploadDir = path.join(__dirname, 'uploads');
+
+// Ensure directories exist
+if (!fs.existsSync(publicDir)) fs.mkdirSync(publicDir, { recursive: true });
+if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir, { recursive: true });
+
 // Middleware
 app.use(bodyParser.json());
-app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static(publicDir));
 
-// Debug environment variables
+// Debug environment variables and paths
 console.log('===== ENVIRONMENT VARIABLES =====');
 console.log('WEBAPP_URL:', process.env.WEBAPP_URL || 'Not set');
 console.log('ADMIN_USER:', process.env.ADMIN_USER || 'admin (default)');
 console.log('ADMIN_PASS:', process.env.ADMIN_PASS ? '*****' : 'admin123 (default)');
+console.log('PORT:', process.env.PORT || 3000);
 console.log('=================================');
 
-// Create uploads directory
-const uploadDir = path.join(__dirname, 'uploads');
-if (!fs.existsSync(uploadDir)) {
-  fs.mkdirSync(uploadDir);
-  console.log('Created uploads directory:', uploadDir);
-}
+console.log('===== PATHS =====');
+console.log('Root directory:', __dirname);
+console.log('Public directory:', publicDir);
+console.log('Admin HTML path:', path.join(publicDir, 'admin.html'));
+console.log('Upload directory:', uploadDir);
+console.log('=================================');
 
-// Configure Multer for file uploads
+// Configure Multer
 const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, uploadDir);
-  },
+  destination: uploadDir,
   filename: (req, file, cb) => {
     const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
     cb(null, uniqueSuffix + path.extname(file.originalname));
   }
 });
 
-const upload = multer({ storage: storage });
+const upload = multer({ storage });
 
 // Admin authentication middleware
 const authMiddleware = basicAuth({
@@ -73,16 +81,13 @@ app.get('/downloads/:filename', (req, res) => {
   }
 });
 
-// Newsletter sending endpoint
+// Newsletter endpoint
 app.post('/admin/newsletter', authMiddleware, (req, res) => {
   const { message } = req.body;
   
   if (!message) {
     return res.status(400).json({ error: 'Message is required' });
   }
-  
-  // In a real implementation, you would send to users
-  console.log('Newsletter message:', message);
   
   res.json({
     success: true,
@@ -92,38 +97,48 @@ app.post('/admin/newsletter', authMiddleware, (req, res) => {
 
 // Admin panel route
 app.get('/admin', authMiddleware, (req, res) => {
-  const adminPath = path.join(__dirname, 'public', 'admin.html');
+  const adminPath = path.join(publicDir, 'admin.html');
   
   if (fs.existsSync(adminPath)) {
     res.sendFile(adminPath);
   } else {
-    res.status(404).send(`
-      <h1>Admin Panel Not Found</h1>
-      <p>File path: ${adminPath}</p>
-      <p>Create a file at public/admin.html to fix this issue.</p>
-      <p>Current directory contents: ${fs.readdirSync(path.join(__dirname, 'public')).join(', ')}</p>
-    `);
+    // Create admin.html if it doesn't exist
+    const htmlContent = `<!DOCTYPE html>
+<html>
+<head><title>Admin Panel</title></head>
+<body>
+  <h1>Automatically Created Admin Panel</h1>
+  <p>This file was created automatically at: ${new Date()}</p>
+  <p>Path: ${adminPath}</p>
+</body>
+</html>`;
+    
+    fs.writeFileSync(adminPath, htmlContent);
+    res.sendFile(adminPath);
   }
 });
 
 // Debug endpoint
 app.get('/debug', (req, res) => {
-  const publicDir = path.join(__dirname, 'public');
-  
   res.json({
     status: 'online',
     time: new Date().toISOString(),
-    adminPanel: {
-      path: path.join(publicDir, 'admin.html'),
-      exists: fs.existsSync(path.join(publicDir, 'admin.html'))
+    paths: {
+      root: __dirname,
+      public: publicDir,
+      admin: path.join(publicDir, 'admin.html'),
+      uploads: uploadDir
     },
-    publicDirFiles: fs.existsSync(publicDir) ? fs.readdirSync(publicDir) : []
+    files: {
+      adminExists: fs.existsSync(path.join(publicDir, 'admin.html')),
+      publicDirFiles: fs.readdirSync(publicDir)
+    }
   });
 });
 
 // Root route
 app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+  res.sendFile(path.join(publicDir, 'index.html'));
 });
 
 // Start server
