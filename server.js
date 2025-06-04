@@ -1,25 +1,26 @@
-require('dotenv').config();
-const express = require('express');
-const bodyParser = require('body-parser');
-const path = require('path');
-const fs = require('fs');
-const basicAuth = require('express-basic-auth');
-const multer = require('multer');
+import dotenv from 'dotenv';
+import express from 'express';
+import bodyParser from 'body-parser';
+import path from 'path';
+import fs from 'fs';
+import basicAuth from 'express-basic-auth';
+import multer from 'multer';
+import { fileURLToPath } from 'url';
 
-const app = express();
+// Configure environment variables
+dotenv.config();
 
-// Get absolute paths
-const __dirname = path.resolve();
+// Get directory paths
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 const publicDir = path.join(__dirname, 'public');
 const uploadDir = path.join(__dirname, 'uploads');
 
-// Ensure directories exist
+// Create directories if they don't exist
 if (!fs.existsSync(publicDir)) fs.mkdirSync(publicDir, { recursive: true });
 if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir, { recursive: true });
 
-// Middleware
-app.use(bodyParser.json());
-app.use(express.static(publicDir));
+const app = express();
 
 // Debug environment variables and paths
 console.log('===== ENVIRONMENT VARIABLES =====');
@@ -35,6 +36,10 @@ console.log('Public directory:', publicDir);
 console.log('Admin HTML path:', path.join(publicDir, 'admin.html'));
 console.log('Upload directory:', uploadDir);
 console.log('=================================');
+
+// Middleware
+app.use(bodyParser.json());
+app.use(express.static(publicDir));
 
 // Configure Multer
 const storage = multer.diskStorage({
@@ -110,6 +115,7 @@ app.get('/admin', authMiddleware, (req, res) => {
   <h1>Automatically Created Admin Panel</h1>
   <p>This file was created automatically at: ${new Date()}</p>
   <p>Path: ${adminPath}</p>
+  <p><a href="/debug">View debug information</a></p>
 </body>
 </html>`;
     
