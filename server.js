@@ -13,9 +13,11 @@ dotenv.config();
 // Get directory paths
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+const publicDir = path.join(__dirname, 'public');
 const uploadDir = path.join(__dirname, 'uploads');
 
 // Create directories if they don't exist
+if (!fs.existsSync(publicDir)) fs.mkdirSync(publicDir, { recursive: true });
 if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir, { recursive: true });
 
 const app = express();
@@ -30,12 +32,26 @@ console.log('=================================');
 
 console.log('===== PATHS =====');
 console.log('Root directory:', __dirname);
+console.log('Public directory:', publicDir);
 console.log('Upload directory:', uploadDir);
 console.log('=================================');
 
+console.log('===== PUBLIC DIRECTORY CONTENTS =====');
+try {
+  if (fs.existsSync(publicDir)) {
+    const files = fs.readdirSync(publicDir);
+    console.log(files.length > 0 ? files.join(', ') : 'Directory is empty');
+  } else {
+    console.log('Public directory does not exist');
+  }
+} catch (err) {
+  console.error('Error reading public directory:', err);
+}
+console.log('=====================================');
+
 // Middleware
 app.use(bodyParser.json());
-app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static(publicDir));
 
 // Configure Multer
 const storage = multer.diskStorage({
@@ -96,344 +112,132 @@ app.post('/admin/newsletter', authMiddleware, (req, res) => {
   });
 });
 
-// Debug endpoint
+// Debug endpoint - shows server information
 app.get('/debug', (req, res) => {
-  res.json({
-    status: 'online',
-    time: new Date().toISOString(),
-    paths: {
-      root: __dirname,
-      uploads: uploadDir
-    }
-  });
+  try {
+    const debugInfo = {
+      status: 'online',
+      time: new Date().toISOString(),
+      paths: {
+        root: __dirname,
+        public: publicDir,
+        uploads: uploadDir
+      },
+      files: {
+        publicDir: fs.existsSync(publicDir) ? fs.readdirSync(publicDir) : [],
+        serverFile: path.basename(__filename)
+      },
+      environment: {
+        NODE_ENV: process.env.NODE_ENV || 'development',
+        PORT: process.env.PORT || 3000
+      }
+    };
+    
+    res.json(debugInfo);
+  } catch (error) {
+    res.status(500).json({ error: 'Debug error', details: error.message });
+  }
 });
 
-// Built-in Admin Panel
-app.get('/admin', authMiddleware, (req, res) => {
-  const adminHtml = `
-  <!DOCTYPE html>
-  <html lang="en">
-  <head>
-      <meta charset="UTF-8">
-      <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      <title>Admin Panel | Abenlytics</title>
-      <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-      <style>
-          * {
-              margin: 0;
-              padding: 0;
-              box-sizing: border-box;
-              font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-          }
-          
-          body {
-              background: linear-gradient(135deg, #0c162d, #1a2238);
-              color: #e2e8f0;
-              min-height: 100vh;
-              padding: 20px;
-          }
-          
-          .admin-container {
-              max-width: 1200px;
-              margin: 0 auto;
-          }
-          
-          header {
-              display: flex;
-              justify-content: space-between;
-              align-items: center;
-              padding: 20px 0;
-              border-bottom: 1px solid rgba(255,255,255,0.1);
-              margin-bottom: 30px;
-          }
-          
-          .logo {
-              display: flex;
-              align-items: center;
-              gap: 15px;
-          }
-          
-          .logo-icon {
-              width: 50px;
-              height: 50px;
-              background: linear-gradient(135deg, #0e9f6e, #1a3a5f);
-              border-radius: 12px;
-              display: flex;
-              align-items: center;
-              justify-content: center;
-              font-size: 24px;
-          }
-          
-          .logo-text {
-              font-size: 28px;
-              font-weight: 700;
-              background: linear-gradient(to right, #0e9f6e, #4fd1c5);
-              -webkit-background-clip: text;
-              -webkit-text-fill-color: transparent;
-          }
-          
-          .panel {
-              background: rgba(26, 58, 95, 0.7);
-              backdrop-filter: blur(10px);
-              border-radius: 15px;
-              padding: 25px;
-              box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-              border: 1px solid rgba(46, 91, 140, 0.5);
-              margin-bottom: 30px;
-          }
-          
-          .panel-title {
-              font-size: 22px;
-              margin-bottom: 20px;
-              padding-bottom: 15px;
-              border-bottom: 1px solid rgba(255,255,255,0.1);
-              display: flex;
-              align-items: center;
-              gap: 10px;
-          }
-          
-          .form-group {
-              margin-bottom: 20px;
-          }
-          
-          label {
-              display: block;
-              margin-bottom: 8px;
-              font-weight: 600;
-          }
-          
-          input, select, textarea {
-              width: 100%;
-              padding: 14px;
-              border-radius: 8px;
-              border: 1px solid rgba(255,255,255,0.1);
-              background: rgba(15, 30, 50, 0.5);
-              color: white;
-              font-size: 16px;
-          }
-          
-          .btn {
-              padding: 15px 25px;
-              background: linear-gradient(135deg, #0e9f6e, #0b8457);
-              color: white;
-              border: none;
-              border-radius: 8px;
-              cursor: pointer;
-              font-weight: 600;
-              font-size: 16px;
-              transition: all 0.3s ease;
-          }
-          
-          .btn:hover {
-              transform: translateY(-3px);
-              box-shadow: 0 5px 15px rgba(14, 159, 110, 0.4);
-          }
-          
-          .notification {
-              position: fixed;
-              top: 20px;
-              right: 20px;
-              padding: 15px 25px;
-              border-radius: 8px;
-              background: #0e9f6e;
-              color: white;
-              font-weight: 600;
-              box-shadow: 0 5px 15px rgba(0,0,0,0.2);
-              transform: translateX(120%);
-              transition: transform 0.3s ease;
-              z-index: 1000;
-          }
-          
-          .notification.show {
-              transform: translateX(0);
-          }
-          
-          footer {
-              text-align: center;
-              padding: 30px 0;
-              margin-top: 50px;
-              color: #a0aec0;
-              border-top: 1px solid rgba(255,255,255,0.1);
-          }
-      </style>
-  </head>
-  <body>
-      <div class="admin-container">
-          <header>
-              <div class="logo">
-                  <div class="logo-icon">
-                      <i class="fas fa-chart-line"></i>
-                  </div>
-                  <div class="logo-text">Abenlytics Admin</div>
-              </div>
-              <div class="admin-info">
-                  <div class="admin-name">Administrator</div>
-                  <div class="admin-email">admin@abenlytics.com</div>
-              </div>
-          </header>
-          
-          <div class="panel">
-              <h2 class="panel-title"><i class="fas fa-file-upload"></i> File Upload</h2>
-              
-              <div class="form-group">
-                  <label for="fileInput">Select File</label>
-                  <input type="file" id="fileInput">
-              </div>
-              
-              <div class="form-group">
-                  <label for="fileName">File Title</label>
-                  <input type="text" id="fileName" placeholder="e.g., Investing Guide">
-              </div>
-              
-              <div class="form-group">
-                  <label for="fileDescription">Description</label>
-                  <textarea id="fileDescription" rows="3" placeholder="Brief description of the file"></textarea>
-              </div>
-              
-              <button class="btn" id="uploadBtn">
-                  <i class="fas fa-upload"></i> Upload File
-              </button>
-          </div>
-          
-          <div class="panel">
-              <h2 class="panel-title"><i class="fas fa-newspaper"></i> Send Message to Users</h2>
-              
-              <div class="form-group">
-                  <label for="messageSubject">Subject</label>
-                  <input type="text" id="messageSubject" placeholder="e.g., Weekly Market Insights">
-              </div>
-              
-              <div class="form-group">
-                  <label for="messageContent">Message Content</label>
-                  <textarea id="messageContent" rows="5" placeholder="Write your message here..."></textarea>
-              </div>
-              
-              <button class="btn" id="sendBtn">
-                  <i class="fas fa-paper-plane"></i> Send Message
-              </button>
-          </div>
-          
-          <div id="notification" class="notification">
-              <i class="fas fa-check-circle"></i> <span id="notificationText">Action completed successfully!</span>
-          </div>
-          
-          <footer>
-              <p>&copy; 2025 Abenlytics Club - Admin Panel</p>
-              <p>Secure access restricted to authorized personnel only</p>
-          </footer>
-      </div>
+// Health check endpoint
+app.get('/health', (req, res) => {
+  res.status(200).send('OK');
+});
 
-      <script>
-          // DOM Elements
-          const uploadBtn = document.getElementById('uploadBtn');
-          const sendBtn = document.getElementById('sendBtn');
-          const notification = document.getElementById('notification');
-          const notificationText = document.getElementById('notificationText');
-          
-          // Show notification
-          function showNotification(message, isError = false) {
-              notificationText.textContent = message;
-              notification.style.background = isError ? '#e53e3e' : '#0e9f6e';
-              notification.classList.add('show');
-              
-              setTimeout(() => {
-                  notification.classList.remove('show');
-              }, 3000);
-          }
-          
-          // Upload button handler
-          uploadBtn.addEventListener('click', async () => {
-              const fileInput = document.getElementById('fileInput');
-              const fileName = document.getElementById('fileName').value;
-              
-              if (!fileInput.files.length) {
-                  showNotification('Please select a file', true);
-                  return;
-              }
-              
-              if (!fileName) {
-                  showNotification('Please enter a file title', true);
-                  return;
-              }
-              
-              const formData = new FormData();
-              formData.append('file', fileInput.files[0]);
-              formData.append('title', fileName);
-              formData.append('description', document.getElementById('fileDescription').value);
-              
-              try {
-                  showNotification('Uploading file...');
-                  
-                  const response = await fetch('/admin/upload', {
-                      method: 'POST',
-                      body: formData
-                  });
-                  
-                  const result = await response.json();
-                  
-                  if (response.ok) {
-                      showNotification(result.message || 'File uploaded successfully!');
-                      // Reset form
-                      fileInput.value = '';
-                      document.getElementById('fileName').value = '';
-                      document.getElementById('fileDescription').value = '';
-                  } else {
-                      showNotification(result.error || 'Upload failed', true);
-                  }
-              } catch (error) {
-                  showNotification('Upload error: ' + error.message, true);
-              }
-          });
-          
-          // Send message button handler
-          sendBtn.addEventListener('click', async () => {
-              const subject = document.getElementById('messageSubject').value;
-              const content = document.getElementById('messageContent').value;
-              
-              if (!subject || !content) {
-                  showNotification('Please fill in all fields', true);
-                  return;
-              }
-              
-              try {
-                  showNotification('Sending message...');
-                  
-                  const response = await fetch('/admin/newsletter', {
-                      method: 'POST',
-                      headers: {'Content-Type': 'application/json'},
-                      body: JSON.stringify({ message: content })
-                  });
-                  
-                  const result = await response.json();
-                  
-                  if (response.ok) {
-                      showNotification(result.message || 'Message sent successfully!');
-                      // Reset form
-                      document.getElementById('messageSubject').value = '';
-                      document.getElementById('messageContent').value = '';
-                  } else {
-                      showNotification(result.error || 'Sending failed', true);
-                  }
-              } catch (error) {
-                  showNotification('Sending error: ' + error.message, true);
-              }
-          });
-          
-          // Initial notification
-          setTimeout(() => {
-              showNotification('Admin panel loaded successfully');
-          }, 1000);
-      </script>
-  </body>
-  </html>
-  `;
-  
-  res.send(adminHtml);
+// Admin panel route - creates file if missing
+app.get('/admin', authMiddleware, (req, res) => {
+  try {
+    const adminPath = path.join(publicDir, 'admin.html');
+    
+    // Create admin.html if it doesn't exist
+    if (!fs.existsSync(adminPath)) {
+      const htmlContent = `<!DOCTYPE html>
+<html>
+<head>
+  <title>Admin Panel | Abenlytics</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f0f2f5;
+      margin: 0;
+      padding: 20px;
+    }
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      background: white;
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    h1 {
+      color: #1a3a5f;
+      text-align: center;
+    }
+    .status {
+      padding: 15px;
+      border-radius: 5px;
+      margin-bottom: 20px;
+      text-align: center;
+      background: #d4edda;
+      color: #155724;
+    }
+    .debug-info {
+      background: #e9ecef;
+      padding: 15px;
+      border-radius: 5px;
+      margin-top: 20px;
+      font-family: monospace;
+      white-space: pre-wrap;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Abenlytics Admin Panel</h1>
+    <div class="status">✅ Admin panel is working!</div>
+    
+    <div class="debug-info" id="debugInfo">
+      Loading debug information...
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      fetch('/debug')
+        .then(response => response.json())
+        .then(data => {
+          document.getElementById('debugInfo').textContent = 
+            JSON.stringify(data, null, 2);
+        })
+        .catch(error => {
+          document.getElementById('debugInfo').textContent = 
+            'Error loading debug info: ' + error.message;
+        });
+    });
+  </script>
+</body>
+</html>`;
+      
+      fs.writeFileSync(adminPath, htmlContent);
+      console.log('Created admin.html file');
+    }
+    
+    res.sendFile(adminPath);
+  } catch (error) {
+    console.error('Admin panel error:', error);
+    res.status(500).send(`
+      <h1>Admin Panel Error</h1>
+      <p>${error.message}</p>
+      <p>Path: ${path.join(publicDir, 'admin.html')}</p>
+      <p><a href="/debug">View debug information</a></p>
+    `);
+  }
 });
 
 // Root route
 app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+  res.sendFile(path.join(publicDir, 'index.html'));
 });
 
 // Start server
@@ -442,4 +246,6 @@ app.listen(PORT, () => {
   console.log(`\n✅ Server running on port ${PORT}`);
   console.log(`🔗 Main App: ${process.env.WEBAPP_URL || 'http://localhost:' + PORT}`);
   console.log(`🔐 Admin Panel: ${process.env.WEBAPP_URL || 'http://localhost:' + PORT}/admin`);
+  console.log(`📊 Debug Info: ${process.env.WEBAPP_URL || 'http://localhost:' + PORT}/debug`);
+  console.log(`❤️ Health Check: ${process.env.WEBAPP_URL || 'http://localhost:' + PORT}/health`);
 });
