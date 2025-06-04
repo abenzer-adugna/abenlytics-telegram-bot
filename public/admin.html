@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Admin Panel</title>
+    <title>Admin Panel | Abenlytics</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -26,8 +26,6 @@
             border-radius: 5px;
             margin-bottom: 20px;
             text-align: center;
-        }
-        .success {
             background: #d4edda;
             color: #155724;
         }
@@ -39,109 +37,30 @@
             font-family: monospace;
             white-space: pre-wrap;
         }
-        .section {
-            margin: 30px 0;
-            padding: 20px;
-            border: 1px solid #e0e0e0;
-            border-radius: 8px;
-        }
-        .btn {
-            padding: 10px 20px;
-            background: #0e9f6e;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 16px;
-        }
     </style>
 </head>
 <body>
     <div class="container">
         <h1>Abenlytics Admin Panel</h1>
+        <div class="status">✅ Admin panel is working!</div>
         
-        <div id="status" class="status">
-            Admin panel loaded successfully!
+        <div class="debug-info" id="debugInfo">
+            Loading debug information...
         </div>
-        
-        <div class="section">
-            <h2>File Upload</h2>
-            <input type="file" id="fileInput">
-            <button class="btn" id="uploadBtn">Upload File</button>
-        </div>
-        
-        <div class="section">
-            <h2>Send Message to Users</h2>
-            <div>
-                <label>Message: </label>
-                <textarea id="message" rows="4" style="width:100%; padding:10px;"></textarea>
-            </div>
-            <button class="btn" id="sendBtn">Send to All Users</button>
-        </div>
-        
-        <div class="debug-info" id="debugInfo"></div>
     </div>
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            const statusEl = document.getElementById('status');
-            const debugEl = document.getElementById('debugInfo');
-            
-            // Display debug info
-            const debugInfo = {
-                path: window.location.pathname,
-                server: window.location.origin,
-                timestamp: new Date().toISOString(),
-                status: "Admin panel loaded"
-            };
-            
-            debugEl.textContent = JSON.stringify(debugInfo, null, 2);
-            
-            // Upload functionality
-            document.getElementById('uploadBtn').addEventListener('click', async () => {
-                const fileInput = document.getElementById('fileInput');
-                if (!fileInput.files.length) {
-                    alert('Please select a file');
-                    return;
-                }
-                
-                const formData = new FormData();
-                formData.append('file', fileInput.files[0]);
-                
-                try {
-                    const response = await fetch('/admin/upload', {
-                        method: 'POST',
-                        body: formData
-                    });
-                    
-                    const result = await response.json();
-                    alert(result.message || 'File uploaded successfully!');
-                } catch (error) {
-                    alert('Upload failed: ' + error.message);
-                }
-            });
-            
-            // Message sending functionality
-            document.getElementById('sendBtn').addEventListener('click', async () => {
-                const message = document.getElementById('message').value;
-                if (!message) {
-                    alert('Please enter a message');
-                    return;
-                }
-                
-                try {
-                    const response = await fetch('/admin/newsletter', {
-                        method: 'POST',
-                        headers: {'Content-Type': 'application/json'},
-                        body: JSON.stringify({ message })
-                    });
-                    
-                    const result = await response.json();
-                    alert(result.message || 'Message sent successfully!');
-                } catch (error) {
-                    alert('Sending failed: ' + error.message);
-                }
-            });
+            fetch('/debug')
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('debugInfo').textContent = 
+                        JSON.stringify(data, null, 2);
+                })
+                .catch(error => {
+                    document.getElementById('debugInfo').textContent = 
+                        'Error loading debug info: ' + error.message;
+                });
         });
     </script>
 </body>
