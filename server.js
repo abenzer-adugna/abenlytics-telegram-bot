@@ -4,13 +4,12 @@ const bodyParser = require('body-parser');
 const path = require('path');
 const fs = require('fs');
 const basicAuth = require('express-basic-auth');
-const fileUpload = require('express-fileupload');
+const multer = require('multer');
 
 const app = express();
 
 // Middleware
 app.use(bodyParser.json());
-app.use(fileUpload());
 app.use(express.static(path.join(__dirname, 'public')));
 
 // Debug environment variables
@@ -27,6 +26,19 @@ if (!fs.existsSync(uploadDir)) {
   console.log('Created uploads directory:', uploadDir);
 }
 
+// Configure Multer for file uploads
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, uploadDir);
+  },
+  filename: (req, file, cb) => {
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+    cb(null, uniqueSuffix + path.extname(file.originalname));
+  }
+});
+
+const upload = multer({ storage: storage });
+
 // Admin authentication middleware
 const authMiddleware = basicAuth({
   users: { 
@@ -37,26 +49,16 @@ const authMiddleware = basicAuth({
 });
 
 // File upload endpoint
-app.post('/admin/upload', authMiddleware, (req, res) => {
-  if (!req.files || !req.files.file) {
+app.post('/admin/upload', authMiddleware, upload.single('file'), (req, res) => {
+  if (!req.file) {
     return res.status(400).json({ error: 'No file uploaded' });
   }
   
-  const file = req.files.file;
-  const fileName = `${Date.now()}-${file.name}`;
-  const filePath = path.join(uploadDir, fileName);
-  
-  file.mv(filePath, (err) => {
-    if (err) {
-      console.error('File save error:', err);
-      return res.status(500).json({ error: 'Error saving file' });
-    }
-    
-    res.json({
-      success: true,
-      message: 'File uploaded successfully',
-      filePath: `/downloads/${fileName}`
-    });
+  res.json({
+    success: true,
+    message: 'File uploaded successfully',
+    filename: req.file.filename,
+    filePath: `/downloads/${req.file.filename}`
   });
 });
 
