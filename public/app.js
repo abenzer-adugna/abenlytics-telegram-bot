@@ -1,18 +1,46 @@
-// Enhanced service request handler with debugging
+// Enhanced service request handler with Telegram integration
 async function requestService(serviceType) {
   try {
     console.log(`Requesting service: ${serviceType}`);
     
-    // Create test user data
-    const userData = {
-      id: Math.floor(Math.random() * 1000000),
-      name: "Test User",
-      email: "test@example.com"
-    };
+    // Get Telegram user data if available
+    let userData = {};
+    if (window.Telegram && window.Telegram.WebApp) {
+      const initData = window.Telegram.WebApp.initData;
+      
+      if (initData) {
+        // Parse initData string
+        const params = new URLSearchParams(initData);
+        const user = JSON.parse(params.get('user'));
+        
+        userData = {
+          id: user.id,
+          first_name: user.first_name || '',
+          last_name: user.last_name || '',
+          username: user.username || '',
+          language_code: user.language_code || 'en'
+        };
+      }
+    }
     
+    // Fallback to test data if Telegram user not available
+    if (!userData.id) {
+      userData = {
+        id: Math.floor(Math.random() * 1000000),
+        first_name: "Test",
+        last_name: "User",
+        username: "test_user",
+        language_code: "en"
+      };
+      console.warn("Using test data - not in Telegram environment");
+    }
+
     const response = await fetch('/api/service', {
       method: 'POST',
-      headers: {'Content-Type': 'application/json'},
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Telegram-InitData': window.Telegram?.WebApp?.initData || 'none'
+      },
       body: JSON.stringify({
         serviceType,
         userData
@@ -32,13 +60,10 @@ async function requestService(serviceType) {
   }
 }
 
-// Add click handlers to all buttons
-document.querySelectorAll('button').forEach(button => {
+// Add click handlers to service buttons
+document.querySelectorAll('button[data-service]').forEach(button => {
   button.addEventListener('click', function() {
-    const service = this.dataset.service || 'unknown';
+    const service = this.dataset.service;
     requestService(service);
   });
 });
-
-// Add data attributes to your buttons in index.html:
-// Example: <button data-service="book_download">Download Book</button>
