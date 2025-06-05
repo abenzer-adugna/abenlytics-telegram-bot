@@ -92,23 +92,34 @@ app.get('/', (req, res) => {
 
 // Service 1: 1-on-1 Help
 app.post('/api/service/one_on_one', async (req, res) => {
-  const { userData } = req.body;
+  const { userData, telegramUsername, problem } = req.body;
   
-  if (!userData || !userData.id) {
-    return res.status(400).json({ status: 'error', message: 'Invalid request' });
+  if (!userData || !userData.id || !telegramUsername || !problem) {
+    return res.status(400).json({ 
+      status: 'error', 
+      message: 'All fields are required' 
+    });
   }
 
   try {
     // Notify admin
     await bot.sendMessage(
       adminId,
-      `📞 New 1-on-1 Request:\n\nName: ${userData.name || 'N/A'}\nID: ${userData.id}`
+      `📞 New 1-on-1 Request:\n\n` +
+      `👤 User: ${userData.name || 'N/A'}\n` +
+      `🆔 ID: ${userData.id}\n` +
+      `📱 Telegram: ${telegramUsername}\n\n` +
+      `❓ Problem:\n${problem}\n\n` +
+      `⏰ Requested at: ${new Date().toLocaleString()}`
     );
     
     // Confirm to user safely
     const messageSent = await safeSendMessage(
       userData.id,
-      "✅ We've received your request! We'll contact you within 24 hours."
+      "✅ We've received your consultation request!\n\n" +
+      "I'll review your inquiry and get back to you when I'm online. " +
+      "Typically responses take 24-48 hours during business days.\n\n" +
+      "Looking forward to helping you with your investment challenges!"
     );
     
     // Store request
@@ -116,6 +127,8 @@ app.post('/api/service/one_on_one', async (req, res) => {
       id: Date.now(),
       userId: userData.id,
       name: userData.name,
+      telegramUsername,
+      problem,
       timestamp: new Date().toISOString(),
       messageSent
     };
@@ -140,7 +153,15 @@ app.post('/api/service/one_on_one', async (req, res) => {
 app.get('/api/books', (req, res) => {
   try {
     const books = JSON.parse(fs.readFileSync('data/books.json', 'utf8'));
-    res.json({ status: 'success', books });
+    res.json({ 
+      status: 'success', 
+      books: books.map(book => ({
+        title: book.title,
+        author: book.author,
+        description: book.description,
+        file: book.file
+      }))
+    });
   } catch (err) {
     res.status(500).json({ status: 'error', message: 'Could not load books' });
   }
@@ -165,7 +186,7 @@ app.post('/api/service/group_access', async (req, res) => {
   }
 
   try {
-    // Send link to user safely
+    // Grant access and send link
     const messageSent = await safeSendMessage(
       userData.id,
       `👥 Join our community: ${groupLink}`
@@ -325,7 +346,7 @@ const initDataFiles = () => {
         title: "The Intelligent Investor",
         author: "Benjamin Graham",
         year: 1949,
-        description: "The definitive book on value investing",
+        description: "The definitive book on value investing and defensive investing strategies",
         file: "the_intelligent_investor.pdf"
       },
       {
@@ -333,7 +354,7 @@ const initDataFiles = () => {
         title: "A Random Walk Down Wall Street",
         author: "Burton Malkiel",
         year: 1973,
-        description: "Classic text on market efficiency",
+        description: "Classic text on market efficiency and index fund investing",
         file: "random_walk.pdf"
       }
     ],
@@ -404,26 +425,30 @@ const initDataFiles = () => {
 
 initDataFiles();
 
+// Bot start command
+bot.onText(/\/start/, (msg) => {
+  const chatId = msg.chat.id;
+  bot.sendMessage(
+    chatId, 
+    '👋 Welcome to Abenlytics Club! Now you can receive service confirmations.', 
+    {
+      reply_markup: {
+        inline_keyboard: [[{
+          text: "🚀 Open Web App",
+          web_app: { url: webAppUrl }
+        }]]
+      }
+    }
+  );
+});
+
 // Start server
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`✅ Server running on port ${PORT}`);
   console.log(`🌐 Webhook URL: ${webAppUrl}/bot${token}`);
-  
-  // Bot start command
-  bot.onText(/\/start/, (msg) => {
-    const chatId = msg.chat.id;
-    bot.sendMessage(
-      chatId, 
-      '👋 Welcome to Abenlytics Club! Now you can receive service confirmations.', 
-      {
-        reply_markup: {
-          inline_keyboard: [[{
-            text: "🚀 Open Web App",
-            web_app: { url: webAppUrl }
-          }]]
-        }
-      }
-    );
-  });
 });
+
+module.exports = {
+  initDataFiles
+};
