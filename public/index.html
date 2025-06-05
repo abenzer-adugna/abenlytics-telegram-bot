@@ -254,40 +254,23 @@
       </div>
       
       <!-- Service 2: Essential Books -->
-      <div class="card p-6 service-card">
-        <div class="flex items-start mb-4">
-          <div class="w-12 h-12 rounded-lg bg-purple-500 bg-opacity-20 flex items-center justify-center mr-4">
-            <i class="fas fa-book text-purple-400 text-xl"></i>
-          </div>
-          <h3 class="text-xl font-bold">Essential Investing Books</h3>
-        </div>
-        <p class="text-gray-300 mb-4">Access our curated library of must-read books for investors at all levels, carefully selected to build your financial knowledge foundation.</p>
-        
-        <!-- Book Cards Container -->
-        <div id="books-container" class="mt-4 space-y-4">
-          <div class="book-card">
-            <h4 class="font-bold text-lg mb-2">The Intelligent Investor</h4>
-            <div class="text-gray-400 mb-2">By Benjamin Graham</div>
-            <p class="mb-3">The definitive book on value investing and defensive investing strategies.</p>
-            <a href="/data/books/the_intelligent_investor.pdf" 
-              class="btn-primary inline-block px-3 py-1 text-sm"
-              download>
-              <i class="fas fa-download mr-1"></i>Download
-            </a>
-          </div>
-          
-          <div class="book-card">
-            <h4 class="font-bold text-lg mb-2">A Random Walk Down Wall Street</h4>
-            <div class="text-gray-400 mb-2">By Burton Malkiel</div>
-            <p class="mb-3">Classic text on market efficiency and index fund investing.</p>
-            <a href="/data/books/random_walk.pdf" 
-              class="btn-primary inline-block px-3 py-1 text-sm"
-              download>
-              <i class="fas fa-download mr-1"></i>Download
-            </a>
-          </div>
-        </div>
-      </div>
+<div class="card p-6 service-card">
+  <div class="flex items-start mb-4">
+    <div class="w-12 h-12 rounded-lg bg-purple-500 bg-opacity-20 flex items-center justify-center mr-4">
+      <i class="fas fa-book text-purple-400 text-xl"></i>
+    </div>
+    <h3 class="text-xl font-bold">Essential Investing Books</h3>
+  </div>
+  <p class="text-gray-300 mb-4">Access our curated library of must-read books for investors at all levels, carefully selected to build your financial knowledge foundation.</p>
+  
+  <!-- Toggle Button -->
+  <button id="toggle-books-btn" class="btn-primary px-4 py-2 text-sm font-medium mb-4">
+    <i class="fas fa-book mr-2"></i>Show Books
+  </button>
+  
+  <!-- Book Cards Container (initially hidden) -->
+  <div id="books-container" class="hidden space-y-4"></div>
+</div>
       
       <!-- Service 3: Book Reviews -->
       <div class="card p-6 service-card">
