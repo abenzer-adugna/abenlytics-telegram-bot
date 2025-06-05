@@ -3,7 +3,8 @@
   "version": "1.0.0",
   "main": "server.js",
   "scripts": {
-    "start": "node server.js"
+    "start": "node server.js",
+    "setup": "mkdir -p data/books data/newsletters data/roadmaps data/prospectus && node -e \"require('./server.js').initDataFiles()\""
   },
   "dependencies": {
     "body-parser": "^1.20.2",
