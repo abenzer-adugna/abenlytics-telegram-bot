@@ -23,6 +23,21 @@ if (!token || !webAppUrl || !adminId || !groupLink) {
 
 const bot = new TelegramBot(token, { polling: false });
 
+// Helper function to safely send messages
+async function safeSendMessage(chatId, message) {
+  try {
+    await bot.sendMessage(chatId, message);
+    return true;
+  } catch (error) {
+    if (error.response?.statusCode === 400 && error.response.body?.description?.includes('chat not found')) {
+      console.warn(`Chat not found for ID: ${chatId}. User needs to start a conversation with the bot first.`);
+      return false;
+    }
+    console.error('Error sending Telegram message:', error.message);
+    return false;
+  }
+}
+
 // Create storage directories
 const storageDirs = [
   path.join(__dirname, 'data'),
@@ -90,8 +105,8 @@ app.post('/api/service/one_on_one', async (req, res) => {
       `📞 New 1-on-1 Request:\n\nName: ${userData.name || 'N/A'}\nID: ${userData.id}`
     );
     
-    // Confirm to user
-    await bot.sendMessage(
+    // Confirm to user safely
+    const messageSent = await safeSendMessage(
       userData.id,
       "✅ We've received your request! We'll contact you within 24 hours."
     );
@@ -101,14 +116,20 @@ app.post('/api/service/one_on_one', async (req, res) => {
       id: Date.now(),
       userId: userData.id,
       name: userData.name,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
+      messageSent
     };
     
     const requests = JSON.parse(fs.readFileSync('data/one_on_one.json', 'utf8') || '[]');
     const updatedRequests = [...requests, request];
     fs.writeFileSync('data/one_on_one.json', JSON.stringify(updatedRequests, null, 2));
     
-    res.json({ status: 'success' });
+    res.json({ 
+      status: 'success',
+      message: messageSent 
+        ? 'Confirmation sent' 
+        : 'Request received! Please start a chat with the bot to get confirmation'
+    });
   } catch (err) {
     console.error('1-on-1 Error:', err);
     res.status(500).json({ status: 'error', message: 'Internal server error' });
@@ -144,8 +165,8 @@ app.post('/api/service/group_access', async (req, res) => {
   }
 
   try {
-    // Grant access and send link
-    await bot.sendMessage(
+    // Send link to user safely
+    const messageSent = await safeSendMessage(
       userData.id,
       `👥 Join our community: ${groupLink}`
     );
@@ -155,14 +176,21 @@ app.post('/api/service/group_access', async (req, res) => {
       id: Date.now(),
       userId: userData.id,
       name: userData.name,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
+      messageSent
     };
     
     const accesses = JSON.parse(fs.readFileSync('data/group_access.json', 'utf8') || '[]');
     const updatedAccesses = [...accesses, access];
     fs.writeFileSync('data/group_access.json', JSON.stringify(updatedAccesses, null, 2));
     
-    res.json({ status: 'success', link: groupLink });
+    res.json({ 
+      status: 'success', 
+      link: groupLink,
+      message: messageSent 
+        ? 'Invite sent to Telegram' 
+        : 'Group link available below - please start a chat with the bot to receive future invites'
+    });
   } catch (err) {
     console.error('Group Access Error:', err);
     res.status(500).json({ status: 'error', message: 'Internal server error' });
@@ -196,8 +224,8 @@ app.post('/api/service/prospectus', prospectusUpload.single('prospectus'), async
       `🧾 New Prospectus Submission:\n\nUser: ${userData.name || 'N/A'}\nID: ${userData.id}\nFile: ${file.filename}`
     );
     
-    // Confirm to user
-    await bot.sendMessage(
+    // Confirm to user safely
+    const messageSent = await safeSendMessage(
       userData.id,
       "✅ We've received your prospectus! We'll review it within 48 hours."
     );
@@ -208,14 +236,20 @@ app.post('/api/service/prospectus', prospectusUpload.single('prospectus'), async
       userId: userData.id,
       name: userData.name,
       filename: file.filename,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
+      messageSent
     };
     
     const submissions = JSON.parse(fs.readFileSync('data/prospectus.json', 'utf8') || '[]');
     const updatedSubmissions = [...submissions, submission];
     fs.writeFileSync('data/prospectus.json', JSON.stringify(updatedSubmissions, null, 2));
     
-    res.json({ status: 'success' });
+    res.json({ 
+      status: 'success',
+      message: messageSent 
+        ? 'Confirmation sent' 
+        : 'Submission received! Please start a chat with the bot to get confirmation'
+    });
   } catch (err) {
     console.error('Prospectus Error:', err);
     res.status(500).json({ status: 'error', message: 'Internal server error' });
@@ -240,8 +274,8 @@ app.post('/api/service/newsletter', async (req, res) => {
   }
 
   try {
-    // Subscribe user
-    await bot.sendMessage(
+    // Subscribe user safely
+    const messageSent = await safeSendMessage(
       userData.id,
       "📬 You're now subscribed to the Abenlytics Newsletter!"
     );
@@ -251,14 +285,20 @@ app.post('/api/service/newsletter', async (req, res) => {
       id: Date.now(),
       userId: userData.id,
       name: userData.name,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
+      messageSent
     };
     
     const subscriptions = JSON.parse(fs.readFileSync('data/newsletter.json', 'utf8') || '[]');
     const updatedSubscriptions = [...subscriptions, subscription];
     fs.writeFileSync('data/newsletter.json', JSON.stringify(updatedSubscriptions, null, 2));
     
-    res.json({ status: 'success' });
+    res.json({ 
+      status: 'success',
+      message: messageSent 
+        ? 'Subscription confirmed' 
+        : 'Subscription created! Please start a chat with the bot to receive newsletters'
+    });
   } catch (err) {
     console.error('Newsletter Error:', err);
     res.status(500).json({ status: 'error', message: 'Internal server error' });
@@ -369,4 +409,21 @@ const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`✅ Server running on port ${PORT}`);
   console.log(`🌐 Webhook URL: ${webAppUrl}/bot${token}`);
+  
+  // Bot start command
+  bot.onText(/\/start/, (msg) => {
+    const chatId = msg.chat.id;
+    bot.sendMessage(
+      chatId, 
+      '👋 Welcome to Abenlytics Club! Now you can receive service confirmations.', 
+      {
+        reply_markup: {
+          inline_keyboard: [[{
+            text: "🚀 Open Web App",
+            web_app: { url: webAppUrl }
+          }]]
+        }
+      }
+    );
+  });
 });
