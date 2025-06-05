@@ -55,6 +55,22 @@
       height: 100%;
     }
     
+    .book-card {
+      background: rgba(26, 58, 95, 0.7);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(46, 91, 140, 0.5);
+      border-radius: 12px;
+      transition: all 0.3s ease;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+    
+    .book-card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15);
+      border-color: rgba(14, 159, 110, 0.7);
+    }
+    
     .crypto-card {
       background: rgba(15, 30, 50, 0.85);
       border-radius: 10px;
@@ -150,8 +166,6 @@
     <div class="hidden md:flex space-x-6 items-center">
       <a href="#crypto" class="hover:text-cyan-300 transition">Live Crypto</a>
       <a href="#services" class="hover:text-cyan-300 transition">Services</a>
-      <a href="#resources" class="hover:text-cyan-300 transition">Resources</a>
-      <a href="#about" class="hover:text-cyan-300 transition">About</a>
       <button class="btn-primary px-4 py-2 font-medium">Join Club</button>
     </div>
     
@@ -172,8 +186,6 @@
     <ul class="space-y-3">
       <li><a href="#crypto" class="block py-2 px-4 hover:bg-gray-700 rounded-lg transition"><i class="fas fa-coins mr-3 text-yellow-400"></i>Live Crypto</a></li>
       <li><a href="#services" class="block py-2 px-4 hover:bg-gray-700 rounded-lg transition"><i class="fas fa-cog mr-3 text-blue-400"></i>Services</a></li>
-      <li><a href="#resources" class="block py-2 px-4 hover:bg-gray-700 rounded-lg transition"><i class="fas fa-book mr-3 text-purple-400"></i>Resources</a></li>
-      <li><a href="#about" class="block py-2 px-4 hover:bg-gray-700 rounded-lg transition"><i class="fas fa-info-circle mr-3 text-cyan-400"></i>About</a></li>
     </ul>
     
     <div class="mt-4 pt-4 border-t border-gray-700">
@@ -250,9 +262,31 @@
           <h3 class="text-xl font-bold">Essential Investing Books</h3>
         </div>
         <p class="text-gray-300 mb-4">Access our curated library of must-read books for investors at all levels, carefully selected to build your financial knowledge foundation.</p>
-        <button class="btn-primary px-4 py-2 text-sm font-medium" onclick="loadServiceData('books')">
-          Explore Library
-        </button>
+        
+        <!-- Book Cards Container -->
+        <div id="books-container" class="mt-4 space-y-4">
+          <div class="book-card">
+            <h4 class="font-bold text-lg mb-2">The Intelligent Investor</h4>
+            <div class="text-gray-400 mb-2">By Benjamin Graham</div>
+            <p class="mb-3">The definitive book on value investing and defensive investing strategies.</p>
+            <a href="/data/books/the_intelligent_investor.pdf" 
+              class="btn-primary inline-block px-3 py-1 text-sm"
+              download>
+              <i class="fas fa-download mr-1"></i>Download
+            </a>
+          </div>
+          
+          <div class="book-card">
+            <h4 class="font-bold text-lg mb-2">A Random Walk Down Wall Street</h4>
+            <div class="text-gray-400 mb-2">By Burton Malkiel</div>
+            <p class="mb-3">Classic text on market efficiency and index fund investing.</p>
+            <a href="/data/books/random_walk.pdf" 
+              class="btn-primary inline-block px-3 py-1 text-sm"
+              download>
+              <i class="fas fa-download mr-1"></i>Download
+            </a>
+          </div>
+        </div>
       </div>
       
       <!-- Service 3: Book Reviews -->
@@ -327,118 +361,6 @@
     </div>
   </section>
 
-  <!-- Resources Section -->
-  <section id="resources" class="py-12 px-4 max-w-6xl mx-auto">
-    <h2 class="text-2xl md:text-3xl font-bold mb-8 text-center">Investment Resources</h2>
-    
-    <!-- Books Section -->
-    <div class="mb-16">
-      <div class="flex justify-between items-center mb-6">
-        <h3 class="text-xl font-bold">📚 Essential Books</h3>
-        <button class="text-cyan-400 hover:text-cyan-300" onclick="loadServiceData('books')">
-          <i class="fas fa-sync-alt mr-1"></i> Refresh
-        </button>
-      </div>
-      <div id="books-container" class="grid grid-cols-1 md:grid-cols-2 gap-6"></div>
-    </div>
-    
-    <!-- Reviews Section -->
-    <div class="mb-16">
-      <div class="flex justify-between items-center mb-6">
-        <h3 class="text-xl font-bold">🧠 Book Reviews & Insights</h3>
-        <button class="text-cyan-400 hover:text-cyan-300" onclick="loadServiceData('reviews')">
-          <i class="fas fa-sync-alt mr-1"></i> Refresh
-        </button>
-      </div>
-      <div id="reviews-container" class="grid grid-cols-1 gap-6"></div>
-    </div>
-    
-    <!-- Newsletters Section -->
-    <div class="mb-16">
-      <div class="flex justify-between items-center mb-6">
-        <h3 class="text-xl font-bold">📰 Weekly Newsletters</h3>
-        <button class="text-cyan-400 hover:text-cyan-300" onclick="loadServiceData('newsletters')">
-          <i class="fas fa-sync-alt mr-1"></i> Refresh
-        </button>
-      </div>
-      <div id="newsletters-container" class="grid grid-cols-1 md:grid-cols-2 gap-6"></div>
-    </div>
-    
-    <!-- Roadmaps Section -->
-    <div class="mb-16">
-      <div class="flex justify-between items-center mb-6">
-        <h3 class="text-xl font-bold">🗺️ Trading Roadmaps</h3>
-        <button class="text-cyan-400 hover:text-cyan-300" onclick="loadServiceData('roadmaps')">
-          <i class="fas fa-sync-alt mr-1"></i> Refresh
-        </button>
-      </div>
-      <div id="roadmaps-container" class="grid grid-cols-1 md:grid-cols-2 gap-6"></div>
-    </div>
-  </section>
-
-  <!-- Testimonials -->
-  <section id="about" class="py-16 px-4 max-w-6xl mx-auto">
-    <div class="text-center mb-12">
-      <h2 class="text-3xl md:text-4xl font-bold">Trusted by <span class="bg-gradient-to-r from-cyan-400 to-green-400 bg-clip-text text-transparent">Investors Worldwide</span></h2>
-    </div>
-    
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-      <div class="card p-6">
-        <div class="flex items-center mb-4">
-          <div class="w-12 h-12 rounded-full bg-gradient-to-br from-blue-500 to-cyan-400 mr-4"></div>
-          <div>
-            <h4 class="font-bold">Michael T.</h4>
-            <div class="text-sm text-gray-400">Portfolio Manager</div>
-          </div>
-        </div>
-        <p class="text-gray-300 italic">"The 1-on-1 sessions completely transformed my approach to portfolio diversification. Worth every penny!"</p>
-        <div class="flex mt-4 text-yellow-400">
-          <i class="fas fa-star"></i>
-          <i class="fas fa-star"></i>
-          <i class="fas fa-star"></i>
-          <i class="fas fa-star"></i>
-          <i class="fas fa-star"></i>
-        </div>
-      </div>
-      
-      <div class="card p-6">
-        <div class="flex items-center mb-4">
-          <div class="w-12 h-12 rounded-full bg-gradient-to-br from-purple-500 to-pink-400 mr-4"></div>
-          <div>
-            <h4 class="font-bold">Sarah K.</h4>
-            <div class="text-sm text-gray-400">Swing Trader</div>
-          </div>
-        </div>
-        <p class="text-gray-300 italic">"The trading roadmaps gave me the structure I needed to develop a profitable strategy. Highly recommended!"</p>
-        <div class="flex mt-4 text-yellow-400">
-          <i class="fas fa-star"></i>
-          <i class="fas fa-star"></i>
-          <i class="fas fa-star"></i>
-          <i class="fas fa-star"></i>
-          <i class="fas fa-star"></i>
-        </div>
-      </div>
-      
-      <div class="card p-6">
-        <div class="flex items-center mb-4">
-          <div class="w-12 h-12 rounded-full bg-gradient-to-br from-green-500 to-cyan-400 mr-4"></div>
-          <div>
-            <h4 class="font-bold">David R.</h4>
-            <div class="text-sm text-gray-400">Long-term Investor</div>
-          </div>
-        </div>
-        <p class="text-gray-300 italic">"The book summaries saved me hundreds of hours while delivering actionable insights. Essential for busy investors."</p>
-        <div class="flex mt-4 text-yellow-400">
-          <i class="fas fa-star"></i>
-          <i class="fas fa-star"></i>
-          <i class="fas fa-star"></i>
-          <i class="fas fa-star"></i>
-          <i class="fas fa-star"></i>
-        </div>
-      </div>
-    </div>
-  </section>
-
   <!-- CTA Section -->
   <section class="py-16 px-4">
     <div class="max-w-4xl mx-auto card p-8 text-center">
@@ -500,8 +422,8 @@
           <h4 class="text-lg font-bold mb-4">Services</h4>
           <ul class="space-y-2">
             <li><a href="#services" class="text-gray-400 hover:text-cyan-400">1-to-1 Help</a></li>
-            <li><a href="#resources" class="text-gray-400 hover:text-cyan-400">Essential Books</a></li>
-            <li><a href="#resources" class="text-gray-400 hover:text-cyan-400">Book Reviews</a></li>
+            <li><a href="#services" class="text-gray-400 hover:text-cyan-400">Essential Books</a></li>
+            <li><a href="#services" class="text-gray-400 hover:text-cyan-400">Book Reviews</a></li>
             <li><a href="#services" class="text-gray-400 hover:text-cyan-400">Weekly Newsletter</a></li>
           </ul>
         </div>
@@ -509,7 +431,7 @@
         <div>
           <h4 class="text-lg font-bold mb-4">Resources</h4>
           <ul class="space-y-2">
-            <li><a href="#resources" class="text-gray-400 hover:text-cyan-400">Trading Roadmaps</a></li>
+            <li><a href="#services" class="text-gray-400 hover:text-cyan-400">Trading Roadmaps</a></li>
             <li><a href="#services" class="text-gray-400 hover:text-cyan-400">Prospectus Review</a></li>
             <li><a href="#services" class="text-gray-400 hover:text-cyan-400">Investor Community</a></li>
             <li><a href="#crypto" class="text-gray-400 hover:text-cyan-400">Market Analysis</a></li>
@@ -639,64 +561,6 @@
       // Reset form and close modal
       fileInput.value = '';
       document.getElementById('prospectus-modal').classList.add('hidden');
-    }
-
-    // Load data services
-    async function loadServiceData(serviceType) {
-      try {
-        const container = document.getElementById(`${serviceType}-container`);
-        container.innerHTML = `
-          <div class="text-center py-10">
-            <i class="fas fa-spinner spinner text-cyan-400 text-3xl mb-4"></i>
-            <p>Loading ${serviceType.replace(/_/g, ' ')}...</p>
-          </div>
-        `;
-        
-        const response = await fetch(`/api/${serviceType}`);
-        const result = await response.json();
-        
-        if (result.status === 'success') {
-          // Render data in UI
-          container.innerHTML = result[serviceType].map(item => {
-            let content = `
-              <div class="card p-6 mb-6">
-                <h3 class="text-xl font-bold mb-2">${item.title}</h3>
-                ${item.author ? `<div class="text-gray-400 mb-2">By ${item.author}</div>` : ''}
-                ${item.date ? `<div class="text-sm text-gray-500 mb-3">${item.date}</div>` : ''}
-                <p class="mb-4">${item.description || item.summary}</p>
-            `;
-            
-            if (item.file) {
-              content += `<a href="/data/${serviceType}/${item.file}" 
-                            class="btn-primary inline-block px-4 py-2"
-                            download>
-                            <i class="fas fa-download mr-2"></i>Download
-                          </a>`;
-            }
-            
-            if (item.steps) {
-              content += `<div class="mt-4">
-                            <h4 class="font-bold mb-2">Key Steps:</h4>
-                            <ul class="list-disc pl-5 space-y-1">`;
-              item.steps.forEach(step => {
-                content += `<li>${step}</li>`;
-              });
-              content += `</ul></div>`;
-            }
-            
-            content += `</div>`;
-            return content;
-          }).join('');
-        }
-      } catch (error) {
-        console.error(`Error loading ${serviceType}:`, error);
-        document.getElementById(`${serviceType}-container`).innerHTML = `
-          <div class="text-center py-10 text-red-400">
-            <i class="fas fa-exclamation-triangle text-3xl mb-4"></i>
-            <p>Failed to load ${serviceType.replace(/_/g, ' ')}</p>
-          </div>
-        `;
-      }
     }
 
     // Fetch live crypto data from CoinGecko
@@ -831,11 +695,6 @@
         });
       });
       
-      // Load data-driven services
-      ['books', 'reviews', 'newsletters', 'roadmaps'].forEach(service => {
-        loadServiceData(service);
-      });
-      
       // Load crypto data
       updateCryptoPrices();
       
@@ -852,4 +711,4 @@
     });
   </script>
 </body>
-  </html>
+</html>
