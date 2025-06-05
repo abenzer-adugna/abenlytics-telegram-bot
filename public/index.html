@@ -56,19 +56,18 @@
     }
     
     .book-card {
-      background: rgba(26, 58, 95, 0.7);
-      backdrop-filter: blur(10px);
-      border: 1px solid rgba(46, 91, 140, 0.5);
-      border-radius: 12px;
+      background: rgba(20, 40, 70, 0.6);
+      backdrop-filter: blur(5px);
+      border: 1px solid rgba(46, 91, 140, 0.3);
+      border-radius: 10px;
+      padding: 1.25rem;
       transition: all 0.3s ease;
-      padding: 1.5rem;
-      margin-bottom: 1.5rem;
     }
     
     .book-card:hover {
       transform: translateY(-3px);
-      box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15);
-      border-color: rgba(14, 159, 110, 0.7);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      border-color: rgba(14, 159, 110, 0.5);
     }
     
     .crypto-card {
@@ -254,23 +253,23 @@
       </div>
       
       <!-- Service 2: Essential Books -->
-<div class="card p-6 service-card">
-  <div class="flex items-start mb-4">
-    <div class="w-12 h-12 rounded-lg bg-purple-500 bg-opacity-20 flex items-center justify-center mr-4">
-      <i class="fas fa-book text-purple-400 text-xl"></i>
-    </div>
-    <h3 class="text-xl font-bold">Essential Investing Books</h3>
-  </div>
-  <p class="text-gray-300 mb-4">Access our curated library of must-read books for investors at all levels, carefully selected to build your financial knowledge foundation.</p>
-  
-  <!-- Toggle Button -->
-  <button id="toggle-books-btn" class="btn-primary px-4 py-2 text-sm font-medium mb-4">
-    <i class="fas fa-book mr-2"></i>Show Books
-  </button>
-  
-  <!-- Book Cards Container (initially hidden) -->
-  <div id="books-container" class="hidden space-y-4"></div>
-</div>
+      <div class="card p-6 service-card">
+        <div class="flex items-start mb-4">
+          <div class="w-12 h-12 rounded-lg bg-purple-500 bg-opacity-20 flex items-center justify-center mr-4">
+            <i class="fas fa-book text-purple-400 text-xl"></i>
+          </div>
+          <h3 class="text-xl font-bold">Essential Investing Books</h3>
+        </div>
+        <p class="text-gray-300 mb-4">Access our curated library of must-read books for investors at all levels, carefully selected to build your financial knowledge foundation.</p>
+        
+        <!-- Toggle Button -->
+        <button id="toggle-books-btn" class="btn-primary px-4 py-2 text-sm font-medium mb-4">
+          <i class="fas fa-book mr-2"></i>Show Books
+        </button>
+        
+        <!-- Book Cards Container (initially hidden) -->
+        <div id="books-container" class="hidden space-y-4"></div>
+      </div>
       
       <!-- Service 3: Book Reviews -->
       <div class="card p-6 service-card">
@@ -360,6 +359,43 @@
       </div>
     </div>
   </section>
+
+  <!-- Consultation Modal -->
+  <div id="consultation-modal" class="hidden fixed inset-0 bg-black bg-opacity-70 z-50 flex items-center justify-center p-4">
+    <div class="bg-gray-800 rounded-lg w-full max-w-md p-6">
+      <h3 class="text-xl font-bold mb-4">📞 Request 1-on-1 Consultation</h3>
+      
+      <div class="mb-4">
+        <label class="block text-gray-300 mb-2">Your Telegram Username</label>
+        <input 
+          type="text" 
+          id="telegram-username" 
+          class="w-full bg-gray-700 text-white p-2 rounded" 
+          placeholder="@yourusername" 
+          required
+        >
+      </div>
+      
+      <div class="mb-4">
+        <label class="block text-gray-300 mb-2">Describe Your Problem</label>
+        <textarea 
+          id="problem-description" 
+          class="w-full bg-gray-700 text-white p-2 rounded h-32" 
+          placeholder="What investment challenges are you facing?" 
+          required
+        ></textarea>
+      </div>
+      
+      <div class="flex justify-end space-x-3">
+        <button id="consultation-cancel" class="px-4 py-2 border border-gray-600 rounded hover:bg-gray-700">
+          Cancel
+        </button>
+        <button id="consultation-submit" class="btn-primary px-4 py-2">
+          Submit Request
+        </button>
+      </div>
+    </div>
+  </div>
 
   <!-- Prospectus Upload Modal -->
   <div id="prospectus-modal" class="hidden fixed inset-0 bg-black bg-opacity-70 z-50 flex items-center justify-center p-4">
@@ -475,21 +511,54 @@
       }
       return null;
     }
+    
+    // Get Telegram user synchronously
+    function getTelegramUserSync() {
+      if (window.Telegram && window.Telegram.WebApp) {
+        try {
+          const initData = window.Telegram.WebApp.initData;
+          if (initData) {
+            const params = new URLSearchParams(initData);
+            const user = JSON.parse(params.get('user'));
+            return {
+              id: user.id,
+              first_name: user.first_name || '',
+              last_name: user.last_name || '',
+              username: user.username || ''
+            };
+          }
+        } catch (e) {
+          console.error('Error parsing Telegram user', e);
+        }
+      }
+      return null;
+    }
 
     // Service request handler
-    async function requestService(serviceType, formData = null) {
+    async function requestService(serviceType, data = null, formData = null) {
       try {
-        const user = await getTelegramUser() || {
-          id: Math.floor(Math.random() * 1000000),
-          first_name: "Test",
-          last_name: "User"
-        };
+        let user, userName;
         
+        if (serviceType === 'one_on_one' && data) {
+          // Use provided data for 1-on-1 requests
+          user = { id: data.userData.id };
+          userName = data.userData.name;
+        } else {
+          // Get user for other services
+          const telegramUser = await getTelegramUser() || {
+            id: Math.floor(Math.random() * 1000000),
+            first_name: "Test",
+            last_name: "User"
+          };
+          
+          user = telegramUser;
+          userName = `${telegramUser.first_name} ${telegramUser.last_name}`.trim();
+        }
+
         let response;
-        const userName = `${user.first_name} ${user.last_name}`.trim();
         
         if (serviceType === 'prospectus' && formData) {
-          // Special handling for file upload
+          // File upload handling
           formData.append('userData', JSON.stringify({
             id: user.id,
             name: userName
@@ -501,15 +570,19 @@
           });
         } else {
           // Standard service request
+          const body = serviceType === 'one_on_one' 
+            ? { ...data } 
+            : {
+                userData: {
+                  id: user.id,
+                  name: userName
+                }
+              };
+          
           response = await fetch(`/api/service/${serviceType}`, {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({
-              userData: {
-                id: user.id,
-                name: userName
-              }
-            })
+            body: JSON.stringify(body)
           });
         }
         
@@ -532,6 +605,41 @@
       }
     }
 
+    // Handle consultation request
+    function handleConsultationRequest() {
+      const usernameInput = document.getElementById('telegram-username');
+      const problemInput = document.getElementById('problem-description');
+      
+      const telegramUsername = usernameInput.value.trim();
+      const problem = problemInput.value.trim();
+      
+      if (!telegramUsername || !problem) {
+        alert('Please provide both your Telegram username and problem description');
+        return;
+      }
+      
+      // Get user data
+      const user = getTelegramUserSync() || {
+        id: Math.floor(Math.random() * 1000000),
+        first_name: "User",
+        last_name: ""
+      };
+      
+      requestService('one_on_one', {
+        telegramUsername,
+        problem,
+        userData: {
+          id: user.id,
+          name: `${user.first_name} ${user.last_name}`.trim() || "Anonymous User"
+        }
+      });
+      
+      // Reset form and close modal
+      usernameInput.value = '';
+      problemInput.value = '';
+      document.getElementById('consultation-modal').classList.add('hidden');
+    }
+
     // Prospectus upload handler
     function handleProspectusUpload() {
       const fileInput = document.getElementById('prospectus-file');
@@ -539,11 +647,85 @@
       
       const formData = new FormData();
       formData.append('prospectus', fileInput.files[0]);
-      requestService('prospectus', formData);
+      requestService('prospectus', null, formData);
       
       // Reset form and close modal
       fileInput.value = '';
       document.getElementById('prospectus-modal').classList.add('hidden');
+    }
+
+    // Function to load books
+    async function loadBooks() {
+      try {
+        const booksContainer = document.getElementById('books-container');
+        const toggleBtn = document.getElementById('toggle-books-btn');
+        
+        // Show loading state
+        booksContainer.innerHTML = `
+          <div class="text-center py-4">
+            <i class="fas fa-spinner spinner text-cyan-400 text-xl"></i>
+            <p class="mt-2">Loading books...</p>
+          </div>
+        `;
+        booksContainer.classList.remove('hidden');
+        
+        // Fetch books
+        const response = await fetch('/api/books');
+        const result = await response.json();
+        
+        if (result.status === 'success') {
+          // Render books
+          booksContainer.innerHTML = result.books.map(book => `
+            <div class="book-card">
+              <h4 class="font-bold text-lg mb-2">${book.title}</h4>
+              <div class="text-gray-400 mb-2">By ${book.author}</div>
+              <p class="mb-3">${book.description}</p>
+              <a href="/data/books/${book.file}" 
+                class="btn-primary inline-block px-3 py-1 text-sm"
+                download>
+                <i class="fas fa-download mr-1"></i>Download
+              </a>
+            </div>
+          `).join('');
+          
+          // Update button text
+          toggleBtn.innerHTML = '<i class="fas fa-eye-slash mr-2"></i>Hide Books';
+        } else {
+          booksContainer.innerHTML = `
+            <div class="text-center py-4 text-red-400">
+              <i class="fas fa-exclamation-triangle text-xl mb-2"></i>
+              <p>Failed to load books</p>
+            </div>
+          `;
+        }
+      } catch (error) {
+        console.error('Error loading books:', error);
+        document.getElementById('books-container').innerHTML = `
+          <div class="text-center py-4 text-red-400">
+            <i class="fas fa-exclamation-triangle text-xl mb-2"></i>
+            <p>Error loading books</p>
+          </div>
+        `;
+      }
+    }
+
+    // Toggle books visibility
+    function toggleBooks() {
+      const booksContainer = document.getElementById('books-container');
+      const toggleBtn = document.getElementById('toggle-books-btn');
+      
+      if (booksContainer.classList.contains('hidden')) {
+        // Load books if not loaded
+        if (booksContainer.innerHTML === '') {
+          loadBooks();
+        } else {
+          booksContainer.classList.remove('hidden');
+          toggleBtn.innerHTML = '<i class="fas fa-eye-slash mr-2"></i>Hide Books';
+        }
+      } else {
+        booksContainer.classList.add('hidden');
+        toggleBtn.innerHTML = '<i class="fas fa-book mr-2"></i>Show Books';
+      }
     }
 
     // Fetch live crypto data from CoinGecko
@@ -653,21 +835,38 @@
     document.addEventListener('DOMContentLoaded', () => {
       // Add service handlers
       document.querySelectorAll('[data-service]').forEach(button => {
-        button.addEventListener('click', () => {
+        button.addEventListener('click', function() {
           const serviceType = button.dataset.service;
           
           if (serviceType === 'prospectus') {
             document.getElementById('prospectus-modal').classList.remove('hidden');
+          } else if (serviceType === 'one_on_one') {
+            document.getElementById('consultation-modal').classList.remove('hidden');
+            
+            // Pre-fill Telegram username if available
+            const user = getTelegramUserSync();
+            if (user && user.username) {
+              document.getElementById('telegram-username').value = `@${user.username}`;
+            }
           } else {
             requestService(serviceType);
           }
         });
       });
       
+      // Book toggle button
+      document.getElementById('toggle-books-btn').addEventListener('click', toggleBooks);
+      
       // Prospectus modal handling
       document.getElementById('prospectus-submit').addEventListener('click', handleProspectusUpload);
       document.getElementById('prospectus-cancel').addEventListener('click', () => {
         document.getElementById('prospectus-modal').classList.add('hidden');
+      });
+      
+      // Consultation modal handling
+      document.getElementById('consultation-submit').addEventListener('click', handleConsultationRequest);
+      document.getElementById('consultation-cancel').addEventListener('click', () => {
+        document.getElementById('consultation-modal').classList.add('hidden');
       });
       
       // Crypto refresh button
@@ -686,10 +885,17 @@
       
       // Close modal when clicking outside
       document.addEventListener('click', (e) => {
-        const modal = document.getElementById('prospectus-modal');
-        if (e.target === modal) {
-          modal.classList.add('hidden');
-        }
+        const modals = [
+          'consultation-modal',
+          'prospectus-modal'
+        ];
+        
+        modals.forEach(id => {
+          const modal = document.getElementById(id);
+          if (e.target === modal) {
+            modal.classList.add('hidden');
+          }
+        });
       });
     });
   </script>
