@@ -21,7 +21,7 @@ if (!token || !webAppUrl || !adminId || !groupLink) {
   process.exit(1);
 }
 
-const bot = new TelegramBot(token, { polling: true }); // Enable polling to receive messages
+const bot = new TelegramBot(token, { polling: false }); // Disable polling
 
 // Helper function to safely read JSON files
 function safeReadJSON(filePath, defaultValue = []) {
@@ -229,9 +229,31 @@ app.use((req, res, next) => {
 app.use(bodyParser.json());
 app.use(express.static(path.join(__dirname, 'public'))); // Serve static files from public directory
 
+// Set up webhook
+const webhookPath = `/bot${token}`;
+const webhookUrl = `${webAppUrl}${webhookPath}`;
+
+bot.setWebHook(webhookUrl)
+  .then(() => console.log(`✅ Webhook set to: ${webhookUrl}`))
+  .catch(err => console.error('❌ Webhook setup failed:', err));
+
+// Telegram webhook handler
+app.post(webhookPath, (req, res) => {
+  bot.processUpdate(req.body);
+  res.sendStatus(200);
+});
+
 // Serve index.html for all routes
 app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
+
+// Store active chats when users interact with the bot
+bot.on('message', (msg) => {
+  if (msg.chat && msg.from) {
+    console.log(`Storing active chat for user: ${msg.from.id} in chat: ${msg.chat.id}`);
+    addActiveChat(msg.from.id, msg.chat.id);
+  }
 });
 
 // API Routes
@@ -520,8 +542,7 @@ bot.on('message', (msg) => {
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`✅ Server running on port ${PORT}`);
-  console.log(`🤖 Telegram bot started with polling`);
-  console.log(`🌐 Serving static files from: ${path.join(__dirname, 'public')}`);
+  console.log(`🌐 Webhook URL: ${webhookUrl}`);
 });
 
 // Export the init function for setup
