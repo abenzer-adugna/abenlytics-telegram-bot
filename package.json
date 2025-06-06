@@ -4,7 +4,7 @@
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
-    "setup": "mkdir -p data/books data/newsletters data/roadmaps data/prospectus && node setup.js"
+    "setup": "mkdir -p data/books data/newsletters data/roadmaps data/prospectus public && node setup.js"
   },
   "dependencies": {
     "body-parser": "^1.20.2",
