@@ -332,7 +332,13 @@ app.post('/api/service/newsletter', async (req, res) => {
       messageSent
     };
     
-    const subscriptions = safeReadJSON('data/newsletter.json', []);
+    // FIX: Ensure we always have an array
+    let subscriptions = safeReadJSON('data/newsletter.json', []);
+    if (!Array.isArray(subscriptions)) {
+      console.warn('Invalid newsletter.json format - resetting to array');
+      subscriptions = [];
+    }
+    
     const updatedSubscriptions = [...subscriptions, subscription];
     fs.writeFileSync('data/newsletter.json', JSON.stringify(updatedSubscriptions, null, 2));
     
