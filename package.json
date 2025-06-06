@@ -4,7 +4,7 @@
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
-    "setup": "mkdir -p data/books data/newsletters data/roadmaps data/prospectus && node -e \"require('./server.js').initDataFiles()\" && echo '[]' > data/one_on_one.json && echo '[]' > data/group_access.json && echo '[]' > data/prospectus.json && echo '[]' > data/newsletter.json"
+    "setup": "mkdir -p data/books data/newsletters data/roadmaps data/prospectus && node -e \"require('./server.js').initDataFiles()\" && touch data/one_on_one.json data/group_access.json data/prospectus.json data/newsletter.json && echo '[]' > data/one_on_one.json && echo '[]' > data/group_access.json && echo '[]' > data/prospectus.json && echo '[]' > data/newsletter.json"
   },
   "dependencies": {
     "body-parser": "^1.20.2",
