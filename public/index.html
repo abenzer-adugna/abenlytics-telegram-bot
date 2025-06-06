@@ -491,45 +491,29 @@
 
     // Initialize Telegram user
     async function getTelegramUser() {
-      if (window.Telegram && window.Telegram.WebApp) {
-        try {
-          const initData = window.Telegram.WebApp.initData;
-          if (initData) {
-            const params = new URLSearchParams(initData);
-            const user = JSON.parse(params.get('user'));
-            return {
-              id: user.id,
-              first_name: user.first_name || '',
-              last_name: user.last_name || '',
-              username: user.username || '',
-              language_code: user.language_code || 'en'
-            };
-          }
-        } catch (e) {
-          console.error('Error parsing Telegram user', e);
-        }
+      if (window.Telegram?.WebApp?.initDataUnsafe?.user) {
+        const user = window.Telegram.WebApp.initDataUnsafe.user;
+        return {
+          id: user.id,
+          first_name: user.first_name || '',
+          last_name: user.last_name || '',
+          username: user.username || '',
+          language_code: user.language_code || 'en'
+        };
       }
       return null;
     }
     
     // Get Telegram user synchronously
     function getTelegramUserSync() {
-      if (window.Telegram && window.Telegram.WebApp) {
-        try {
-          const initData = window.Telegram.WebApp.initData;
-          if (initData) {
-            const params = new URLSearchParams(initData);
-            const user = JSON.parse(params.get('user'));
-            return {
-              id: user.id,
-              first_name: user.first_name || '',
-              last_name: user.last_name || '',
-              username: user.username || ''
-            };
-          }
-        } catch (e) {
-          console.error('Error parsing Telegram user', e);
-        }
+      if (window.Telegram?.WebApp?.initDataUnsafe?.user) {
+        const user = window.Telegram.WebApp.initDataUnsafe.user;
+        return {
+          id: user.id,
+          first_name: user.first_name || '',
+          last_name: user.last_name || '',
+          username: user.username || ''
+        };
       }
       return null;
     }
