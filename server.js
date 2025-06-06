@@ -227,22 +227,14 @@ app.use((req, res, next) => {
 
 // Middleware
 app.use(bodyParser.json());
-app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static(path.join(__dirname, 'public'))); // Serve static files from public directory
 
-// Routes
-app.get('/', (req, res) => {
+// Serve index.html for all routes
+app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
-// Store active chats when users interact with the bot
-bot.on('message', (msg) => {
-  if (msg.chat && msg.from) {
-    console.log(`Storing active chat for user: ${msg.from.id} in chat: ${msg.chat.id}`);
-    addActiveChat(msg.from.id, msg.chat.id);
-  }
-});
-
-// Service 1: 1-on-1 Help
+// API Routes
 app.post('/api/service/one_on_one', async (req, res) => {
   const { userData, telegramUsername, problem } = req.body;
   
@@ -462,7 +454,7 @@ app.post('/api/service/newsletter', async (req, res) => {
       messageSent
     };
     
-    // FIX: Ensure we always have an array
+    // Ensure we always have an array
     let subscriptions = safeReadJSON('data/newsletter.json', []);
     if (!Array.isArray(subscriptions)) {
       console.warn('Invalid newsletter.json format - resetting to array');
@@ -529,6 +521,7 @@ const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`✅ Server running on port ${PORT}`);
   console.log(`🤖 Telegram bot started with polling`);
+  console.log(`🌐 Serving static files from: ${path.join(__dirname, 'public')}`);
 });
 
 // Export the init function for setup
