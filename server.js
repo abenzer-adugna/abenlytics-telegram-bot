@@ -23,9 +23,31 @@ if (!token || !webAppUrl || !adminId || !groupLink) {
 
 const bot = new TelegramBot(token, { polling: false });
 
+// Helper function to safely read JSON files
+function safeReadJSON(filePath, defaultValue = []) {
+  try {
+    const data = fs.readFileSync(filePath, 'utf8');
+    return data ? JSON.parse(data) : defaultValue;
+  } catch (e) {
+    return defaultValue;
+  }
+}
+
 // Helper function to safely send messages
 async function safeSendMessage(chatId, message) {
   try {
+    // First check if the chat exists
+    try {
+      await bot.getChat(chatId);
+    } catch (error) {
+      if (error.response?.statusCode === 400 && error.response.body?.description?.includes('chat not found')) {
+        console.warn(`Chat not found for ID: ${chatId}. User needs to start a conversation with the bot first.`);
+        return false;
+      }
+      throw error; // Rethrow other errors
+    }
+    
+    // Now send the message
     await bot.sendMessage(chatId, message);
     return true;
   } catch (error) {
@@ -133,7 +155,7 @@ app.post('/api/service/one_on_one', async (req, res) => {
       messageSent
     };
     
-    const requests = JSON.parse(fs.readFileSync('data/one_on_one.json', 'utf8') || '[]');
+    const requests = safeReadJSON('data/one_on_one.json', []);
     const updatedRequests = [...requests, request];
     fs.writeFileSync('data/one_on_one.json', JSON.stringify(updatedRequests, null, 2));
     
@@ -152,7 +174,7 @@ app.post('/api/service/one_on_one', async (req, res) => {
 // Service 2: Essential Books
 app.get('/api/books', (req, res) => {
   try {
-    const books = JSON.parse(fs.readFileSync('data/books.json', 'utf8'));
+    const books = safeReadJSON('data/books.json', []);
     res.json({ 
       status: 'success', 
       books: books.map(book => ({
@@ -170,7 +192,7 @@ app.get('/api/books', (req, res) => {
 // Service 3: Book Reviews
 app.get('/api/reviews', (req, res) => {
   try {
-    const reviews = JSON.parse(fs.readFileSync('data/reviews.json', 'utf8'));
+    const reviews = safeReadJSON('data/reviews.json', []);
     res.json({ status: 'success', reviews });
   } catch (err) {
     res.status(500).json({ status: 'error', message: 'Could not load reviews' });
@@ -201,7 +223,7 @@ app.post('/api/service/group_access', async (req, res) => {
       messageSent
     };
     
-    const accesses = JSON.parse(fs.readFileSync('data/group_access.json', 'utf8') || '[]');
+    const accesses = safeReadJSON('data/group_access.json', []);
     const updatedAccesses = [...accesses, access];
     fs.writeFileSync('data/group_access.json', JSON.stringify(updatedAccesses, null, 2));
     
@@ -261,7 +283,7 @@ app.post('/api/service/prospectus', prospectusUpload.single('prospectus'), async
       messageSent
     };
     
-    const submissions = JSON.parse(fs.readFileSync('data/prospectus.json', 'utf8') || '[]');
+    const submissions = safeReadJSON('data/prospectus.json', []);
     const updatedSubmissions = [...submissions, submission];
     fs.writeFileSync('data/prospectus.json', JSON.stringify(updatedSubmissions, null, 2));
     
@@ -280,7 +302,7 @@ app.post('/api/service/prospectus', prospectusUpload.single('prospectus'), async
 // Service 6: Newsletter
 app.get('/api/newsletters', (req, res) => {
   try {
-    const newsletters = JSON.parse(fs.readFileSync('data/newsletters.json', 'utf8'));
+    const newsletters = safeReadJSON('data/newsletters.json', []);
     res.json({ status: 'success', newsletters });
   } catch (err) {
     res.status(500).json({ status: 'error', message: 'Could not load newsletters' });
@@ -310,7 +332,7 @@ app.post('/api/service/newsletter', async (req, res) => {
       messageSent
     };
     
-    const subscriptions = JSON.parse(fs.readFileSync('data/newsletter.json', 'utf8') || '[]');
+    const subscriptions = safeReadJSON('data/newsletter.json', []);
     const updatedSubscriptions = [...subscriptions, subscription];
     fs.writeFileSync('data/newsletter.json', JSON.stringify(updatedSubscriptions, null, 2));
     
@@ -329,7 +351,7 @@ app.post('/api/service/newsletter', async (req, res) => {
 // Service 7: Roadmaps
 app.get('/api/roadmaps', (req, res) => {
   try {
-    const roadmaps = JSON.parse(fs.readFileSync('data/roadmaps.json', 'utf8'));
+    const roadmaps = safeReadJSON('data/roadmaps.json', []);
     res.json({ status: 'success', roadmaps });
   } catch (err) {
     res.status(500).json({ status: 'error', message: 'Could not load roadmaps' });
@@ -417,7 +439,13 @@ const initDataFiles = () => {
 
   Object.entries(files).forEach(([filename, data]) => {
     const filePath = path.join(__dirname, 'data', filename);
+    
+    // Create file if it doesn't exist
     if (!fs.existsSync(filePath)) {
+      fs.writeFileSync(filePath, JSON.stringify(data, null, 2));
+    } 
+    // Initialize empty files
+    else if (fs.statSync(filePath).size === 0) {
       fs.writeFileSync(filePath, JSON.stringify(data, null, 2));
     }
   });
