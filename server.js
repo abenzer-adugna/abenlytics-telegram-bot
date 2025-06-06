@@ -21,7 +21,7 @@ if (!token || !webAppUrl || !adminId || !groupLink) {
   process.exit(1);
 }
 
-const bot = new TelegramBot(token, { polling: false });
+const bot = new TelegramBot(token, { polling: true }); // Enable polling to receive messages
 
 // Helper function to safely read JSON files
 function safeReadJSON(filePath, defaultValue = []) {
@@ -33,15 +33,48 @@ function safeReadJSON(filePath, defaultValue = []) {
   }
 }
 
+// Helper to save active chats
+function saveActiveChats(chats) {
+  fs.writeFileSync('data/active_chats.json', JSON.stringify(chats, null, 2));
+}
+
+// Get active chats
+function getActiveChats() {
+  return safeReadJSON('data/active_chats.json', {});
+}
+
+// Add chat to active list
+function addActiveChat(userId, chatId) {
+  const chats = getActiveChats();
+  chats[userId] = chatId;
+  saveActiveChats(chats);
+}
+
+// Remove inactive chat
+function removeInactiveChat(userId) {
+  const chats = getActiveChats();
+  delete chats[userId];
+  saveActiveChats(chats);
+}
+
 // Helper function to safely send messages
-async function safeSendMessage(chatId, message) {
+async function safeSendMessage(userId, message) {
+  const chats = getActiveChats();
+  const chatId = chats[userId];
+  
+  if (!chatId) {
+    console.warn(`No active chat found for user: ${userId}`);
+    return false;
+  }
+
   try {
     // First check if the chat exists
     try {
       await bot.getChat(chatId);
     } catch (error) {
       if (error.response?.statusCode === 400 && error.response.body?.description?.includes('chat not found')) {
-        console.warn(`Chat not found for ID: ${chatId}. User needs to start a conversation with the bot first.`);
+        console.warn(`Chat not found for ID: ${chatId}. Removing from active chats.`);
+        removeInactiveChat(userId);
         return false;
       }
       throw error; // Rethrow other errors
@@ -52,7 +85,8 @@ async function safeSendMessage(chatId, message) {
     return true;
   } catch (error) {
     if (error.response?.statusCode === 400 && error.response.body?.description?.includes('chat not found')) {
-      console.warn(`Chat not found for ID: ${chatId}. User needs to start a conversation with the bot first.`);
+      console.warn(`Chat not found for ID: ${chatId}. Removing from active chats.`);
+      removeInactiveChat(userId);
       return false;
     }
     console.error('Error sending Telegram message:', error.message);
@@ -96,20 +130,28 @@ app.use((req, res, next) => {
 app.use(bodyParser.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Webhook setup
-bot.setWebHook(`${webAppUrl}/bot${token}`)
-  .then(() => console.log('✅ Telegram webhook set'))
-  .catch(console.error);
+// Webhook setup (commented since we're using polling)
+// bot.setWebHook(`${webAppUrl}/bot${token}`)
+//   .then(() => console.log('✅ Telegram webhook set'))
+//   .catch(console.error);
 
-// Telegram webhook handler
-app.post(`/bot${token}`, (req, res) => {
-  bot.processUpdate(req.body);
-  res.sendStatus(200);
-});
+// Telegram webhook handler (commented since we're using polling)
+// app.post(`/bot${token}`, (req, res) => {
+//   bot.processUpdate(req.body);
+//   res.sendStatus(200);
+// });
 
 // Routes
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
+
+// Store active chats when users interact with the bot
+bot.on('message', (msg) => {
+  if (msg.chat && msg.from) {
+    console.log(`Storing active chat for user: ${msg.from.id} in chat: ${msg.chat.id}`);
+    addActiveChat(msg.from.id, msg.chat.id);
+  }
 });
 
 // Service 1: 1-on-1 Help
@@ -367,6 +409,7 @@ app.get('/api/roadmaps', (req, res) => {
 // Initialize data files
 const initDataFiles = () => {
   const files = {
+    'active_chats.json': {},
     'one_on_one.json': [],
     'books.json': [
       {
@@ -462,6 +505,11 @@ initDataFiles();
 // Bot start command
 bot.onText(/\/start/, (msg) => {
   const chatId = msg.chat.id;
+  const userId = msg.from.id;
+  
+  console.log(`User started conversation: ${userId} in chat: ${chatId}`);
+  addActiveChat(userId, chatId);
+  
   bot.sendMessage(
     chatId, 
     '👋 Welcome to Abenlytics Club! Now you can receive service confirmations.', 
@@ -476,13 +524,17 @@ bot.onText(/\/start/, (msg) => {
   );
 });
 
+// Store chat IDs for any message from users
+bot.on('message', (msg) => {
+  if (msg.chat && msg.from) {
+    console.log(`Storing active chat for user: ${msg.from.id} in chat: ${msg.chat.id}`);
+    addActiveChat(msg.from.id, msg.chat.id);
+  }
+});
+
 // Start server
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`✅ Server running on port ${PORT}`);
-  console.log(`🌐 Webhook URL: ${webAppUrl}/bot${token}`);
+  console.log(`🤖 Telegram bot started with polling`);
 });
-
-module.exports = {
-  initDataFiles
-};
