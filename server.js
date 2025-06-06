@@ -21,9 +21,9 @@ if (!token || !webAppUrl || !adminId || !groupLink) {
   process.exit(1);
 }
 
-const bot = new TelegramBot(token, { polling: false }); // Disable polling
+const bot = new TelegramBot(token, { polling: false });
 
-// Helper function to safely read JSON files
+// Helper functions
 function safeReadJSON(filePath, defaultValue = []) {
   try {
     const data = fs.readFileSync(filePath, 'utf8');
@@ -33,31 +33,26 @@ function safeReadJSON(filePath, defaultValue = []) {
   }
 }
 
-// Helper to save active chats
 function saveActiveChats(chats) {
   fs.writeFileSync('data/active_chats.json', JSON.stringify(chats, null, 2));
 }
 
-// Get active chats
 function getActiveChats() {
   return safeReadJSON('data/active_chats.json', {});
 }
 
-// Add chat to active list
 function addActiveChat(userId, chatId) {
   const chats = getActiveChats();
   chats[userId] = chatId;
   saveActiveChats(chats);
 }
 
-// Remove inactive chat
 function removeInactiveChat(userId) {
   const chats = getActiveChats();
   delete chats[userId];
   saveActiveChats(chats);
 }
 
-// Helper function to safely send messages
 async function safeSendMessage(userId, message) {
   const chats = getActiveChats();
   const chatId = chats[userId];
@@ -68,28 +63,14 @@ async function safeSendMessage(userId, message) {
   }
 
   try {
-    // First check if the chat exists
-    try {
-      await bot.getChat(chatId);
-    } catch (error) {
-      if (error.response?.statusCode === 400 && error.response.body?.description?.includes('chat not found')) {
-        console.warn(`Chat not found for ID: ${chatId}. Removing from active chats.`);
-        removeInactiveChat(userId);
-        return false;
-      }
-      throw error; // Rethrow other errors
-    }
-    
-    // Now send the message
+    await bot.getChat(chatId);
     await bot.sendMessage(chatId, message);
     return true;
   } catch (error) {
-    if (error.response?.statusCode === 400 && error.response.body?.description?.includes('chat not found')) {
-      console.warn(`Chat not found for ID: ${chatId}. Removing from active chats.`);
+    if (error.response?.statusCode === 400) {
       removeInactiveChat(userId);
-      return false;
     }
-    console.error('Error sending Telegram message:', error.message);
+    console.error('Error sending message:', error.message);
     return false;
   }
 }
@@ -109,7 +90,7 @@ storageDirs.forEach(dir => {
   }
 });
 
-// Initialize data files function
+// Initialize data files
 function initDataFiles() {
   const files = {
     'active_chats.json': {},
@@ -120,7 +101,7 @@ function initDataFiles() {
         title: "The Intelligent Investor",
         author: "Benjamin Graham",
         year: 1949,
-        description: "The definitive book on value investing and defensive investing strategies",
+        description: "The definitive book on value investing",
         file: "the_intelligent_investor.pdf"
       },
       {
@@ -128,7 +109,7 @@ function initDataFiles() {
         title: "A Random Walk Down Wall Street",
         author: "Burton Malkiel",
         year: 1973,
-        description: "Classic text on market efficiency and index fund investing",
+        description: "Classic text on market efficiency",
         file: "random_walk.pdf"
       }
     ],
@@ -160,13 +141,6 @@ function initDataFiles() {
         date: "2025-03-15",
         description: "Analysis of emerging market opportunities",
         file: "newsletter_q1_2025.pdf"
-      },
-      {
-        id: 2,
-        title: "Crypto Winter Analysis",
-        date: "2025-02-01",
-        description: "Navigating bear markets in cryptocurrency",
-        file: "crypto_winter_analysis.pdf"
       }
     ],
     'roadmaps.json': [
@@ -175,45 +149,31 @@ function initDataFiles() {
         title: "Long-Term Wealth Building",
         type: "long-term",
         description: "10-year investment strategy",
-        steps: ["Asset allocation", "Dollar-cost averaging", "Tax optimization"],
+        steps: ["Asset allocation", "Dollar-cost averaging"],
         file: "long_term_roadmap.pdf"
-      },
-      {
-        id: 2,
-        title: "Swing Trading Strategy",
-        type: "swing",
-        description: "3-6 month position trading",
-        steps: ["Technical analysis", "Risk management", "Position sizing"],
-        file: "swing_trading_roadmap.pdf"
       }
     ]
   };
 
   Object.entries(files).forEach(([filename, data]) => {
     const filePath = path.join(__dirname, 'data', filename);
-    
-    // Create file if it doesn't exist
     if (!fs.existsSync(filePath)) {
       fs.writeFileSync(filePath, JSON.stringify(data, null, 2));
-      console.log(`Created file: ${filePath}`);
-    } 
-    // Initialize empty files
-    else if (fs.statSync(filePath).size === 0) {
-      fs.writeFileSync(filePath, JSON.stringify(data, null, 2));
-      console.log(`Initialized empty file: ${filePath}`);
     }
   });
 }
 
-// Initialize files on server start
 initDataFiles();
+
+// Middleware
+app.use(bodyParser.json());
+app.use(express.static(path.join(__dirname, 'public')));
+app.use('/data', express.static(path.join(__dirname, 'data')));
 
 // Rate limiting
 const apiLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  max: 100,
-  message: { status: 'error', message: 'Too many requests' },
-  standardHeaders: true
+  max: 100
 });
 
 app.use(apiLimiter);
@@ -225,39 +185,92 @@ app.use((req, res, next) => {
   next();
 });
 
-// Middleware
-app.use(bodyParser.json());
-app.use(express.static(path.join(__dirname, 'public'))); // Serve static files from public directory
-
-// Set up webhook
+// Webhook setup
 const webhookPath = `/bot${token}`;
-const webhookUrl = `${webAppUrl}${webhookPath}`;
+bot.setWebHook(`${webAppUrl}${webhookPath}`)
+  .then(() => console.log(`✅ Webhook set to: ${webAppUrl}${webhookPath}`));
 
-bot.setWebHook(webhookUrl)
-  .then(() => console.log(`✅ Webhook set to: ${webhookUrl}`))
-  .catch(err => console.error('❌ Webhook setup failed:', err));
-
-// Telegram webhook handler
+// Routes
 app.post(webhookPath, (req, res) => {
   bot.processUpdate(req.body);
   res.sendStatus(200);
 });
 
-// Serve index.html for all routes
-app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'index.html'));
-});
-
-// Store active chats when users interact with the bot
-bot.on('message', (msg) => {
-  if (msg.chat && msg.from) {
-    console.log(`Storing active chat for user: ${msg.from.id} in chat: ${msg.chat.id}`);
-    addActiveChat(msg.from.id, msg.chat.id);
+// File download endpoints
+app.get('/api/books/download/:filename', (req, res) => {
+  const filePath = path.join(__dirname, 'data', 'books', req.params.filename);
+  if (fs.existsSync(filePath)) {
+    res.download(filePath);
+  } else {
+    res.status(404).json({ status: 'error', message: 'File not found' });
   }
 });
-app.get('/',(req, res) =>{
-  res.status(200).send('abenlytics server is healthy.');});
-// API Routes
+
+// API endpoints
+app.get('/api/books', (req, res) => {
+  try {
+    const books = safeReadJSON('data/books.json', []);
+    res.json({ status: 'success', books });
+  } catch (err) {
+    res.status(500).json({ status: 'error', message: 'Could not load books' });
+  }
+});
+
+app.get('/api/reviews', (req, res) => {
+  try {
+    const reviews = safeReadJSON('data/reviews.json', []);
+    res.json({ status: 'success', reviews });
+  } catch (err) {
+    res.status(500).json({ status: 'error', message: 'Could not load reviews' });
+  }
+});
+
+// Service endpoints
+app.post('/api/service/newsletter', async (req, res) => {
+  const { userData } = req.body;
+  
+  if (!userData?.id) {
+    return res.status(400).json({ status: 'error', message: 'Invalid request' });
+  }
+
+  try {
+    // Notify admin
+    await bot.sendMessage(
+      adminId,
+      `📬 New Newsletter Subscriber:\n\n` +
+      `👤 User: ${userData.name || 'N/A'}\n` +
+      `🆔 ID: ${userData.id}\n` +
+      `⏰ At: ${new Date().toLocaleString()}`
+    );
+    
+    // Confirm to user
+    const messageSent = await safeSendMessage(
+      userData.id,
+      "📬 You're subscribed to Abenlytics Newsletter!\n" +
+      "Expect our first edition soon with exclusive market insights."
+    );
+    
+    // Store subscription
+    const subscriptions = safeReadJSON('data/newsletter.json', []);
+    fs.writeFileSync('data/newsletter.json', JSON.stringify([
+      ...subscriptions,
+      {
+        id: Date.now(),
+        userId: userData.id,
+        name: userData.name,
+        timestamp: new Date().toISOString(),
+        messageSent
+      }
+    ], null, 2));
+    
+    res.json({ status: 'success', message: 'Subscription successful' });
+  } catch (err) {
+    console.error('Newsletter error:', err);
+    res.status(500).json({ status: 'error', message: 'Internal server error' });
+  }
+});
+
+// 1-on-1 Consultation
 app.post('/api/service/one_on_one', async (req, res) => {
   const { userData, telegramUsername, problem } = req.body;
   
@@ -280,29 +293,28 @@ app.post('/api/service/one_on_one', async (req, res) => {
       `⏰ Requested at: ${new Date().toLocaleString()}`
     );
     
-    // Confirm to user safely
+    // Confirm to user
     const messageSent = await safeSendMessage(
       userData.id,
       "✅ We've received your consultation request!\n\n" +
       "I'll review your inquiry and get back to you when I'm online. " +
-      "Typically responses take 24-48 hours during business days.\n\n" +
-      "Looking forward to helping you with your investment challenges!"
+      "Typically responses take 24-48 hours during business days."
     );
     
     // Store request
-    const request = {
-      id: Date.now(),
-      userId: userData.id,
-      name: userData.name,
-      telegramUsername,
-      problem,
-      timestamp: new Date().toISOString(),
-      messageSent
-    };
-    
     const requests = safeReadJSON('data/one_on_one.json', []);
-    const updatedRequests = [...requests, request];
-    fs.writeFileSync('data/one_on_one.json', JSON.stringify(updatedRequests, null, 2));
+    fs.writeFileSync('data/one_on_one.json', JSON.stringify([
+      ...requests,
+      {
+        id: Date.now(),
+        userId: userData.id,
+        name: userData.name,
+        telegramUsername,
+        problem,
+        timestamp: new Date().toISOString(),
+        messageSent
+      }
+    ], null, 2));
     
     res.json({ 
       status: 'success',
@@ -316,76 +328,7 @@ app.post('/api/service/one_on_one', async (req, res) => {
   }
 });
 
-// Service 2: Essential Books
-app.get('/api/books', (req, res) => {
-  try {
-    const books = safeReadJSON('data/books.json', []);
-    res.json({ 
-      status: 'success', 
-      books: books.map(book => ({
-        title: book.title,
-        author: book.author,
-        description: book.description,
-        file: book.file
-      }))
-    });
-  } catch (err) {
-    res.status(500).json({ status: 'error', message: 'Could not load books' });
-  }
-});
-
-// Service 3: Book Reviews
-app.get('/api/reviews', (req, res) => {
-  try {
-    const reviews = safeReadJSON('data/reviews.json', []);
-    res.json({ status: 'success', reviews });
-  } catch (err) {
-    res.status(500).json({ status: 'error', message: 'Could not load reviews' });
-  }
-});
-
-// Service 4: Group Access
-app.post('/api/service/group_access', async (req, res) => {
-  const { userData } = req.body;
-  
-  if (!userData || !userData.id) {
-    return res.status(400).json({ status: 'error', message: 'Invalid request' });
-  }
-
-  try {
-    // Grant access and send link
-    const messageSent = await safeSendMessage(
-      userData.id,
-      `👥 Join our community: ${groupLink}`
-    );
-    
-    // Log access
-    const access = {
-      id: Date.now(),
-      userId: userData.id,
-      name: userData.name,
-      timestamp: new Date().toISOString(),
-      messageSent
-    };
-    
-    const accesses = safeReadJSON('data/group_access.json', []);
-    const updatedAccesses = [...accesses, access];
-    fs.writeFileSync('data/group_access.json', JSON.stringify(updatedAccesses, null, 2));
-    
-    res.json({ 
-      status: 'success', 
-      link: groupLink,
-      message: messageSent 
-        ? 'Invite sent to Telegram' 
-        : 'Group link available below - please start a chat with the bot to receive future invites'
-    });
-  } catch (err) {
-    console.error('Group Access Error:', err);
-    res.status(500).json({ status: 'error', message: 'Internal server error' });
-  }
-});
-
-// Service 5: Prospectus Review
+// Prospectus Review
 const prospectusStorage = multer.diskStorage({
   destination: (req, file, cb) => {
     cb(null, 'data/prospectus/');
@@ -409,28 +352,31 @@ app.post('/api/service/prospectus', prospectusUpload.single('prospectus'), async
     // Notify admin
     await bot.sendMessage(
       adminId,
-      `🧾 New Prospectus Submission:\n\nUser: ${userData.name || 'N/A'}\nID: ${userData.id}\nFile: ${file.filename}`
+      `🧾 New Prospectus Submission:\n\n` +
+      `👤 User: ${userData.name || 'N/A'}\n` +
+      `🆔 ID: ${userData.id}\n` +
+      `📄 File: ${file.filename}`
     );
     
-    // Confirm to user safely
+    // Confirm to user
     const messageSent = await safeSendMessage(
       userData.id,
       "✅ We've received your prospectus! We'll review it within 48 hours."
     );
     
-    // Log submission
-    const submission = {
-      id: Date.now(),
-      userId: userData.id,
-      name: userData.name,
-      filename: file.filename,
-      timestamp: new Date().toISOString(),
-      messageSent
-    };
-    
+    // Store submission
     const submissions = safeReadJSON('data/prospectus.json', []);
-    const updatedSubmissions = [...submissions, submission];
-    fs.writeFileSync('data/prospectus.json', JSON.stringify(updatedSubmissions, null, 2));
+    fs.writeFileSync('data/prospectus.json', JSON.stringify([
+      ...submissions,
+      {
+        id: Date.now(),
+        userId: userData.id,
+        name: userData.name,
+        filename: file.filename,
+        timestamp: new Date().toISOString(),
+        messageSent
+      }
+    ], null, 2));
     
     res.json({ 
       status: 'success',
@@ -444,17 +390,8 @@ app.post('/api/service/prospectus', prospectusUpload.single('prospectus'), async
   }
 });
 
-// Service 6: Newsletter
-app.get('/api/newsletters', (req, res) => {
-  try {
-    const newsletters = safeReadJSON('data/newsletters.json', []);
-    res.json({ status: 'success', newsletters });
-  } catch (err) {
-    res.status(500).json({ status: 'error', message: 'Could not load newsletters' });
-  }
-});
-
-app.post('/api/service/newsletter', async (req, res) => {
+// Group Access
+app.post('/api/service/group_access', async (req, res) => {
   const { userData } = req.body;
   
   if (!userData || !userData.id) {
@@ -462,44 +399,39 @@ app.post('/api/service/newsletter', async (req, res) => {
   }
 
   try {
-    // Subscribe user safely
+    // Send group link
     const messageSent = await safeSendMessage(
       userData.id,
-      "📬 You're now subscribed to the Abenlytics Newsletter!"
+      `👥 Join our community: ${groupLink}`
     );
     
-    // Store subscription
-    const subscription = {
-      id: Date.now(),
-      userId: userData.id,
-      name: userData.name,
-      timestamp: new Date().toISOString(),
-      messageSent
-    };
-    
-    // Ensure we always have an array
-    let subscriptions = safeReadJSON('data/newsletter.json', []);
-    if (!Array.isArray(subscriptions)) {
-      console.warn('Invalid newsletter.json format - resetting to array');
-      subscriptions = [];
-    }
-    
-    const updatedSubscriptions = [...subscriptions, subscription];
-    fs.writeFileSync('data/newsletter.json', JSON.stringify(updatedSubscriptions, null, 2));
+    // Store access
+    const accesses = safeReadJSON('data/group_access.json', []);
+    fs.writeFileSync('data/group_access.json', JSON.stringify([
+      ...accesses,
+      {
+        id: Date.now(),
+        userId: userData.id,
+        name: userData.name,
+        timestamp: new Date().toISOString(),
+        messageSent
+      }
+    ], null, 2));
     
     res.json({ 
-      status: 'success',
+      status: 'success', 
+      link: groupLink,
       message: messageSent 
-        ? 'Subscription confirmed' 
-        : 'Subscription created! Please start a chat with the bot to receive newsletters'
+        ? 'Invite sent to Telegram' 
+        : 'Group link available below - please start a chat with the bot to receive future invites'
     });
   } catch (err) {
-    console.error('Newsletter Error:', err);
+    console.error('Group Access Error:', err);
     res.status(500).json({ status: 'error', message: 'Internal server error' });
   }
 });
 
-// Service 7: Roadmaps
+// Roadmaps
 app.get('/api/roadmaps', (req, res) => {
   try {
     const roadmaps = safeReadJSON('data/roadmaps.json', []);
@@ -509,32 +441,23 @@ app.get('/api/roadmaps', (req, res) => {
   }
 });
 
-// Bot start command
+// Bot commands
 bot.onText(/\/start/, (msg) => {
   const chatId = msg.chat.id;
-  const userId = msg.from.id;
-  
-  console.log(`User started conversation: ${userId} in chat: ${chatId}`);
-  addActiveChat(userId, chatId);
-  
-  bot.sendMessage(
-    chatId, 
-    '👋 Welcome to Abenlytics Club! Now you can receive service confirmations.', 
-    {
-      reply_markup: {
-        inline_keyboard: [[{
-          text: "🚀 Open Web App",
-          web_app: { url: webAppUrl }
-        }]]
-      }
+  addActiveChat(msg.from.id, chatId);
+  bot.sendMessage(chatId, '👋 Welcome to Abenlytics Club!', {
+    reply_markup: {
+      inline_keyboard: [[{
+        text: "🚀 Open Web App",
+        web_app: { url: webAppUrl }
+      }]]
     }
-  );
+  });
 });
 
-// Store chat IDs for any message from users
+// Store active chats
 bot.on('message', (msg) => {
   if (msg.chat && msg.from) {
-    console.log(`Storing active chat for user: ${msg.from.id} in chat: ${msg.chat.id}`);
     addActiveChat(msg.from.id, msg.chat.id);
   }
 });
@@ -543,10 +466,6 @@ bot.on('message', (msg) => {
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`✅ Server running on port ${PORT}`);
-  console.log(`🌐 Webhook URL: ${webhookUrl}`);
 });
 
-// Export the init function for setup
-module.exports = {
-  initDataFiles
-};
+module.exports = { initDataFiles };
