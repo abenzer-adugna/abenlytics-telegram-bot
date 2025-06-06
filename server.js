@@ -255,7 +255,8 @@ bot.on('message', (msg) => {
     addActiveChat(msg.from.id, msg.chat.id);
   }
 });
-
+app.get('/',(req, res) =>{
+  res.status(200).send('abenlytics server is healthy.');});
 // API Routes
 app.post('/api/service/one_on_one', async (req, res) => {
   const { userData, telegramUsername, problem } = req.body;
