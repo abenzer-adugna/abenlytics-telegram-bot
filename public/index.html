@@ -148,6 +148,17 @@
       0% { transform: rotate(0deg); }
       100% { transform: rotate(360deg); }
     }
+
+    /* Review modal styles */
+    .review-modal {
+      background: rgba(0, 0, 0, 0.8);
+      backdrop-filter: blur(5px);
+    }
+    
+    .review-content {
+      max-height: 80vh;
+      overflow-y: auto;
+    }
   </style>
 </head>
 <body>
@@ -222,7 +233,6 @@
     </div>
     
     <div id="crypto-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
-      <!-- Crypto cards will be dynamically inserted here -->
       <div class="text-center py-10">
         <i class="fas fa-spinner spinner text-cyan-400 text-3xl mb-4"></i>
         <p>Loading crypto data...</p>
@@ -262,12 +272,10 @@
         </div>
         <p class="text-gray-300 mb-4">Access our curated library of must-read books for investors at all levels, carefully selected to build your financial knowledge foundation.</p>
         
-        <!-- Toggle Button -->
         <button id="toggle-books-btn" class="btn-primary px-4 py-2 text-sm font-medium mb-4">
           <i class="fas fa-book mr-2"></i>Show Books
         </button>
         
-        <!-- Book Cards Container (initially hidden) -->
         <div id="books-container" class="hidden space-y-4"></div>
       </div>
       
@@ -280,7 +288,7 @@
           <h3 class="text-xl font-bold">Book Reviews & Insights</h3>
         </div>
         <p class="text-gray-300 mb-4">Get digestible summaries and practical applications from top investing books, saving you time while delivering actionable knowledge.</p>
-        <button class="btn-primary px-4 py-2 text-sm font-medium" onclick="loadServiceData('reviews')">
+        <button class="btn-primary px-4 py-2 text-sm font-medium" onclick="loadReviews()">
           Read Reviews
         </button>
       </div>
@@ -418,6 +426,21 @@
     </div>
   </div>
 
+  <!-- Review Modal -->
+  <div id="review-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 review-modal">
+    <div class="bg-gray-800 rounded-lg w-full max-w-2xl p-6 review-content">
+      <div class="flex justify-between items-center mb-4">
+        <h3 class="text-2xl font-bold">📚 Book Reviews & Insights</h3>
+        <button id="close-review-modal" class="text-gray-400 hover:text-white">
+          <i class="fas fa-times text-xl"></i>
+        </button>
+      </div>
+      <div id="reviews-container" class="space-y-4">
+        <!-- Reviews will be inserted here -->
+      </div>
+    </div>
+  </div>
+
   <!-- Footer -->
   <footer class="py-10 px-4 border-t border-gray-800">
     <div class="max-w-6xl mx-auto">
@@ -489,7 +512,7 @@
       }
     });
 
-    // Initialize Telegram user
+    // Telegram user functions
     async function getTelegramUser() {
       if (window.Telegram?.WebApp?.initDataUnsafe?.user) {
         const user = window.Telegram.WebApp.initDataUnsafe.user;
@@ -504,7 +527,6 @@
       return null;
     }
     
-    // Get Telegram user synchronously
     function getTelegramUserSync() {
       if (window.Telegram?.WebApp?.initDataUnsafe?.user) {
         const user = window.Telegram.WebApp.initDataUnsafe.user;
@@ -524,17 +546,14 @@
         let user, userName;
         
         if (serviceType === 'one_on_one' && data) {
-          // Use provided data for 1-on-1 requests
           user = { id: data.userData.id };
           userName = data.userData.name;
         } else {
-          // Get user for other services
           const telegramUser = await getTelegramUser() || {
             id: Math.floor(Math.random() * 1000000),
             first_name: "Test",
             last_name: "User"
           };
-          
           user = telegramUser;
           userName = `${telegramUser.first_name} ${telegramUser.last_name}`.trim();
         }
@@ -542,7 +561,6 @@
         let response;
         
         if (serviceType === 'prospectus' && formData) {
-          // File upload handling
           formData.append('userData', JSON.stringify({
             id: user.id,
             name: userName
@@ -553,7 +571,6 @@
             body: formData
           });
         } else {
-          // Standard service request
           const body = serviceType === 'one_on_one' 
             ? { ...data } 
             : {
@@ -641,17 +658,17 @@
     // Function to load books
     async function loadBooks() {
       try {
-        const booksContainer = document.getElementById('books-container');
+        const container = document.getElementById('books-container');
         const toggleBtn = document.getElementById('toggle-books-btn');
         
         // Show loading state
-        booksContainer.innerHTML = `
+        container.innerHTML = `
           <div class="text-center py-4">
             <i class="fas fa-spinner spinner text-cyan-400 text-xl"></i>
             <p class="mt-2">Loading books...</p>
           </div>
         `;
-        booksContainer.classList.remove('hidden');
+        container.classList.remove('hidden');
         
         // Fetch books
         const response = await fetch('/api/books');
@@ -659,14 +676,14 @@
         
         if (result.status === 'success') {
           // Render books
-          booksContainer.innerHTML = result.books.map(book => `
+          container.innerHTML = result.books.map(book => `
             <div class="book-card">
               <h4 class="font-bold text-lg mb-2">${book.title}</h4>
               <div class="text-gray-400 mb-2">By ${book.author}</div>
               <p class="mb-3">${book.description}</p>
               <a href="/data/books/${book.file}" 
-                class="btn-primary inline-block px-3 py-1 text-sm"
-                download>
+                 class="btn-primary inline-block px-3 py-1 text-sm"
+                 download="${book.title}.pdf">
                 <i class="fas fa-download mr-1"></i>Download
               </a>
             </div>
@@ -675,19 +692,14 @@
           // Update button text
           toggleBtn.innerHTML = '<i class="fas fa-eye-slash mr-2"></i>Hide Books';
         } else {
-          booksContainer.innerHTML = `
-            <div class="text-center py-4 text-red-400">
-              <i class="fas fa-exclamation-triangle text-xl mb-2"></i>
-              <p>Failed to load books</p>
-            </div>
-          `;
+          throw new Error('Failed to load books');
         }
       } catch (error) {
-        console.error('Error loading books:', error);
-        document.getElementById('books-container').innerHTML = `
+        const container = document.getElementById('books-container');
+        container.innerHTML = `
           <div class="text-center py-4 text-red-400">
             <i class="fas fa-exclamation-triangle text-xl mb-2"></i>
-            <p>Error loading books</p>
+            <p>Error loading books. Please try again.</p>
           </div>
         `;
       }
@@ -695,20 +707,95 @@
 
     // Toggle books visibility
     function toggleBooks() {
-      const booksContainer = document.getElementById('books-container');
-      const toggleBtn = document.getElementById('toggle-books-btn');
+      const container = document.getElementById('books-container');
+      const btn = document.getElementById('toggle-books-btn');
       
-      if (booksContainer.classList.contains('hidden')) {
-        // Load books if not loaded
-        if (booksContainer.innerHTML === '') {
-          loadBooks();
-        } else {
-          booksContainer.classList.remove('hidden');
-          toggleBtn.innerHTML = '<i class="fas fa-eye-slash mr-2"></i>Hide Books';
-        }
+      if (container.classList.contains('hidden')) {
+        loadBooks();
+        btn.innerHTML = '<i class="fas fa-eye-slash mr-2"></i>Hide Books';
       } else {
-        booksContainer.classList.add('hidden');
-        toggleBtn.innerHTML = '<i class="fas fa-book mr-2"></i>Show Books';
+        container.classList.add('hidden');
+        btn.innerHTML = '<i class="fas fa-book mr-2"></i>Show Books';
+      }
+    }
+
+    // Load reviews
+    async function loadReviews() {
+      try {
+        // Show loading state
+        const modal = document.getElementById('review-modal');
+        const container = document.getElementById('reviews-container');
+        container.innerHTML = `
+          <div class="text-center py-8">
+            <i class="fas fa-spinner spinner text-cyan-400 text-2xl"></i>
+            <p class="mt-2">Loading reviews...</p>
+          </div>
+        `;
+        modal.classList.remove('hidden');
+        
+        // Fetch reviews
+        const response = await fetch('/api/reviews');
+        const result = await response.json();
+        
+        if (result.status === 'success') {
+          // Render reviews
+          container.innerHTML = result.reviews.map(review => `
+            <div class="bg-gray-700 p-4 rounded-lg">
+              <h4 class="font-bold text-lg mb-2">${review.title}</h4>
+              <div class="flex items-center mb-2">
+                ${'★'.repeat(review.rating)}${'☆'.repeat(5 - review.rating)}
+                <span class="ml-2 text-yellow-400">${review.rating}/5</span>
+              </div>
+              <p class="mb-3"><strong>Summary:</strong> ${review.summary}</p>
+              <p><strong>Key Insights:</strong> ${review.keyInsights.join(', ')}</p>
+            </div>
+          `).join('');
+        } else {
+          throw new Error('Failed to load reviews');
+        }
+      } catch (error) {
+        const container = document.getElementById('reviews-container');
+        container.innerHTML = `
+          <div class="text-center py-8 text-red-400">
+            <i class="fas fa-exclamation-triangle text-2xl mb-2"></i>
+            <p>Error loading reviews. Please try again.</p>
+          </div>
+        `;
+      }
+    }
+
+    // Newsletter subscription
+    async function subscribeNewsletter() {
+      try {
+        const user = await getTelegramUser() || {
+          id: Date.now(),
+          first_name: "User",
+          last_name: ""
+        };
+        
+        const response = await fetch('/api/service/newsletter', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            userData: {
+              id: user.id,
+              name: `${user.first_name} ${user.last_name}`.trim() || "Anonymous User"
+            }
+          })
+        });
+        
+        const result = await response.json();
+        
+        if (result.status === 'success') {
+          alert('🎉 You have successfully subscribed to our newsletter!');
+        } else {
+          alert('⚠️ ' + (result.message || 'Subscription failed. Please try again.'));
+        }
+      } catch (error) {
+        console.error('Newsletter subscription error:', error);
+        alert('❌ Network error. Please try again.');
       }
     }
 
@@ -832,8 +919,10 @@
             if (user && user.username) {
               document.getElementById('telegram-username').value = `@${user.username}`;
             }
-          } else {
-            requestService(serviceType);
+          } else if (serviceType === 'newsletter') {
+            subscribeNewsletter();
+          } else if (serviceType === 'group_access') {
+            requestService('group_access');
           }
         });
       });
@@ -851,6 +940,11 @@
       document.getElementById('consultation-submit').addEventListener('click', handleConsultationRequest);
       document.getElementById('consultation-cancel').addEventListener('click', () => {
         document.getElementById('consultation-modal').classList.add('hidden');
+      });
+      
+      // Review modal handling
+      document.getElementById('close-review-modal').addEventListener('click', () => {
+        document.getElementById('review-modal').classList.add('hidden');
       });
       
       // Crypto refresh button
@@ -871,7 +965,8 @@
       document.addEventListener('click', (e) => {
         const modals = [
           'consultation-modal',
-          'prospectus-modal'
+          'prospectus-modal',
+          'review-modal'
         ];
         
         modals.forEach(id => {
@@ -884,4 +979,4 @@
     });
   </script>
 </body>
-</html>
+                                                                </html>
