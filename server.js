@@ -109,6 +109,105 @@ storageDirs.forEach(dir => {
   }
 });
 
+// Initialize data files function
+function initDataFiles() {
+  const files = {
+    'active_chats.json': {},
+    'one_on_one.json': [],
+    'books.json': [
+      {
+        id: 1,
+        title: "The Intelligent Investor",
+        author: "Benjamin Graham",
+        year: 1949,
+        description: "The definitive book on value investing and defensive investing strategies",
+        file: "the_intelligent_investor.pdf"
+      },
+      {
+        id: 2,
+        title: "A Random Walk Down Wall Street",
+        author: "Burton Malkiel",
+        year: 1973,
+        description: "Classic text on market efficiency and index fund investing",
+        file: "random_walk.pdf"
+      }
+    ],
+    'reviews.json': [
+      {
+        id: 1,
+        bookId: 1,
+        title: "The Intelligent Investor Review",
+        rating: 5,
+        summary: "A timeless classic that every investor should read",
+        keyInsights: ["Margin of safety", "Mr. Market concept"]
+      },
+      {
+        id: 2,
+        bookId: 2,
+        title: "Random Walk Review",
+        rating: 4,
+        summary: "Essential reading on market efficiency",
+        keyInsights: ["Efficient market hypothesis", "Index fund benefits"]
+      }
+    ],
+    'group_access.json': [],
+    'prospectus.json': [],
+    'newsletter.json': [],
+    'newsletters.json': [
+      {
+        id: 1,
+        title: "Market Trends Q1 2025",
+        date: "2025-03-15",
+        description: "Analysis of emerging market opportunities",
+        file: "newsletter_q1_2025.pdf"
+      },
+      {
+        id: 2,
+        title: "Crypto Winter Analysis",
+        date: "2025-02-01",
+        description: "Navigating bear markets in cryptocurrency",
+        file: "crypto_winter_analysis.pdf"
+      }
+    ],
+    'roadmaps.json': [
+      {
+        id: 1,
+        title: "Long-Term Wealth Building",
+        type: "long-term",
+        description: "10-year investment strategy",
+        steps: ["Asset allocation", "Dollar-cost averaging", "Tax optimization"],
+        file: "long_term_roadmap.pdf"
+      },
+      {
+        id: 2,
+        title: "Swing Trading Strategy",
+        type: "swing",
+        description: "3-6 month position trading",
+        steps: ["Technical analysis", "Risk management", "Position sizing"],
+        file: "swing_trading_roadmap.pdf"
+      }
+    ]
+  };
+
+  Object.entries(files).forEach(([filename, data]) => {
+    const filePath = path.join(__dirname, 'data', filename);
+    
+    // Create file if it doesn't exist
+    if (!fs.existsSync(filePath)) {
+      fs.writeFileSync(filePath, JSON.stringify(data, null, 2));
+      console.log(`Created file: ${filePath}`);
+    } 
+    // Initialize empty files
+    else if (fs.statSync(filePath).size === 0) {
+      fs.writeFileSync(filePath, JSON.stringify(data, null, 2));
+      console.log(`Initialized empty file: ${filePath}`);
+    }
+  });
+}
+
+// Initialize files on server start
+initDataFiles();
+
 // Rate limiting
 const apiLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
@@ -129,17 +228,6 @@ app.use((req, res, next) => {
 // Middleware
 app.use(bodyParser.json());
 app.use(express.static(path.join(__dirname, 'public')));
-
-// Webhook setup (commented since we're using polling)
-// bot.setWebHook(`${webAppUrl}/bot${token}`)
-//   .then(() => console.log('✅ Telegram webhook set'))
-//   .catch(console.error);
-
-// Telegram webhook handler (commented since we're using polling)
-// app.post(`/bot${token}`, (req, res) => {
-//   bot.processUpdate(req.body);
-//   res.sendStatus(200);
-// });
 
 // Routes
 app.get('/', (req, res) => {
@@ -406,102 +494,6 @@ app.get('/api/roadmaps', (req, res) => {
   }
 });
 
-// Initialize data files
-const initDataFiles = () => {
-  const files = {
-    'active_chats.json': {},
-    'one_on_one.json': [],
-    'books.json': [
-      {
-        id: 1,
-        title: "The Intelligent Investor",
-        author: "Benjamin Graham",
-        year: 1949,
-        description: "The definitive book on value investing and defensive investing strategies",
-        file: "the_intelligent_investor.pdf"
-      },
-      {
-        id: 2,
-        title: "A Random Walk Down Wall Street",
-        author: "Burton Malkiel",
-        year: 1973,
-        description: "Classic text on market efficiency and index fund investing",
-        file: "random_walk.pdf"
-      }
-    ],
-    'reviews.json': [
-      {
-        id: 1,
-        bookId: 1,
-        title: "The Intelligent Investor Review",
-        rating: 5,
-        summary: "A timeless classic that every investor should read",
-        keyInsights: ["Margin of safety", "Mr. Market concept"]
-      },
-      {
-        id: 2,
-        bookId: 2,
-        title: "Random Walk Review",
-        rating: 4,
-        summary: "Essential reading on market efficiency",
-        keyInsights: ["Efficient market hypothesis", "Index fund benefits"]
-      }
-    ],
-    'group_access.json': [],
-    'prospectus.json': [],
-    'newsletter.json': [],
-    'newsletters.json': [
-      {
-        id: 1,
-        title: "Market Trends Q1 2025",
-        date: "2025-03-15",
-        description: "Analysis of emerging market opportunities",
-        file: "newsletter_q1_2025.pdf"
-      },
-      {
-        id: 2,
-        title: "Crypto Winter Analysis",
-        date: "2025-02-01",
-        description: "Navigating bear markets in cryptocurrency",
-        file: "crypto_winter_analysis.pdf"
-      }
-    ],
-    'roadmaps.json': [
-      {
-        id: 1,
-        title: "Long-Term Wealth Building",
-        type: "long-term",
-        description: "10-year investment strategy",
-        steps: ["Asset allocation", "Dollar-cost averaging", "Tax optimization"],
-        file: "long_term_roadmap.pdf"
-      },
-      {
-        id: 2,
-        title: "Swing Trading Strategy",
-        type: "swing",
-        description: "3-6 month position trading",
-        steps: ["Technical analysis", "Risk management", "Position sizing"],
-        file: "swing_trading_roadmap.pdf"
-      }
-    ]
-  };
-
-  Object.entries(files).forEach(([filename, data]) => {
-    const filePath = path.join(__dirname, 'data', filename);
-    
-    // Create file if it doesn't exist
-    if (!fs.existsSync(filePath)) {
-      fs.writeFileSync(filePath, JSON.stringify(data, null, 2));
-    } 
-    // Initialize empty files
-    else if (fs.statSync(filePath).size === 0) {
-      fs.writeFileSync(filePath, JSON.stringify(data, null, 2));
-    }
-  });
-};
-
-initDataFiles();
-
 // Bot start command
 bot.onText(/\/start/, (msg) => {
   const chatId = msg.chat.id;
@@ -538,3 +530,8 @@ app.listen(PORT, () => {
   console.log(`✅ Server running on port ${PORT}`);
   console.log(`🤖 Telegram bot started with polling`);
 });
+
+// Export the init function for setup
+module.exports = {
+  initDataFiles
+};
