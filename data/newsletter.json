@@ -1,6 +1,7 @@
-{
-  "date": "2025-06-05",
-  "title": "Welcome to Abenlytics club!",
-  "content": "Thank you for subscribing. Big insights coming your way every week!"
-}
-
+[
+  {
+    "status": "Coming Soon",
+    "message": "Our next edition is on the way! Stay tuned for exciting market insights and updates.",
+    "expected_release_date": "2025-06-15"
+  }
+]
