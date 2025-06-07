@@ -1,0 +1,14 @@
+[
+  {
+    "id": 1,
+    "bookTitle": "The Intelligent Investor",
+    "rating": 5,
+    "summary": "The definitive book on value investing",
+    "keyInsights": [
+      "Margin of safety concept",
+      "Mr. Market analogy",
+      "Long-term approach"
+    ],
+    "date": "2023-10-15"
+  }
+]
