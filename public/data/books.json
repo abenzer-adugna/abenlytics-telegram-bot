@@ -1,80 +1,54 @@
 [
   {
-    "title": "Principles",
-    "author": "Ray Dalio",
-    "category": "Investing & Life",
-    "id": "principles"
-  },
-  {
-    "title": "The Little Book of Common Sense Investing",
-    "author": "John C. Bogle",
-    "category": "Long-Term Investing",
-    "id": "common-sense-investing"
-  },
-  {
-    "title": "One Up on Wall Street",
-    "author": "Peter Lynch",
-    "category": "Stock Picking",
-    "id": "one-up-wall-street"
+    "title": "A Random Walk Down Wall Street",
+    "pdf_link": "/books/A_Random_Walk_Down_Wall_Street.pdf"
   },
   {
     "title": "Common Stocks and Uncommon Profits",
-    "author": "Philip Fisher",
-    "category": "Value Investing",
-    "id": "common-stocks-uncommon-profits"
+    "pdf_link": "/books/Common_Stocks_and_Uncommon_Profits.pdf"
   },
   {
-    "title": "The Intelligent Investor",
-    "author": "Benjamin Graham",
-    "category": "Value Investing",
-    "id": "intelligent-investor"
-  },
-  {
-    "title": "The Essays of Warren Buffett",
-    "author": "Warren Buffett & Lawrence A. Cunningham",
-    "category": "Business & Investing Wisdom",
-    "id": "essays-of-warren-buffett"
-  },
-  {
-    "title": "The Psychology of Money",
-    "author": "Morgan Housel",
-    "category": "Behavioral Finance",
-    "id": "psychology-of-money"
-  },
-  {
-    "title": "A Random Walk Down Wall Street",
-    "author": "Burton G. Malkiel",
-    "category": "Investment Strategy",
-    "id": "random-walk"
+    "title": "Essays of Warren Buffett",
+    "pdf_link": "/books/Essays_of_Warren_Buffett.pdf"
   },
   {
     "title": "Flash Boys",
-    "author": "Michael Lewis",
-    "category": "Financial Markets",
-    "id": "flash-boys"
+    "pdf_link": "/books/Flash_Boys.pdf"
   },
   {
-    "title": "Reminiscences of a Stock Operator",
-    "author": "Edwin Lefèvre",
-    "category": "Trading Classic",
-    "id": "reminiscences-stock-operator"
-  },
-  {
-    "title": "The Alchemy of Finance",
-    "author": "George Soros",
-    "category": "Macro Investing",
-    "id": "alchemy-of-finance"
+    "title": "Little Book of Common Sense Investing",
+    "pdf_link": "/books/Little_Book_of_Common_Sense_Investing.pdf"
   },
   {
     "title": "Market Wizards",
-    "author": "Jack D. Schwager",
-    "category": "Trading Interviews",
-    "id": "market-wizards"
+    "pdf_link": "/books/Market_Wizards.pdf"
+  },
+  {
+    "title": "One Up On Wall Street",
+    "pdf_link": "/books/One_Up_on_Wall_Street.pdf"
+  },
+  {
+    "title": "Principles: Life and Work",
+    "pdf_link": "/books/Principles_Life_and_Work.pdf"
+  },
+  {
+    "title": "Reminiscences of a Stock Operator",
+    "pdf_link": "/books/Reminiscences_of_a_Stock_Operator.pdf"
+  },
+  {
+    "title": "The Alchemy of Finance",
+    "pdf_link": "/books/The_Alchemy_of_Finance.pdf"
+  },
+  {
+    "title": "The Intelligent Investor",
+    "pdf_link": "/books/The_Intelligent_Investor.pdf"
+  },
+  {
+    "title": "The Psychology of Money",
+    "pdf_link": "/books/The_Psychology_of_Money.pdf"
   },
   {
     "title": "Unshakeable",
-    "author": "Tony Robbins",
-    "category": "Wealth & Mindset",
-    "id": "unshakeable"
+    "pdf_link": "/books/Unshakeable.pdf"
   }
-    ]
+]
