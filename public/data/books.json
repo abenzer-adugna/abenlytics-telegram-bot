@@ -1,0 +1,14 @@
+[
+  {
+    "title": "The Intelligent Investor",
+    "author": "Benjamin Graham",
+    "description": "A classic book on value investing",
+    "file": "the-intelligent-investor.pdf"
+  },
+  {
+    "title": "Security Analysis",
+    "author": "Benjamin Graham & David Dodd",
+    "description": "The bible of fundamental analysis",
+    "file": "security-analysis.pdf"
+  }
+]
