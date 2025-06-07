@@ -676,7 +676,7 @@
     }
 
     // Function to load books
-    async function loadBooks() {
+   async function loadBooks() {
       try {
         const container = document.getElementById('books-container');
         const toggleBtn = document.getElementById('toggle-books-btn');
@@ -692,6 +692,11 @@
         
         // Fetch books
         const response = await fetch('/api/books');
+        
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
         const result = await response.json();
         
         if (result.status === 'success') {
@@ -709,21 +714,25 @@
             </div>
           `).join('');
           
-          // Update button text
           toggleBtn.innerHTML = '<i class="fas fa-eye-slash mr-2"></i>Hide Books';
         } else {
-          throw new Error('Failed to load books');
+          throw new Error(result.error || 'Failed to load books');
         }
       } catch (error) {
+        console.error('Book loading error:', error);
         const container = document.getElementById('books-container');
         container.innerHTML = `
           <div class="text-center py-4 text-red-400">
             <i class="fas fa-exclamation-triangle text-xl mb-2"></i>
-            <p>Error loading books. Please try again.</p>
+            <p>Error loading books: ${error.message}</p>
+            <button onclick="loadBooks()" class="mt-2 btn-primary px-3 py-1 text-sm">
+              <i class="fas fa-sync-alt mr-1"></i>Try Again
+            </button>
           </div>
         `;
       }
     }
+
 
     // Toggle books visibility
     function toggleBooks() {
