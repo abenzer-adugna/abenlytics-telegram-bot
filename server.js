@@ -5,6 +5,7 @@ const rateLimit = require('express-rate-limit');
 const cors = require('cors');
 const TelegramBot = require('node-telegram-bot-api');
 const path = require('path');
+const fs = require('fs');
 
 // Initialize Express
 const app = express();
@@ -44,56 +45,38 @@ bot.on('message', (msg) => {
 // ======================
 
 // 1. Get Books
-app.get('/api/books', async (req, res) => {
+app.get('/api/books', (req, res) => {
   try {
-    const books = [
-      {
-        title: "The Intelligent Investor",
-        author: "Benjamin Graham",
-        description: "A classic book on value investing",
-        file: "books/the-intelligent-investor.pdf"
-      },
-      {
-        title: "Security Analysis",
-        author: "Benjamin Graham & David Dodd",
-        description: "The bible of fundamental analysis",
-        file: "books/security-analysis.pdf"
-      }
-    ];
-
+    const booksPath = path.join(__dirname, 'public', 'data', 'books.json');
+    const books = JSON.parse(fs.readFileSync(booksPath, 'utf8'));
+    
     res.json({
       status: 'success',
       books: books.map(book => ({
         ...book,
-        url: `${process.env.WEBAPP_URL || 'http://localhost:3000'}/${book.file}`
+        url: `${process.env.WEBAPP_URL || 'http://localhost:3000'}/books/${book.file}`
       }))
     });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    console.error('Books endpoint error:', error);
+    res.status(500).json({ 
+      error: 'Failed to load books',
+      details: error.message 
+    });
   }
 });
 
 // 2. Get Roadmaps
-app.get('/api/roadmaps', async (req, res) => {
+app.get('/api/roadmaps', (req, res) => {
   try {
-    const roadmaps = [
-      {
-        title: "Beginner's Investment Roadmap",
-        description: "Step-by-step guide to start investing",
-        file: "roadmaps/beginner-investment.pdf"
-      },
-      {
-        title: "Advanced Trading Strategies",
-        description: "Professional trading techniques",
-        file: "roadmaps/advanced-trading.pdf"
-      }
-    ];
-
+    const roadmapsPath = path.join(__dirname, 'public', 'data', 'roadmaps.json');
+    const roadmaps = JSON.parse(fs.readFileSync(roadmapsPath, 'utf8'));
+    
     res.json({
       status: 'success',
       roadmaps: roadmaps.map(roadmap => ({
         ...roadmap,
-        url: `${process.env.WEBAPP_URL || 'http://localhost:3000'}/${roadmap.file}`
+        url: `${process.env.WEBAPP_URL || 'http://localhost:3000'}/roadmaps/${roadmap.file}`
       }))
     });
   } catch (error) {
@@ -102,35 +85,11 @@ app.get('/api/roadmaps', async (req, res) => {
 });
 
 // 3. Get Reviews
-app.get('/api/reviews', async (req, res) => {
+app.get('/api/reviews', (req, res) => {
   try {
-    const reviews = [
-      {
-        id: 1,
-        bookTitle: "The Intelligent Investor",
-        rating: 5,
-        summary: "The definitive book on value investing, teaching the principles of long-term investment strategies.",
-        keyInsights: [
-          "Margin of safety concept",
-          "Mr. Market analogy",
-          "Difference between investing and speculating"
-        ],
-        date: "2023-10-15"
-      },
-      {
-        id: 2,
-        bookTitle: "Security Analysis",
-        rating: 4,
-        summary: "The foundational text for fundamental analysis of securities.",
-        keyInsights: [
-          "Intrinsic value calculation",
-          "Financial statement analysis",
-          "Risk assessment techniques"
-        ],
-        date: "2023-11-02"
-      }
-    ];
-
+    const reviewsPath = path.join(__dirname, 'public', 'data', 'reviews.json');
+    const reviews = JSON.parse(fs.readFileSync(reviewsPath, 'utf8'));
+    
     res.json({
       status: 'success',
       reviews
@@ -221,8 +180,28 @@ app.post('/api/service/prospectus', async (req, res) => {
   }
 });
 
+// 8. 1-on-1 Consultation
+app.post('/api/service/one_on_one', async (req, res) => {
+  try {
+    const { telegramUsername, problem, userData } = req.body;
+    
+    await bot.sendMessage(
+      process.env.ADMIN_CHAT_ID,
+      `📞 New Consultation Request:\n\n` +
+      `👤 ${userData.name}\n` +
+      `📱 Telegram: ${telegramUsername}\n` +
+      `❓ Problem: ${problem}\n\n` +
+      `🆔 User ID: ${userData.id}`
+    );
+
+    res.json({ status: 'success' });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
 // Serve Static Files
-app.use(express.static('public'));
+app.use(express.static(path.join(__dirname, 'public')));
 
 // Fallback route for SPA
 app.get('*', (req, res) => {
