@@ -15,7 +15,7 @@
     "express-rate-limit": "^6.7.0",
     "helmet": "^7.1.0",
     "cors": "^2.8.5",
-    "got": "^12.6.0"  // Replaces deprecated 'request'
+    "got": "^12.6.0"  
   },
   "devDependencies": {
     "nodemon": "^3.0.2"
