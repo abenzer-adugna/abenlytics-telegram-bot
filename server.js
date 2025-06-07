@@ -53,7 +53,12 @@ app.get('/api/books', async (req, res) => {
         description: "A classic book on value investing",
         file: "books/the-intelligent-investor.pdf"
       },
-      // Add more books as needed
+      {
+        title: "Security Analysis",
+        author: "Benjamin Graham & David Dodd",
+        description: "The bible of fundamental analysis",
+        file: "books/security-analysis.pdf"
+      }
     ];
 
     res.json({
@@ -77,7 +82,11 @@ app.get('/api/roadmaps', async (req, res) => {
         description: "Step-by-step guide to start investing",
         file: "roadmaps/beginner-investment.pdf"
       },
-      // Add more roadmaps as needed
+      {
+        title: "Advanced Trading Strategies",
+        description: "Professional trading techniques",
+        file: "roadmaps/advanced-trading.pdf"
+      }
     ];
 
     res.json({
@@ -92,13 +101,52 @@ app.get('/api/roadmaps', async (req, res) => {
   }
 });
 
-// 3. Telegram Webhook
+// 3. Get Reviews
+app.get('/api/reviews', async (req, res) => {
+  try {
+    const reviews = [
+      {
+        id: 1,
+        bookTitle: "The Intelligent Investor",
+        rating: 5,
+        summary: "The definitive book on value investing, teaching the principles of long-term investment strategies.",
+        keyInsights: [
+          "Margin of safety concept",
+          "Mr. Market analogy",
+          "Difference between investing and speculating"
+        ],
+        date: "2023-10-15"
+      },
+      {
+        id: 2,
+        bookTitle: "Security Analysis",
+        rating: 4,
+        summary: "The foundational text for fundamental analysis of securities.",
+        keyInsights: [
+          "Intrinsic value calculation",
+          "Financial statement analysis",
+          "Risk assessment techniques"
+        ],
+        date: "2023-11-02"
+      }
+    ];
+
+    res.json({
+      status: 'success',
+      reviews
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// 4. Telegram Webhook
 app.post(`/bot${process.env.TELEGRAM_TOKEN}`, (req, res) => {
   bot.processUpdate(req.body);
   res.sendStatus(200);
 });
 
-// 4. Group Access Service
+// 5. Group Access Service
 app.post('/api/service/group_access', async (req, res) => {
   try {
     const { userData } = req.body;
@@ -123,7 +171,7 @@ app.post('/api/service/group_access', async (req, res) => {
   }
 });
 
-// 5. Newsletter Subscription
+// 6. Newsletter Subscription
 app.post('/api/service/newsletter', async (req, res) => {
   try {
     const { userData } = req.body;
@@ -151,7 +199,7 @@ app.post('/api/service/newsletter', async (req, res) => {
   }
 });
 
-// 6. Prospectus Service
+// 7. Prospectus Service
 app.post('/api/service/prospectus', async (req, res) => {
   try {
     const { userData } = req.body;
