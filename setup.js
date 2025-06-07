@@ -1,47 +1,31 @@
-const { initDataFiles } = require('./server');
+const { createClient } = require('@supabase/supabase-js');
 const fs = require('fs');
-const path = require('path');
 
-// Initialize data files
-initDataFiles();
+const supabase = createClient(
+  process.env.SUPABASE_URL,
+  process.env.SUPABASE_KEY
+);
 
-// Create placeholder files
-const dataDirs = [
-  'books',
-  'newsletters',
-  'roadmaps',
-  'prospectus'
-];
-
-dataDirs.forEach(dir => {
-  const fullPath = path.join(__dirname, 'data', dir);
-  if (!fs.existsSync(fullPath)) {
-    fs.mkdirSync(fullPath, { recursive: true });
+async function initStorage() {
+  // Create buckets if they don't exist
+  const { data: buckets } = await supabase.storage.listBuckets();
+  
+  if (!buckets.some(b => b.name === 'books')) {
+    await supabase.storage.createBucket('books', { public: true });
   }
-});
+  
+  if (!buckets.some(b => b.name === 'uploads')) {
+    await supabase.storage.createBucket('uploads', { public: true });
+  }
 
-// Create placeholder PDFs
-const placeholderText = 'This is a placeholder file. Replace with actual content.';
-const placeholders = {
-  books: [
-    'the_intelligent_investor.pdf',
-    'random_walk.pdf'
-  ],
-  newsletters: [
-    'newsletter_q1_2025.pdf'
-  ],
-  roadmaps: [
-    'long_term_roadmap.pdf'
-  ]
-};
+  // Upload default books
+  const books = JSON.parse(fs.readFileSync('./data/books.json'));
+  for (const book of books) {
+    const file = fs.readFileSync(`./data/books/${book.file}`);
+    await supabase.storage
+      .from('books')
+      .upload(book.file, file);
+  }
+}
 
-Object.entries(placeholders).forEach(([dir, files]) => {
-  files.forEach(file => {
-    const filePath = path.join(__dirname, 'data', dir, file);
-    if (!fs.existsSync(filePath)) {
-      fs.writeFileSync(filePath, placeholderText);
-    }
-  });
-});
-
-console.log('✅ Data files and placeholders initialized successfully');
+initStorage().then(() => console.log('✅ Storage initialized'));
