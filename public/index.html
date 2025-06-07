@@ -159,6 +159,12 @@
       max-height: 80vh;
       overflow-y: auto;
     }
+    
+    /* Star rating styles */
+    .star-rating {
+      color: #fbbf24;
+      font-size: 1.1rem;
+    }
   </style>
 </head>
 <body>
@@ -316,7 +322,7 @@
           <h3 class="text-xl font-bold">Trading & Investing Roadmaps</h3>
         </div>
         <p class="text-gray-300 mb-4">Follow our actionable roadmaps for different investment styles: long-term wealth building, swing trading strategies, and short-term opportunities.</p>
-        <button class="btn-primary px-4 py-2 text-sm font-medium" onclick="loadServiceData('roadmaps')">
+        <button class="btn-primary px-4 py-2 text-sm font-medium" onclick="loadRoadmaps()">
           View Roadmaps
         </button>
       </div>
@@ -541,7 +547,7 @@
     }
 
     // Service request handler
-    async function requestService(serviceType, data = null, formData = null) {
+    async function requestService(serviceType, data = null) {
       try {
         let user, userName;
         
@@ -558,34 +564,20 @@
           userName = `${telegramUser.first_name} ${telegramUser.last_name}`.trim();
         }
 
-        let response;
+        const body = serviceType === 'one_on_one' 
+          ? { ...data } 
+          : {
+              userData: {
+                id: user.id,
+                name: userName
+              }
+            };
         
-        if (serviceType === 'prospectus' && formData) {
-          formData.append('userData', JSON.stringify({
-            id: user.id,
-            name: userName
-          }));
-          
-          response = await fetch('/api/service/prospectus', {
-            method: 'POST',
-            body: formData
-          });
-        } else {
-          const body = serviceType === 'one_on_one' 
-            ? { ...data } 
-            : {
-                userData: {
-                  id: user.id,
-                  name: userName
-                }
-              };
-          
-          response = await fetch(`/api/service/${serviceType}`, {
-            method: 'POST',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify(body)
-          });
-        }
+        const response = await fetch(`/api/service/${serviceType}`, {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify(body)
+        });
         
         const result = await response.json();
         
@@ -646,9 +638,37 @@
       const fileInput = document.getElementById('prospectus-file');
       if (!fileInput.files.length) return alert('Please select a file');
       
-      const formData = new FormData();
-      formData.append('prospectus', fileInput.files[0]);
-      requestService('prospectus', null, formData);
+      // Get user data
+      const user = getTelegramUserSync() || {
+        id: Math.floor(Math.random() * 1000000),
+        first_name: "User",
+        last_name: ""
+      };
+      
+      fetch('/api/service/prospectus', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          userData: {
+            id: user.id,
+            name: `${user.first_name} ${user.last_name}`.trim() || "Anonymous User"
+          }
+        })
+      })
+      .then(response => response.json())
+      .then(result => {
+        if (result.status === 'success') {
+          alert(result.message);
+        } else {
+          alert('Error: ' + (result.message || 'Request failed'));
+        }
+      })
+      .catch(error => {
+        console.error('Error:', error);
+        alert('Network error. Please try again.');
+      });
       
       // Reset form and close modal
       fileInput.value = '';
@@ -681,9 +701,9 @@
               <h4 class="font-bold text-lg mb-2">${book.title}</h4>
               <div class="text-gray-400 mb-2">By ${book.author}</div>
               <p class="mb-3">${book.description}</p>
-              <a href="/data/books/${book.file}" 
+              <a href="${book.url}" 
                  class="btn-primary inline-block px-3 py-1 text-sm"
-                 download="${book.title}.pdf">
+                 download="${book.title.replace(/ /g, '-')}.pdf">
                 <i class="fas fa-download mr-1"></i>Download
               </a>
             </div>
@@ -741,13 +761,21 @@
           // Render reviews
           container.innerHTML = result.reviews.map(review => `
             <div class="bg-gray-700 p-4 rounded-lg">
-              <h4 class="font-bold text-lg mb-2">${review.title}</h4>
-              <div class="flex items-center mb-2">
+              <div class="flex justify-between items-start mb-2">
+                <h4 class="font-bold text-lg">${review.bookTitle}</h4>
+                <span class="text-sm text-gray-400">${review.date}</span>
+              </div>
+              <div class="flex items-center mb-3">
                 ${'★'.repeat(review.rating)}${'☆'.repeat(5 - review.rating)}
                 <span class="ml-2 text-yellow-400">${review.rating}/5</span>
               </div>
-              <p class="mb-3"><strong>Summary:</strong> ${review.summary}</p>
-              <p><strong>Key Insights:</strong> ${review.keyInsights.join(', ')}</p>
+              <p class="mb-3"><strong class="text-cyan-300">Summary:</strong> ${review.summary}</p>
+              <div>
+                <strong class="text-cyan-300">Key Insights:</strong>
+                <ul class="list-disc list-inside mt-1">
+                  ${review.keyInsights.map(insight => `<li>${insight}</li>`).join('')}
+                </ul>
+              </div>
             </div>
           `).join('');
         } else {
@@ -759,8 +787,36 @@
           <div class="text-center py-8 text-red-400">
             <i class="fas fa-exclamation-triangle text-2xl mb-2"></i>
             <p>Error loading reviews. Please try again.</p>
+            <button onclick="loadReviews()" class="mt-4 btn-primary px-4 py-2">
+              <i class="fas fa-sync-alt mr-2"></i>Retry
+            </button>
           </div>
         `;
+      }
+    }
+
+    // Load roadmaps
+    async function loadRoadmaps() {
+      try {
+        const response = await fetch('/api/roadmaps');
+        const result = await response.json();
+        
+        if (result.status === 'success') {
+          // Create a modal or display roadmaps as needed
+          const roadmapLinks = result.roadmaps.map(r => 
+            `<li class="mb-2"><a href="${r.url}" class="text-cyan-400 hover:underline" download>${r.title}</a></li>`
+          ).join('');
+          
+          alert(`
+            Available Roadmaps:
+            <ul class="mt-2">${roadmapLinks}</ul>
+          `, { isHTML: true });
+        } else {
+          throw new Error('Failed to load roadmaps');
+        }
+      } catch (error) {
+        console.error('Roadmap loading error:', error);
+        alert('Error loading roadmaps. Please try again.');
       }
     }
 
@@ -979,4 +1035,4 @@
     });
   </script>
 </body>
-                                                                </html>
+</html>
