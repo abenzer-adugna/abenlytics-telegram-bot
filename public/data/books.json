@@ -1,14 +1,80 @@
 [
   {
-    "title": "The Intelligent Investor",
-    "author": "Benjamin Graham",
-    "description": "A classic book on value investing",
-    "file": "the-intelligent-investor.pdf"
+    "title": "Principles",
+    "author": "Ray Dalio",
+    "category": "Investing & Life",
+    "id": "principles"
   },
   {
-    "title": "Security Analysis",
-    "author": "Benjamin Graham & David Dodd",
-    "description": "The bible of fundamental analysis",
-    "file": "security-analysis.pdf"
+    "title": "The Little Book of Common Sense Investing",
+    "author": "John C. Bogle",
+    "category": "Long-Term Investing",
+    "id": "common-sense-investing"
+  },
+  {
+    "title": "One Up on Wall Street",
+    "author": "Peter Lynch",
+    "category": "Stock Picking",
+    "id": "one-up-wall-street"
+  },
+  {
+    "title": "Common Stocks and Uncommon Profits",
+    "author": "Philip Fisher",
+    "category": "Value Investing",
+    "id": "common-stocks-uncommon-profits"
+  },
+  {
+    "title": "The Intelligent Investor",
+    "author": "Benjamin Graham",
+    "category": "Value Investing",
+    "id": "intelligent-investor"
+  },
+  {
+    "title": "The Essays of Warren Buffett",
+    "author": "Warren Buffett & Lawrence A. Cunningham",
+    "category": "Business & Investing Wisdom",
+    "id": "essays-of-warren-buffett"
+  },
+  {
+    "title": "The Psychology of Money",
+    "author": "Morgan Housel",
+    "category": "Behavioral Finance",
+    "id": "psychology-of-money"
+  },
+  {
+    "title": "A Random Walk Down Wall Street",
+    "author": "Burton G. Malkiel",
+    "category": "Investment Strategy",
+    "id": "random-walk"
+  },
+  {
+    "title": "Flash Boys",
+    "author": "Michael Lewis",
+    "category": "Financial Markets",
+    "id": "flash-boys"
+  },
+  {
+    "title": "Reminiscences of a Stock Operator",
+    "author": "Edwin Lefèvre",
+    "category": "Trading Classic",
+    "id": "reminiscences-stock-operator"
+  },
+  {
+    "title": "The Alchemy of Finance",
+    "author": "George Soros",
+    "category": "Macro Investing",
+    "id": "alchemy-of-finance"
+  },
+  {
+    "title": "Market Wizards",
+    "author": "Jack D. Schwager",
+    "category": "Trading Interviews",
+    "id": "market-wizards"
+  },
+  {
+    "title": "Unshakeable",
+    "author": "Tony Robbins",
+    "category": "Wealth & Mindset",
+    "id": "unshakeable"
   }
-]
+    ]
