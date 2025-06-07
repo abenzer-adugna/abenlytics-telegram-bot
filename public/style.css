@@ -1,0 +1,187 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Roboto+Slab:wght@300;400;500;600;700&display=swap');
+
+:root {
+    --primary: #1a3a5f;
+    --secondary: #2c5282;
+    --accent: #0e9f6e;
+    --light: #f0f7ff;
+}
+
+body {
+    font-family: 'Inter', sans-serif;
+    background: linear-gradient(rgba(10, 25, 47, 0.9), rgba(10, 25, 47, 0.9)), 
+                url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="40" viewBox="0 0 100 40"><rect width="100" height="40" fill="%231a3a5f"/><path d="M0 20 Q 25 10, 50 20 T 100 20" stroke="%230e9f6e" fill="none" stroke-width="0.5"/><path d="M0 25 Q 25 15, 50 25 T 100 25" stroke="%23e53e3e" fill="none" stroke-width="0.5"/></svg>');
+    background-size: cover;
+    color: #e2e8f0;
+    min-height: 100vh;
+}
+
+.candlestick-bg {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="400" height="300" viewBox="0 0 400 300"><rect width="400" height="300" fill="%230c162d" opacity="0.3"/><g stroke-opacity="0.1"><line x1="50" y1="250" x2="100" y2="150" stroke="%230e9f6e" stroke-width="10"/><line x1="100" y1="150" x2="100" y2="200" stroke="%230e9f6e" stroke-width="10"/><line x1="150" y1="200" x2="200" y2="100" stroke="%23e53e3e" stroke-width="10"/><line x1="200" y1="100" x2="200" y2="180" stroke="%23e53e3e" stroke-width="10"/><line x1="250" y1="180" x2="300" y2="120" stroke="%230e9f6e" stroke-width="10"/><line x1="300" y1="120" x2="300" y2="200" stroke="%230e9f6e" stroke-width="10"/></g></svg>');
+    background-size: 1200px 900px;
+    opacity: 0.4;
+    z-index: -1;
+}
+
+.card {
+    background: rgba(26, 58, 95, 0.7);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(46, 91, 140, 0.5);
+    border-radius: 12px;
+    transition: all 0.3s ease;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+    border-color: rgba(14, 159, 110, 0.7);
+}
+
+.service-card {
+    height: 100%;
+}
+
+.book-card {
+    background: rgba(20, 40, 70, 0.6);
+    backdrop-filter: blur(5px);
+    border: 1px solid rgba(46, 91, 140, 0.3);
+    border-radius: 10px;
+    padding: 1.25rem;
+    transition: all 0.3s ease;
+}
+
+.book-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    border-color: rgba(14, 159, 110, 0.5);
+}
+
+.crypto-card {
+    background: rgba(15, 30, 50, 0.85);
+    border-radius: 10px;
+    transition: all 0.3s ease;
+}
+
+.crypto-card:hover {
+    transform: scale(1.02);
+    background: rgba(20, 40, 65, 0.9);
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, var(--accent), #0b8457);
+    color: white;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+}
+
+.btn-primary:hover {
+    background: linear-gradient(135deg, #0b8457, var(--accent));
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(14, 159, 110, 0.3);
+}
+
+.hamburger-menu {
+    background: rgba(15, 30, 50, 0.95);
+    backdrop-filter: blur(10px);
+}
+
+.price-up {
+    color: #0e9f6e;
+}
+
+.price-down {
+    color: #e53e3e;
+}
+
+h1, h2, h3, h4 {
+    font-family: 'Roboto Slab', serif;
+    font-weight: 600;
+}
+
+.hero-content {
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.chart-container {
+    height: 200px;
+    background: rgba(10, 25, 47, 0.6);
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.chart-line {
+    stroke-width: 2;
+    fill: none;
+}
+
+.chart-up {
+    stroke: #0e9f6e;
+}
+
+.chart-down {
+    stroke: #e53e3e;
+}
+
+.hidden {
+    display: none;
+}
+
+.spinner {
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Review modal styles */
+.review-modal {
+    background: rgba(0, 0, 0, 0.8);
+    backdrop-filter: blur(5px);
+}
+
+.review-content {
+    max-height: 80vh;
+    overflow-y: auto;
+}
+
+.star-rating {
+    color: #fbbf24;
+    font-size: 1.1rem;
+}
+
+/* Book section improvements */
+.books-loading {
+    text-align: center;
+    padding: 2rem;
+}
+
+.books-error {
+    background: rgba(220, 38, 38, 0.1);
+    border-radius: 0.5rem;
+    padding: 1.5rem;
+    text-align: center;
+}
+
+.book-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1.5rem;
+    margin-top: 1rem;
+}
+
+.book-cover {
+    height: 180px;
+    background: linear-gradient(135deg, #1a3a5f, #2c5282);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    margin-bottom: 1rem;
+}
