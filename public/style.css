@@ -704,28 +704,36 @@ button {
     margin-top: 1.5rem;
 }
 /* About Modal Styles */
-#about-modal .bg-gradient-to-r {
-    background-size: 200% auto;
-    transition: background-position 0.5s;
+#about-modal {
+    backdrop-filter: blur(5px);
 }
 
-#about-modal .bg-gradient-to-r:hover {
-    background-position: right center;
+#about-modal .bg-gray-700 {
+    scrollbar-width: thin;
+    scrollbar-color: #0e9f6e #374151;
 }
 
-#about-modal ul li {
-    padding: 0.5rem 0;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+#about-modal .bg-gray-700::-webkit-scrollbar {
+    width: 6px;
 }
 
-#about-modal ul li:last-child {
-    border-bottom: none;
+#about-modal .bg-gray-700::-webkit-scrollbar-track {
+    background: #374151;
+    border-radius: 3px;
 }
 
-#about-modal .btn-primary, 
-#about-modal .btn-secondary {
-    padding: 0.75rem 1.5rem;
-    font-size: 1rem;
+#about-modal .bg-gray-700::-webkit-scrollbar-thumb {
+    background-color: #0e9f6e;
+    border-radius: 3px;
+}
+
+#about-modal .list-disc {
+    list-style-type: disc;
+    margin-left: 1rem;
+}
+
+#about-modal .btn-primary {
+    transition: all 0.3s ease;
 }
 
 /* ==================== */
