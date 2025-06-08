@@ -220,41 +220,52 @@
         </div>
     </section>
 
-    <!-- Consultation Modal -->
-    <div id="consultation-modal" class="modal hidden">
-        <div class="modal-content">
-            <h3 class="modal-title">📞 Request 1-on-1 Consultation</h3>
-            
-            <div class="form-group">
-                <label>Your Telegram Username</label>
-                <input 
-                    type="text" 
-                    id="telegram-username" 
-                    class="form-input"
-                    placeholder="@yourusername" 
-                    required
-                >
-            </div>
-            
-            <div class="form-group">
-                <label>Describe Your Problem</label>
-                <textarea 
-                    id="problem-description" 
-                    class="form-textarea"
-                    placeholder="What investment challenges are you facing?" 
-                    required
-                ></textarea>
-            </div>
-            
-            <div class="modal-actions">
-                <button id="consultation-cancel" class="btn-cancel">
-                    Cancel
-                </button>
-                <button id="consultation-submit" class="btn-primary">
-                    Submit Request
-                </button>
-            </div>
+    <!-- Consultation Modal (updated) -->
+<div id="consultation-modal" class="hidden fixed inset-0 bg-black bg-opacity-70 z-50 flex items-center justify-center p-4">
+    <div class="bg-gray-800 rounded-lg w-full max-w-md p-6">
+        <h3 class="text-xl font-bold mb-4">📞 Request 1-on-1 Help</h3>
+        
+        <div class="mb-4">
+            <label class="block text-gray-300 mb-2">Your Name</label>
+            <input 
+                type="text" 
+                id="user-name" 
+                class="w-full bg-gray-700 text-white p-2 rounded" 
+                placeholder="John Doe" 
+                required
+            >
         </div>
+        
+        <div class="mb-4">
+            <label class="block text-gray-300 mb-2">Your Telegram Username</label>
+            <input 
+                type="text" 
+                id="telegram-username" 
+                class="w-full bg-gray-700 text-white p-2 rounded" 
+                placeholder="@username" 
+                required
+            >
+        </div>
+        
+        <div class="mb-4">
+            <label class="block text-gray-300 mb-2">Describe Your Problem</label>
+            <textarea 
+                id="problem-description" 
+                class="w-full bg-gray-700 text-white p-2 rounded h-32" 
+                placeholder="What investment challenges are you facing?" 
+                required
+            ></textarea>
+        </div>
+        
+        <div class="flex justify-end space-x-3">
+            <button id="consultation-cancel" class="px-4 py-2 border border-gray-600 rounded hover:bg-gray-700">
+                Cancel
+            </button>
+            <button id="consultation-submit" class="btn-primary px-4 py-2">
+                Get Help
+            </button>
+        </div>
+    </div>
     </div>
 
     <!-- Prospectus Modal -->
