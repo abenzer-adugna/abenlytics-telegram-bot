@@ -4,199 +4,199 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Abenlytics Club | Investing Intelligence</title>
-    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Roboto+Slab:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <div class="candlestick-bg"></div>
     
     <!-- Navbar -->
-    <nav class="fixed top-0 left-0 right-0 bg-gray-900 bg-opacity-80 backdrop-filter backdrop-blur-lg z-50 p-4 flex justify-between items-center border-b border-gray-700">
-        <div class="flex items-center">
-            <div class="w-10 h-10 rounded-lg bg-gradient-to-br from-blue-500 to-cyan-400 flex items-center justify-center mr-3">
-                <i class="fas fa-chart-line text-white text-xl"></i>
+    <nav class="navbar">
+        <div class="navbar-brand">
+            <div class="logo-icon">
+                <i class="fas fa-chart-line"></i>
             </div>
-            <h1 class="text-xl md:text-2xl font-bold bg-gradient-to-r from-cyan-400 to-green-400 bg-clip-text text-transparent">Abenlytics Club</h1>
+            <h1 class="logo-text">Abenlytics Club</h1>
         </div>
         
-        <div class="hidden md:flex space-x-6 items-center">
-            <a href="#crypto" class="hover:text-cyan-300 transition">Live Crypto</a>
-            <a href="#services" class="hover:text-cyan-300 transition">Services</a>
-            <button class="btn-primary px-4 py-2 font-medium">Join Club</button>
+        <div class="navbar-links">
+            <a href="#crypto" class="nav-link">Live Crypto</a>
+            <a href="#services" class="nav-link">Services</a>
+            <button class="btn-primary">Join Club</button>
         </div>
         
-        <button id="menuBtn" class="md:hidden text-gray-300">
-            <i class="fas fa-bars text-2xl"></i>
+        <button id="menuBtn" class="mobile-menu-button">
+            <i class="fas fa-bars"></i>
         </button>
     </nav>
 
-    <!-- Hamburger Menu -->
-    <div id="dropdownMenu" class="fixed top-16 right-4 w-64 bg-gray-800 bg-opacity-90 backdrop-filter backdrop-blur-lg rounded-lg shadow-xl z-50 p-4 hidden transition-all duration-300 transform origin-top-right hamburger-menu">
-        <div class="text-center mb-4">
-            <div class="w-16 h-16 rounded-full bg-gradient-to-br from-blue-500 to-cyan-400 flex items-center justify-center mx-auto mb-2">
-                <i class="fas fa-chart-line text-white text-2xl"></i>
+    <!-- Mobile Menu -->
+    <div id="dropdownMenu" class="mobile-menu">
+        <div class="mobile-menu-header">
+            <div class="mobile-logo-icon">
+                <i class="fas fa-chart-line"></i>
             </div>
-            <h3 class="font-bold text-lg">Abenlytics Club</h3>
+            <h3>Abenlytics Club</h3>
         </div>
         
-        <ul class="space-y-3">
-            <li><a href="#crypto" class="block py-2 px-4 hover:bg-gray-700 rounded-lg transition"><i class="fas fa-coins mr-3 text-yellow-400"></i>Live Crypto</a></li>
-            <li><a href="#services" class="block py-2 px-4 hover:bg-gray-700 rounded-lg transition"><i class="fas fa-cog mr-3 text-blue-400"></i>Services</a></li>
+        <ul class="mobile-menu-links">
+            <li><a href="#crypto" class="mobile-link"><i class="fas fa-coins"></i>Live Crypto</a></li>
+            <li><a href="#services" class="mobile-link"><i class="fas fa-cog"></i>Services</a></li>
         </ul>
         
-        <div class="mt-4 pt-4 border-t border-gray-700">
-            <button class="btn-primary w-full py-2 font-medium">Join Club</button>
+        <div class="mobile-menu-footer">
+            <button class="btn-primary">Join Club</button>
         </div>
     </div>
 
     <!-- Hero Section -->
-    <section class="pt-28 pb-20 px-4 max-w-6xl mx-auto">
-        <div class="text-center max-w-3xl mx-auto hero-content">
-            <h1 class="text-4xl md:text-5xl font-bold mb-6">Elevate Your <span class="bg-gradient-to-r from-cyan-400 to-green-400 bg-clip-text text-transparent">Investing IQ</span></h1>
-            <p class="text-xl text-gray-300 mb-8">Professional guidance, curated resources, and strategic insights to help you navigate financial markets with confidence.</p>
+    <section class="hero-section">
+        <div class="hero-content">
+            <h1 class="hero-title">Elevate Your <span class="highlight">Investing IQ</span></h1>
+            <p class="hero-subtitle">Professional guidance, curated resources, and strategic insights to help you navigate financial markets with confidence.</p>
             
-            <div class="flex flex-col sm:flex-row justify-center gap-4">
-                <button class="btn-primary px-8 py-3 font-semibold text-lg">
-                    <i class="fas fa-rocket mr-2"></i>Get Started
+            <div class="hero-actions">
+                <button class="btn-primary btn-large">
+                    <i class="fas fa-rocket"></i>Get Started
                 </button>
-                <button class="px-8 py-3 font-semibold text-lg border border-cyan-500 text-cyan-300 rounded-lg hover:bg-cyan-900 transition">
-                    <i class="fas fa-book-open mr-2"></i>Learn More
+                <button class="btn-secondary btn-large">
+                    <i class="fas fa-book-open"></i>Learn More
                 </button>
             </div>
         </div>
     </section>
 
     <!-- Live Crypto Feed -->
-    <section id="crypto" class="py-12 px-4 max-w-6xl mx-auto">
-        <div class="flex justify-between items-center mb-6">
-            <h2 class="text-2xl md:text-3xl font-bold">💹 Live Crypto Markets</h2>
-            <div class="text-sm text-gray-400 flex items-center">
+    <section id="crypto" class="crypto-section">
+        <div class="section-header">
+            <h2 class="section-title">💹 Live Crypto Markets</h2>
+            <div class="refresh-container">
                 <span id="crypto-updated">Updated just now</span>
-                <button id="refresh-crypto" class="ml-2 text-cyan-400">
+                <button id="refresh-crypto" class="refresh-button">
                     <i class="fas fa-sync-alt"></i>
                 </button>
             </div>
         </div>
         
-        <div id="crypto-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
-            <div class="text-center py-10">
-                <i class="fas fa-spinner spinner text-cyan-400 text-3xl mb-4"></i>
+        <div id="crypto-container" class="crypto-grid">
+            <div class="loading-state">
+                <i class="fas fa-spinner spinner"></i>
                 <p>Loading crypto data...</p>
             </div>
         </div>
     </section>
 
     <!-- Services Section -->
-    <section id="services" class="py-16 px-4 max-w-6xl mx-auto">
-        <div class="text-center mb-16">
-            <h2 class="text-3xl md:text-4xl font-bold mb-4">Premium <span class="bg-gradient-to-r from-cyan-400 to-green-400 bg-clip-text text-transparent">Investing Services</span></h2>
-            <p class="text-xl text-gray-300 max-w-2xl mx-auto">Access professional resources and personalized guidance to enhance your financial journey</p>
+    <section id="services" class="services-section">
+        <div class="section-intro">
+            <h2 class="section-title">Premium <span class="highlight">Investing Services</span></h2>
+            <p class="section-description">Access professional resources and personalized guidance to enhance your financial journey</p>
         </div>
         
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <div class="services-grid">
             <!-- Service 1: 1-on-1 Help -->
-            <div class="card p-6 service-card">
-                <div class="flex items-start mb-4">
-                    <div class="w-12 h-12 rounded-lg bg-blue-500 bg-opacity-20 flex items-center justify-center mr-4">
-                        <i class="fas fa-handshake text-blue-400 text-xl"></i>
+            <div class="service-card">
+                <div class="service-header">
+                    <div class="service-icon bg-blue">
+                        <i class="fas fa-handshake"></i>
                     </div>
-                    <h3 class="text-xl font-bold">1-to-1 Personalized Help</h3>
+                    <h3 class="service-title">1-to-1 Personalized Help</h3>
                 </div>
-                <p class="text-gray-300 mb-4">Get tailored support and guidance on investing strategies, portfolio management, and trading techniques from experienced professionals.</p>
-                <button data-service="one_on_one" class="btn-primary px-4 py-2 text-sm font-medium">
+                <p class="service-description">Get tailored support and guidance on investing strategies, portfolio management, and trading techniques from experienced professionals.</p>
+                <button data-service="one_on_one" class="btn-primary">
                     Request Consultation
                 </button>
             </div>
             
             <!-- Service 2: Essential Books -->
-            <div class="card p-6 service-card">
-                <div class="flex items-start mb-4">
-                    <div class="w-12 h-12 rounded-lg bg-purple-500 bg-opacity-20 flex items-center justify-center mr-4">
-                        <i class="fas fa-book text-purple-400 text-xl"></i>
+            <div class="service-card">
+                <div class="service-header">
+                    <div class="service-icon bg-purple">
+                        <i class="fas fa-book"></i>
                     </div>
-                    <h3 class="text-xl font-bold">Essential Investing Books</h3>
+                    <h3 class="service-title">Essential Investing Books</h3>
                 </div>
-                <p class="text-gray-300 mb-4">Access our curated library of must-read books for investors at all levels, carefully selected to build your financial knowledge foundation.</p>
+                <p class="service-description">Access our curated library of must-read books for investors at all levels, carefully selected to build your financial knowledge foundation.</p>
                 
-                <button id="toggle-books-btn" class="btn-primary px-4 py-2 text-sm font-medium mb-4">
-                    <i class="fas fa-book mr-2"></i>Show Books
+                <button id="toggle-books-btn" class="btn-primary">
+                    <i class="fas fa-book"></i>Show Books
                 </button>
                 
-                <div id="books-container" class="hidden">
-                    <div class="books-loading">
-                        <i class="fas fa-spinner spinner text-cyan-400 text-3xl mb-4"></i>
+                <div id="books-container" class="books-container hidden">
+                    <div class="loading-state">
+                        <i class="fas fa-spinner spinner"></i>
                         <p>Loading investment books...</p>
                     </div>
                 </div>
             </div>
             
             <!-- Service 3: Book Reviews -->
-            <div class="card p-6 service-card">
-                <div class="flex items-start mb-4">
-                    <div class="w-12 h-12 rounded-lg bg-yellow-500 bg-opacity-20 flex items-center justify-center mr-4">
-                        <i class="fas fa-star text-yellow-400 text-xl"></i>
+            <div class="service-card">
+                <div class="service-header">
+                    <div class="service-icon bg-yellow">
+                        <i class="fas fa-star"></i>
                     </div>
-                    <h3 class="text-xl font-bold">Book Reviews & Insights</h3>
+                    <h3 class="service-title">Book Reviews & Insights</h3>
                 </div>
-                <p class="text-gray-300 mb-4">Get digestible summaries and practical applications from top investing books, saving you time while delivering actionable knowledge.</p>
-                <button class="btn-primary px-4 py-2 text-sm font-medium" id="reviews-btn">
+                <p class="service-description">Get digestible summaries and practical applications from top investing books, saving you time while delivering actionable knowledge.</p>
+                <button id="reviews-btn" class="btn-primary">
                     Read Reviews
                 </button>
             </div>
             
             <!-- Service 4: Newsletter -->
-            <div class="card p-6 service-card">
-                <div class="flex items-start mb-4">
-                    <div class="w-12 h-12 rounded-lg bg-green-500 bg-opacity-20 flex items-center justify-center mr-4">
-                        <i class="fas fa-newspaper text-green-400 text-xl"></i>
+            <div class="service-card">
+                <div class="service-header">
+                    <div class="service-icon bg-green">
+                        <i class="fas fa-newspaper"></i>
                     </div>
-                    <h3 class="text-xl font-bold">Weekly Investing Newsletter</h3>
+                    <h3 class="service-title">Weekly Investing Newsletter</h3>
                 </div>
-                <p class="text-gray-300 mb-4">Stay informed with our concise weekly updates featuring market trends, strategic insights, and distilled wisdom from financial literature.</p>
-                <button data-service="newsletter" class="btn-primary px-4 py-2 text-sm font-medium">
+                <p class="service-description">Stay informed with our concise weekly updates featuring market trends, strategic insights, and distilled wisdom from financial literature.</p>
+                <button data-service="newsletter" class="btn-primary">
                     Subscribe Now
                 </button>
             </div>
             
             <!-- Service 5: Roadmaps -->
-            <div class="card p-6 service-card">
-                <div class="flex items-start mb-4">
-                    <div class="w-12 h-12 rounded-lg bg-red-500 bg-opacity-20 flex items-center justify-center mr-4">
-                        <i class="fas fa-map text-red-400 text-xl"></i>
+            <div class="service-card">
+                <div class="service-header">
+                    <div class="service-icon bg-red">
+                        <i class="fas fa-map"></i>
                     </div>
-                    <h3 class="text-xl font-bold">Trading & Investing Roadmaps</h3>
+                    <h3 class="service-title">Trading & Investing Roadmaps</h3>
                 </div>
-                <p class="text-gray-300 mb-4">Follow our actionable roadmaps for different investment styles: long-term wealth building, swing trading strategies, and short-term opportunities.</p>
-                <button class="btn-primary px-4 py-2 text-sm font-medium" id="roadmaps-btn">
+                <p class="service-description">Follow our actionable roadmaps for different investment styles: long-term wealth building, swing trading strategies, and short-term opportunities.</p>
+                <button id="roadmaps-btn" class="btn-primary">
                     View Roadmaps
                 </button>
             </div>
             
             <!-- Service 6: Prospectus -->
-            <div class="card p-6 service-card">
-                <div class="flex items-start mb-4">
-                    <div class="w-12 h-12 rounded-lg bg-cyan-500 bg-opacity-20 flex items-center justify-center mr-4">
-                        <i class="fas fa-file-alt text-cyan-400 text-xl"></i>
+            <div class="service-card">
+                <div class="service-header">
+                    <div class="service-icon bg-cyan">
+                        <i class="fas fa-file-alt"></i>
                     </div>
-                    <h3 class="text-xl font-bold">Prospectus Review Service</h3>
+                    <h3 class="service-title">Prospectus Review Service</h3>
                 </div>
-                <p class="text-gray-300 mb-4">Get simplified analysis of complex company filings for IPOs and public companies, highlighting key information to inform your investment decisions.</p>
-                <button data-service="prospectus" class="btn-primary px-4 py-2 text-sm font-medium">
+                <p class="service-description">Get simplified analysis of complex company filings for IPOs and public companies, highlighting key information to inform your investment decisions.</p>
+                <button data-service="prospectus" class="btn-primary">
                     Request Review
                 </button>
             </div>
             
             <!-- Service 7: Group Access -->
-            <div class="card p-6 service-card">
-                <div class="flex items-start mb-4">
-                    <div class="w-12 h-12 rounded-lg bg-pink-500 bg-opacity-20 flex items-center justify-center mr-4">
-                        <i class="fas fa-users text-pink-400 text-xl"></i>
+            <div class="service-card">
+                <div class="service-header">
+                    <div class="service-icon bg-pink">
+                        <i class="fas fa-users"></i>
                     </div>
-                    <h3 class="text-xl font-bold">Investor Community</h3>
+                    <h3 class="service-title">Investor Community</h3>
                 </div>
-                <p class="text-gray-300 mb-4">Join our exclusive community of like-minded investors to share insights, discuss strategies, and network with fellow financial enthusiasts.</p>
-                <button data-service="group_access" class="btn-primary px-4 py-2 text-sm font-medium">
+                <p class="service-description">Join our exclusive community of like-minded investors to share insights, discuss strategies, and network with fellow financial enthusiasts.</p>
+                <button data-service="group_access" class="btn-primary">
                     Join Community
                 </button>
             </div>
@@ -204,74 +204,74 @@
     </section>
 
     <!-- CTA Section -->
-    <section class="py-16 px-4">
-        <div class="max-w-4xl mx-auto card p-8 text-center">
-            <h2 class="text-3xl md:text-4xl font-bold mb-4">Ready to Elevate Your <span class="bg-gradient-to-r from-cyan-400 to-green-400 bg-clip-text text-transparent">Investing Journey?</span></h2>
-            <p class="text-xl text-gray-300 mb-8">Join Abenlytics Club today and unlock premium resources and personalized guidance</p>
+    <section class="cta-section">
+        <div class="cta-card">
+            <h2 class="cta-title">Ready to Elevate Your <span class="highlight">Investing Journey?</span></h2>
+            <p class="cta-description">Join Abenlytics Club today and unlock premium resources and personalized guidance</p>
             
-            <div class="flex flex-col sm:flex-row justify-center gap-4">
-                <button class="btn-primary px-8 py-3 font-semibold text-lg">
-                    <i class="fas fa-gem mr-2"></i>Premium Membership
+            <div class="cta-actions">
+                <button class="btn-primary btn-large">
+                    <i class="fas fa-gem"></i>Premium Membership
                 </button>
-                <button class="px-8 py-3 font-semibold text-lg border border-cyan-500 text-cyan-300 rounded-lg hover:bg-cyan-900 transition">
-                    <i class="fas fa-book mr-2"></i>Free Resources
+                <button class="btn-secondary btn-large">
+                    <i class="fas fa-book"></i>Free Resources
                 </button>
             </div>
         </div>
     </section>
 
     <!-- Consultation Modal -->
-    <div id="consultation-modal" class="hidden fixed inset-0 bg-black bg-opacity-70 z-50 flex items-center justify-center p-4">
-        <div class="bg-gray-800 rounded-lg w-full max-w-md p-6">
-            <h3 class="text-xl font-bold mb-4">📞 Request 1-on-1 Consultation</h3>
+    <div id="consultation-modal" class="modal hidden">
+        <div class="modal-content">
+            <h3 class="modal-title">📞 Request 1-on-1 Consultation</h3>
             
-            <div class="mb-4">
-                <label class="block text-gray-300 mb-2">Your Telegram Username</label>
+            <div class="form-group">
+                <label>Your Telegram Username</label>
                 <input 
                     type="text" 
                     id="telegram-username" 
-                    class="w-full bg-gray-700 text-white p-2 rounded" 
+                    class="form-input"
                     placeholder="@yourusername" 
                     required
                 >
             </div>
             
-            <div class="mb-4">
-                <label class="block text-gray-300 mb-2">Describe Your Problem</label>
+            <div class="form-group">
+                <label>Describe Your Problem</label>
                 <textarea 
                     id="problem-description" 
-                    class="w-full bg-gray-700 text-white p-2 rounded h-32" 
+                    class="form-textarea"
                     placeholder="What investment challenges are you facing?" 
                     required
                 ></textarea>
             </div>
             
-            <div class="flex justify-end space-x-3">
-                <button id="consultation-cancel" class="px-4 py-2 border border-gray-600 rounded hover:bg-gray-700">
+            <div class="modal-actions">
+                <button id="consultation-cancel" class="btn-cancel">
                     Cancel
                 </button>
-                <button id="consultation-submit" class="btn-primary px-4 py-2">
+                <button id="consultation-submit" class="btn-primary">
                     Submit Request
                 </button>
             </div>
         </div>
     </div>
 
-    <!-- Prospectus Upload Modal -->
-    <div id="prospectus-modal" class="hidden fixed inset-0 bg-black bg-opacity-70 z-50 flex items-center justify-center p-4">
-        <div class="bg-gray-800 rounded-lg w-full max-w-md p-6">
-            <h3 class="text-xl font-bold mb-4">📄 Upload Prospectus</h3>
+    <!-- Prospectus Modal -->
+    <div id="prospectus-modal" class="modal hidden">
+        <div class="modal-content">
+            <h3 class="modal-title">📄 Upload Prospectus</h3>
             
-            <div class="mb-4">
-                <label class="block text-gray-300 mb-2">Select File (PDF/DOC/DOCX)</label>
-                <input type="file" id="prospectus-file" class="w-full bg-gray-700 text-white p-2 rounded" accept=".pdf,.doc,.docx">
+            <div class="form-group">
+                <label>Select File (PDF/DOC/DOCX)</label>
+                <input type="file" id="prospectus-file" class="form-input" accept=".pdf,.doc,.docx">
             </div>
             
-            <div class="flex justify-end space-x-3">
-                <button id="prospectus-cancel" class="px-4 py-2 border border-gray-600 rounded hover:bg-gray-700">
+            <div class="modal-actions">
+                <button id="prospectus-cancel" class="btn-cancel">
                     Cancel
                 </button>
-                <button id="prospectus-submit" class="btn-primary px-4 py-2">
+                <button id="prospectus-submit" class="btn-primary">
                     Submit
                 </button>
             </div>
@@ -279,71 +279,69 @@
     </div>
 
     <!-- Review Modal -->
-    <div id="review-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 review-modal">
-        <div class="bg-gray-800 rounded-lg w-full max-w-2xl p-6 review-content">
-            <div class="flex justify-between items-center mb-4">
-                <h3 class="text-2xl font-bold">📚 Book Reviews & Insights</h3>
-                <button id="close-review-modal" class="text-gray-400 hover:text-white">
-                    <i class="fas fa-times text-xl"></i>
+    <div id="review-modal" class="modal hidden">
+        <div class="modal-content wide">
+            <div class="modal-header">
+                <h3 class="modal-title">📚 Book Reviews & Insights</h3>
+                <button id="close-review-modal" class="modal-close">
+                    <i class="fas fa-times"></i>
                 </button>
             </div>
-            <div id="reviews-container" class="space-y-4">
+            <div id="reviews-container" class="reviews-container">
                 <!-- Reviews will be inserted here -->
             </div>
         </div>
     </div>
 
     <!-- Footer -->
-    <footer class="py-10 px-4 border-t border-gray-800">
-        <div class="max-w-6xl mx-auto">
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
-                <div>
-                    <div class="flex items-center mb-4">
-                        <div class="w-10 h-10 rounded-lg bg-gradient-to-br from-blue-500 to-cyan-400 flex items-center justify-center mr-3">
-                            <i class="fas fa-chart-line text-white"></i>
-                        </div>
-                        <h3 class="text-xl font-bold">Abenlytics Club</h3>
+    <footer class="footer">
+        <div class="footer-container">
+            <div class="footer-brand">
+                <div class="footer-logo">
+                    <div class="logo-icon">
+                        <i class="fas fa-chart-line"></i>
                     </div>
-                    <p class="text-gray-400 mb-4">Your trusted partner in financial education and investment strategy.</p>
-                    <div class="flex space-x-4">
-                        <a href="#" class="text-gray-400 hover:text-cyan-400"><i class="fab fa-twitter"></i></a>
-                        <a href="#" class="text-gray-400 hover:text-cyan-400"><i class="fab fa-linkedin"></i></a>
-                        <a href="#" class="text-gray-400 hover:text-cyan-400"><i class="fab fa-telegram"></i></a>
-                    </div>
+                    <h3>Abenlytics Club</h3>
                 </div>
-                
-                <div>
-                    <h4 class="text-lg font-bold mb-4">Services</h4>
-                    <ul class="space-y-2">
-                        <li><a href="#services" class="text-gray-400 hover:text-cyan-400">1-to-1 Help</a></li>
-                        <li><a href="#services" class="text-gray-400 hover:text-cyan-400">Essential Books</a></li>
-                        <li><a href="#services" class="text-gray-400 hover:text-cyan-400">Book Reviews</a></li>
-                        <li><a href="#services" class="text-gray-400 hover:text-cyan-400">Weekly Newsletter</a></li>
-                    </ul>
-                </div>
-                
-                <div>
-                    <h4 class="text-lg font-bold mb-4">Resources</h4>
-                    <ul class="space-y-2">
-                        <li><a href="#services" class="text-gray-400 hover:text-cyan-400">Trading Roadmaps</a></li>
-                        <li><a href="#services" class="text-gray-400 hover:text-cyan-400">Prospectus Review</a></li>
-                        <li><a href="#services" class="text-gray-400 hover:text-cyan-400">Investor Community</a></li>
-                        <li><a href="#crypto" class="text-gray-400 hover:text-cyan-400">Market Analysis</a></li>
-                    </ul>
-                </div>
-                
-                <div>
-                    <h4 class="text-lg font-bold mb-4">Contact Us</h4>
-                    <ul class="space-y-2">
-                        <li class="text-gray-400"><i class="fas fa-envelope mr-2"></i> support@abenlytics.com</li>
-                        <li class="text-gray-400"><i class="fab fa-telegram mr-2"></i> @abenlytics_support</li>
-                    </ul>
+                <p class="footer-description">Your trusted partner in financial education and investment strategy.</p>
+                <div class="social-links">
+                    <a href="#" class="social-link"><i class="fab fa-twitter"></i></a>
+                    <a href="#" class="social-link"><i class="fab fa-linkedin"></i></a>
+                    <a href="#" class="social-link"><i class="fab fa-telegram"></i></a>
                 </div>
             </div>
             
-            <div class="border-t border-gray-800 mt-10 pt-6 text-center text-gray-500">
-                <p>&copy; 2025 Abenlytics Club. All rights reserved.</p>
+            <div class="footer-links">
+                <h4 class="footer-heading">Services</h4>
+                <ul>
+                    <li><a href="#services" class="footer-link">1-to-1 Help</a></li>
+                    <li><a href="#services" class="footer-link">Essential Books</a></li>
+                    <li><a href="#services" class="footer-link">Book Reviews</a></li>
+                    <li><a href="#services" class="footer-link">Weekly Newsletter</a></li>
+                </ul>
             </div>
+            
+            <div class="footer-links">
+                <h4 class="footer-heading">Resources</h4>
+                <ul>
+                    <li><a href="#services" class="footer-link">Trading Roadmaps</a></li>
+                    <li><a href="#services" class="footer-link">Prospectus Review</a></li>
+                    <li><a href="#services" class="footer-link">Investor Community</a></li>
+                    <li><a href="#crypto" class="footer-link">Market Analysis</a></li>
+                </ul>
+            </div>
+            
+            <div class="footer-links">
+                <h4 class="footer-heading">Contact Us</h4>
+                <ul>
+                    <li class="footer-contact"><i class="fas fa-envelope"></i> support@abenlytics.com</li>
+                    <li class="footer-contact"><i class="fab fa-telegram"></i> @abenlytics_support</li>
+                </ul>
+            </div>
+        </div>
+        
+        <div class="footer-copyright">
+            <p>&copy; 2025 Abenlytics Club. All rights reserved.</p>
         </div>
     </footer>
 
