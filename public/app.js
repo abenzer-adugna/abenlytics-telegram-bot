@@ -13,6 +13,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const refreshCryptoBtn = document.getElementById('refresh-crypto');
     const cryptoContainer = document.getElementById('crypto-container');
     const cryptoUpdated = document.getElementById('crypto-updated');
+    const consultationSubmitBtn = document.getElementById('consultation-submit');
     
     // =====================================================
     // Initialize Event Listeners
@@ -184,8 +185,10 @@ document.addEventListener('DOMContentLoaded', function() {
             document.getElementById('prospectus-modal').classList.add('hidden');
         });
         
-        // Consultation modal handling
-        document.getElementById('consultation-submit')?.addEventListener('click', handleConsultationRequest);
+        // Consultation modal handling (updated)
+        if (consultationSubmitBtn) {
+            consultationSubmitBtn.addEventListener('click', handleConsultationRequest);
+        }
         document.getElementById('consultation-cancel')?.addEventListener('click', () => {
             document.getElementById('consultation-modal').classList.add('hidden');
         });
@@ -252,31 +255,43 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // Handle consultation request
+    // Handle consultation request (updated)
     async function handleConsultationRequest() {
+        const nameInput = document.getElementById('user-name');
         const usernameInput = document.getElementById('telegram-username');
         const problemInput = document.getElementById('problem-description');
         
+        const name = nameInput.value.trim();
         const telegramUsername = usernameInput.value.trim();
         const problem = problemInput.value.trim();
         
-        if (!telegramUsername || !problem) {
-            alert('Please provide both your Telegram username and problem description');
+        // Validate inputs
+        if (!name || !telegramUsername || !problem) {
+            alert('Please fill in all fields');
             return;
         }
-        
+
         try {
+            // Show loading state
+            const submitBtn = document.getElementById('consultation-submit');
+            const originalBtnText = submitBtn.innerHTML;
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fas fa-spinner spinner"></i> Sending...';
+            
+            // Get user data (Telegram or fallback)
             const user = await getTelegramUser();
             
+            // Send to server
             const response = await fetch('/api/service/one_on_one', {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
                 body: JSON.stringify({
+                    name,
                     telegramUsername,
                     problem,
                     userData: {
                         id: user.id,
-                        name: `${user.first_name} ${user.last_name}`.trim() || "Anonymous User"
+                        name: `${user.first_name} ${user.last_name}`.trim() || name
                     }
                 })
             });
@@ -284,17 +299,25 @@ document.addEventListener('DOMContentLoaded', function() {
             const result = await response.json();
             
             if (result.status === 'success') {
-                alert('✅ Consultation request sent successfully!');
-                // Reset form and close modal
+                // Show success message
+                alert('✅ Help is on the way! Our team will contact you shortly on Telegram.\n\nWe\'re happy to help!');
+                
+                // Reset form
+                nameInput.value = '';
                 usernameInput.value = '';
                 problemInput.value = '';
                 document.getElementById('consultation-modal').classList.add('hidden');
             } else {
-                throw new Error(result.message || 'Request failed');
+                throw new Error(result.message || 'Failed to send request');
             }
         } catch (error) {
             console.error('Consultation error:', error);
             alert(`❌ Error: ${error.message}`);
+        } finally {
+            // Reset button state
+            const submitBtn = document.getElementById('consultation-submit');
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = 'Get Help';
         }
     }
 
