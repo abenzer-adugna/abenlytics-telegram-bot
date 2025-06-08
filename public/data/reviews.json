@@ -1,0 +1,35 @@
+[
+  {
+    "bookTitle": "The Intelligent Investor",
+    "summary": "A foundational book on value investing, emphasizing margin of safety and disciplined long-term strategies.",
+    "rating": 5,
+    "date": "2025-06-01",
+    "keyInsights": [
+      "Always invest with a margin of safety.",
+      "The market is a voting machine in the short term, but a weighing machine in the long run.",
+      "Investing is most intelligent when it is most businesslike."
+    ]
+  },
+  {
+    "bookTitle": "Market Wizards",
+    "summary": "Insights from interviews with top traders reveal the importance of risk management and psychological control.",
+    "rating": 4,
+    "date": "2025-06-02",
+    "keyInsights": [
+      "There’s no single strategy for success in trading.",
+      "Discipline and patience are essential for consistency.",
+      "Cut losses quickly and let winners run."
+    ]
+  },
+  {
+    "bookTitle": "The Psychology of Money",
+    "summary": "Explores how personal behavior and mindset often matter more than financial knowledge.",
+    "rating": 5,
+    "date": "2025-06-03",
+    "keyInsights": [
+      "Wealth is what you don’t see—savings matter more than spending.",
+      "Time is the most powerful force in investing.",
+      "Luck and risk are two sides of the same coin."
+    ]
+  }
+]

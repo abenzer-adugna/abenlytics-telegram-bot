@@ -1,0 +1,80 @@
+[
+  {
+    "title": "A Random Walk Down Wall Street",
+    "author": "Burton G. Malkiel",
+    "description": "Explains how markets are efficient and why index funds make sense.",
+    "file": "A_Random_Walk_Down_Wall_Street.pdf"
+  },
+  {
+    "title": "Common Stocks and Uncommon Profits",
+    "author": "Philip Fisher",
+    "description": "Philip Fisher’s timeless lessons on growth stock investing.",
+    "file": "Common_Stocks_and_Uncommon_Profits.pdf"
+  },
+  {
+    "title": "Essays of Warren Buffett",
+    "author": "Warren Buffett",
+    "description": "Key shareholder letters curated by Buffett himself.",
+    "file": "Essays_of_Warren_Buffett.pdf"
+  },
+  {
+    "title": "Flash Boys",
+    "author": "Michael Lewis",
+    "description": "A look into high-frequency trading and market manipulation.",
+    "file": "Flash_Boys.pdf"
+  },
+  {
+    "title": "Little Book of Common Sense Investing",
+    "author": "John C. Bogle",
+    "description": "Jack Bogle on why indexing wins over active management.",
+    "file": "Little_Book_of_Common_Sense_Investing.pdf"
+  },
+  {
+    "title": "Market Wizards",
+    "author": "Jack D. Schwager",
+    "description": "Interviews with legendary traders and their strategies.",
+    "file": "Market_Wizards.pdf"
+  },
+  {
+    "title": "One Up On Wall Street",
+    "author": "Peter Lynch",
+    "description": "Peter Lynch on spotting investment opportunities in plain sight.",
+    "file": "One_Up_on_Wall_Street.pdf"
+  },
+  {
+    "title": "Principles: Life and Work",
+    "author": "Ray Dalio",
+    "description": "Ray Dalio shares the principles that shaped Bridgewater.",
+    "file": "Principles_Life_and_Work.pdf"
+  },
+  {
+    "title": "Reminiscences of a Stock Operator",
+    "author": "Edwin Lefèvre",
+    "description": "A semi-autobiographical story of a legendary speculator.",
+    "file": "Reminiscences_of_a_Stock_Operator.pdf"
+  },
+  {
+    "title": "The Alchemy of Finance",
+    "author": "George Soros",
+    "description": "George Soros explains reflexivity and market behavior.",
+    "file": "The_Alchemy_of_Finance.pdf"
+  },
+  {
+    "title": "The Intelligent Investor",
+    "author": "Benjamin Graham",
+    "description": "Benjamin Graham’s guide to value investing.",
+    "file": "The_Intelligent_Investor.pdf"
+  },
+  {
+    "title": "The Psychology of Money",
+    "author": "Morgan Housel",
+    "description": "Morgan Housel explains the behavioral side of finance.",
+    "file": "The_Psychology_of_Money.pdf"
+  },
+  {
+    "title": "Unshakeable",
+    "author": "Tony Robbins",
+    "description": "Tony Robbins' strategies for building long-term wealth.",
+    "file": "Unshakeable.pdf"
+  }
+]

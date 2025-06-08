@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Abenlytics Club | Investing Intelligence</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Roboto+Slab:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="candlestick-bg"></div>
+    
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="navbar-brand">
+            <div class="logo-icon">
+                <i class="fas fa-chart-line"></i>
+            </div>
+            <h1 class="logo-text">Abenlytics Club</h1>
+        </div>
+        
+        <div class="navbar-links">
+            <a href="#crypto" class="nav-link">Live Crypto</a>
+            <a href="#services" class="nav-link">Services</a>
+            <button class="btn-primary">Join Club</button>
+        </div>
+        
+        <button id="menuBtn" class="mobile-menu-button">
+            <i class="fas fa-bars"></i>
+        </button>
+    </nav>
+
+    <!-- Mobile Menu -->
+    <div id="dropdownMenu" class="mobile-menu">
+        <div class="mobile-menu-header">
+            <div class="mobile-logo-icon">
+                <i class="fas fa-chart-line"></i>
+            </div>
+            <h3>Abenlytics Club</h3>
+        </div>
+        
+        <ul class="mobile-menu-links">
+            <li><a href="#crypto" class="mobile-link"><i class="fas fa-coins"></i>Live Crypto</a></li>
+            <li><a href="#services" class="mobile-link"><i class="fas fa-cog"></i>Services</a></li>
+        </ul>
+        
+        <div class="mobile-menu-footer">
+            <button class="btn-primary">Join Club</button>
+        </div>
+    </div>
+
+    <!-- Hero Section -->
+    <section class="hero-section">
+        <div class="hero-content">
+            <h1 class="hero-title">Elevate Your <span class="highlight">Investing IQ</span></h1>
+            <p class="hero-subtitle">Professional guidance, curated resources, and strategic insights to help you navigate financial markets with confidence.</p>
+            
+            <div class="hero-actions">
+                <button class="btn-primary btn-large">
+                    <i class="fas fa-rocket"></i>Get Started
+                </button>
+                <button class="btn-secondary btn-large">
+                    <i class="fas fa-book-open"></i>Learn More
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Live Crypto Feed -->
+    <section id="crypto" class="crypto-section">
+        <div class="section-header">
+            <h2 class="section-title">💹 Live Crypto Markets</h2>
+            <div class="refresh-container">
+                <span id="crypto-updated">Updated just now</span>
+                <button id="refresh-crypto" class="refresh-button">
+                    <i class="fas fa-sync-alt"></i>
+                </button>
+            </div>
+        </div>
+        
+        <div id="crypto-container" class="crypto-grid">
+            <div class="loading-state">
+                <i class="fas fa-spinner spinner"></i>
+                <p>Loading crypto data...</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Services Section -->
+    <section id="services" class="services-section">
+        <div class="section-intro">
+            <h2 class="section-title">Premium <span class="highlight">Investing Services</span></h2>
+            <p class="section-description">Access professional resources and personalized guidance to enhance your financial journey</p>
+        </div>
+        
+        <div class="services-grid">
+            <!-- Service 1: 1-on-1 Help -->
+            <div class="service-card">
+                <div class="service-header">
+                    <div class="service-icon bg-blue">
+                        <i class="fas fa-handshake"></i>
+                    </div>
+                    <h3 class="service-title">1-to-1 Personalized Help</h3>
+                </div>
+                <p class="service-description">Get tailored support and guidance on investing strategies, portfolio management, and trading techniques from experienced professionals.</p>
+                <button data-service="one_on_one" class="btn-primary">
+                    Request Consultation
+                </button>
+            </div>
+            
+            <!-- Service 2: Essential Books -->
+            <div class="service-card">
+                <div class="service-header">
+                    <div class="service-icon bg-purple">
+                        <i class="fas fa-book"></i>
+                    </div>
+                    <h3 class="service-title">Essential Investing Books</h3>
+                </div>
+                <p class="service-description">Access our curated library of must-read books for investors at all levels, carefully selected to build your financial knowledge foundation.</p>
+                
+                <button id="toggle-books-btn" class="btn-primary">
+                    <i class="fas fa-book"></i>Show Books
+                </button>
+                
+                <div id="books-container" class="books-container hidden">
+                    <div class="loading-state">
+                        <i class="fas fa-spinner spinner"></i>
+                        <p>Loading investment books...</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Service 3: Book Reviews -->
+            <div class="service-card">
+                <div class="service-header">
+                    <div class="service-icon bg-yellow">
+                        <i class="fas fa-star"></i>
+                    </div>
+                    <h3 class="service-title">Book Reviews & Insights</h3>
+                </div>
+                <p class="service-description">Get digestible summaries and practical applications from top investing books, saving you time while delivering actionable knowledge.</p>
+                <button id="reviews-btn" class="btn-primary">
+                    Read Reviews
+                </button>
+            </div>
+            
+            <!-- Service 4: Newsletter -->
+            <div class="service-card">
+                <div class="service-header">
+                    <div class="service-icon bg-green">
+                        <i class="fas fa-newspaper"></i>
+                    </div>
+                    <h3 class="service-title">Weekly Investing Newsletter</h3>
+                </div>
+                <p class="service-description">Stay informed with our concise weekly updates featuring market trends, strategic insights, and distilled wisdom from financial literature.</p>
+                <button data-service="newsletter" class="btn-primary">
+                    Subscribe Now
+                </button>
+            </div>
+            
+            <!-- Service 5: Roadmaps -->
+            <div class="service-card">
+                <div class="service-header">
+                    <div class="service-icon bg-red">
+                        <i class="fas fa-map"></i>
+                    </div>
+                    <h3 class="service-title">Trading & Investing Roadmaps</h3>
+                </div>
+                <p class="service-description">Follow our actionable roadmaps for different investment styles: long-term wealth building, swing trading strategies, and short-term opportunities.</p>
+                <button id="roadmaps-btn" class="btn-primary">
+                    View Roadmaps
+                </button>
+            </div>
+            
+            <!-- Service 6: Prospectus -->
+            <div class="service-card">
+                <div class="service-header">
+                    <div class="service-icon bg-cyan">
+                        <i class="fas fa-file-alt"></i>
+                    </div>
+                    <h3 class="service-title">Prospectus Review Service</h3>
+                </div>
+                <p class="service-description">Get simplified analysis of complex company filings for IPOs and public companies, highlighting key information to inform your investment decisions.</p>
+                <button data-service="prospectus" class="btn-primary">
+                    Request Review
+                </button>
+            </div>
+            
+            <!-- Service 7: Group Access -->
+            <div class="service-card">
+                <div class="service-header">
+                    <div class="service-icon bg-pink">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <h3 class="service-title">Investor Community</h3>
+                </div>
+                <p class="service-description">Join our exclusive community of like-minded investors to share insights, discuss strategies, and network with fellow financial enthusiasts.</p>
+                <button data-service="group_access" class="btn-primary">
+                    Join Community
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="cta-section">
+        <div class="cta-card">
+            <h2 class="cta-title">Ready to Elevate Your <span class="highlight">Investing Journey?</span></h2>
+            <p class="cta-description">Join Abenlytics Club today and unlock premium resources and personalized guidance</p>
+            
+            <div class="cta-actions">
+                <button class="btn-primary btn-large">
+                    <i class="fas fa-gem"></i>Premium Membership
+                </button>
+                <button class="btn-secondary btn-large">
+                    <i class="fas fa-book"></i>Free Resources
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Consultation Modal -->
+    <div id="consultation-modal" class="modal hidden">
+        <div class="modal-content">
+            <h3 class="modal-title">📞 Request 1-on-1 Consultation</h3>
+            
+            <div class="form-group">
+                <label>Your Telegram Username</label>
+                <input 
+                    type="text" 
+                    id="telegram-username" 
+                    class="form-input"
+                    placeholder="@yourusername" 
+                    required
+                >
+            </div>
+            
+            <div class="form-group">
+                <label>Describe Your Problem</label>
+                <textarea 
+                    id="problem-description" 
+                    class="form-textarea"
+                    placeholder="What investment challenges are you facing?" 
+                    required
+                ></textarea>
+            </div>
+            
+            <div class="modal-actions">
+                <button id="consultation-cancel" class="btn-cancel">
+                    Cancel
+                </button>
+                <button id="consultation-submit" class="btn-primary">
+                    Submit Request
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Prospectus Modal -->
+    <div id="prospectus-modal" class="modal hidden">
+        <div class="modal-content">
+            <h3 class="modal-title">📄 Upload Prospectus</h3>
+            
+            <div class="form-group">
+                <label>Select File (PDF/DOC/DOCX)</label>
+                <input type="file" id="prospectus-file" class="form-input" accept=".pdf,.doc,.docx">
+            </div>
+            
+            <div class="modal-actions">
+                <button id="prospectus-cancel" class="btn-cancel">
+                    Cancel
+                </button>
+                <button id="prospectus-submit" class="btn-primary">
+                    Submit
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Review Modal -->
+    <div id="review-modal" class="modal hidden">
+        <div class="modal-content wide">
+            <div class="modal-header">
+                <h3 class="modal-title">📚 Book Reviews & Insights</h3>
+                <button id="close-review-modal" class="modal-close">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div id="reviews-container" class="reviews-container">
+                <!-- Reviews will be inserted here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-container">
+            <div class="footer-brand">
+                <div class="footer-logo">
+                    <div class="logo-icon">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                    <h3>Abenlytics Club</h3>
+                </div>
+                <p class="footer-description">Your trusted partner in financial education and investment strategy.</p>
+                <div class="social-links">
+                    <a href="#" class="social-link"><i class="fab fa-twitter"></i></a>
+                    <a href="#" class="social-link"><i class="fab fa-linkedin"></i></a>
+                    <a href="#" class="social-link"><i class="fab fa-telegram"></i></a>
+                </div>
+            </div>
+            
+            <div class="footer-links">
+                <h4 class="footer-heading">Services</h4>
+                <ul>
+                    <li><a href="#services" class="footer-link">1-to-1 Help</a></li>
+                    <li><a href="#services" class="footer-link">Essential Books</a></li>
+                    <li><a href="#services" class="footer-link">Book Reviews</a></li>
+                    <li><a href="#services" class="footer-link">Weekly Newsletter</a></li>
+                </ul>
+            </div>
+            
+            <div class="footer-links">
+                <h4 class="footer-heading">Resources</h4>
+                <ul>
+                    <li><a href="#services" class="footer-link">Trading Roadmaps</a></li>
+                    <li><a href="#services" class="footer-link">Prospectus Review</a></li>
+                    <li><a href="#services" class="footer-link">Investor Community</a></li>
+                    <li><a href="#crypto" class="footer-link">Market Analysis</a></li>
+                </ul>
+            </div>
+            
+            <div class="footer-links">
+                <h4 class="footer-heading">Contact Us</h4>
+                <ul>
+                    <li class="footer-contact"><i class="fas fa-envelope"></i> support@abenlytics.com</li>
+                    <li class="footer-contact"><i class="fab fa-telegram"></i> @abenlytics_support</li>
+                </ul>
+            </div>
+        </div>
+        
+        <div class="footer-copyright">
+            <p>&copy; 2025 Abenlytics Club. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script src="app.js"></script>
+</body>
+</html>
