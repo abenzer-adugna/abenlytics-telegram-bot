@@ -110,7 +110,7 @@ document.addEventListener('DOMContentLoaded', function() {
             
             const result = await response.json();
             
-            if (result.status === 'success') {
+            if (result.status === 'success' && result.books && result.books.length > 0) {
                 // Render books
                 booksContainer.innerHTML = `
                     <div class="book-grid">
@@ -120,11 +120,11 @@ document.addEventListener('DOMContentLoaded', function() {
                                     <i class="fas fa-book-open text-white text-5xl opacity-80"></i>
                                 </div>
                                 <h4 class="font-bold text-lg mb-2">${book.title}</h4>
-                                <div class="text-gray-400 mb-2">By ${book.author}</div>
-                                <p class="mb-3 text-gray-300">${book.description}</p>
+                                <div class="text-gray-400 mb-2">By ${book.author || 'Unknown Author'}</div>
+                                <p class="mb-3 text-gray-300">${book.description || book.note || 'No description available'}</p>
                                 <a href="${book.url}" 
                                     class="btn-primary inline-block px-3 py-1 text-sm"
-                                    download="${book.title.replace(/ /g, '-')}.pdf">
+                                    target="_blank">
                                     <i class="fas fa-download mr-1"></i>Download
                                 </a>
                             </div>
@@ -132,7 +132,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     </div>
                 `;
             } else {
-                throw new Error(result.error || 'Invalid response format');
+                throw new Error(result.error || 'No books found');
             }
             
             // Update button text
@@ -170,7 +170,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 } else if (serviceType === 'newsletter') {
                     subscribeNewsletter();
                 } else if (serviceType === 'group_access') {
-                    requestService('group_access');
+                    requestGroupAccess();
                 }
             });
         });
@@ -215,7 +215,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // =====================================================
-    // Additional Functions
+    // Service Functions
     // =====================================================
     
     // Telegram user functions
@@ -252,56 +252,8 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // Service request handler
-    async function requestService(serviceType, data = null) {
-        try {
-            let user, userName;
-            
-            if (serviceType === 'one_on_one' && data) {
-                user = { id: data.userData.id };
-                userName = data.userData.name;
-            } else {
-                const telegramUser = await getTelegramUser();
-                user = telegramUser;
-                userName = `${telegramUser.first_name} ${telegramUser.last_name}`.trim();
-            }
-
-            const body = serviceType === 'one_on_one' 
-                ? { ...data } 
-                : {
-                    userData: {
-                        id: user.id,
-                        name: userName
-                    }
-                };
-            
-            const response = await fetch(`/api/service/${serviceType}`, {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify(body)
-            });
-            
-            const result = await response.json();
-            
-            if (result.status === 'success') {
-                alert(`✅ ${serviceType.replace(/_/g, ' ')} request successful!`);
-                if (serviceType === 'group_access' && result.link) {
-                    window.open(result.link, '_blank');
-                }
-            } else {
-                alert(`❌ Error: ${result.message}`);
-            }
-            
-            return result;
-        } catch (error) {
-            console.error('Service error:', error);
-            alert('❌ Network error. Please try again.');
-            return { status: 'error', message: 'Network error' };
-        }
-    }
-
     // Handle consultation request
-    function handleConsultationRequest() {
+    async function handleConsultationRequest() {
         const usernameInput = document.getElementById('telegram-username');
         const problemInput = document.getElementById('problem-description');
         
@@ -313,46 +265,75 @@ document.addEventListener('DOMContentLoaded', function() {
             return;
         }
         
-        // Get user data
-        const user = getTelegramUserSync() || {
-            id: Math.floor(Math.random() * 1000000),
-            first_name: "User",
-            last_name: ""
-        };
-        
-        requestService('one_on_one', {
-            telegramUsername,
-            problem,
-            userData: {
-                id: user.id,
-                name: `${user.first_name} ${user.last_name}`.trim() || "Anonymous User"
+        try {
+            const user = await getTelegramUser();
+            
+            const response = await fetch('/api/service/one_on_one', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({
+                    telegramUsername,
+                    problem,
+                    userData: {
+                        id: user.id,
+                        name: `${user.first_name} ${user.last_name}`.trim() || "Anonymous User"
+                    }
+                })
+            });
+            
+            const result = await response.json();
+            
+            if (result.status === 'success') {
+                alert('✅ Consultation request sent successfully!');
+                // Reset form and close modal
+                usernameInput.value = '';
+                problemInput.value = '';
+                document.getElementById('consultation-modal').classList.add('hidden');
+            } else {
+                throw new Error(result.message || 'Request failed');
             }
-        });
-        
-        // Reset form and close modal
-        usernameInput.value = '';
-        problemInput.value = '';
-        document.getElementById('consultation-modal').classList.add('hidden');
+        } catch (error) {
+            console.error('Consultation error:', error);
+            alert(`❌ Error: ${error.message}`);
+        }
     }
 
     // Prospectus upload handler
-    function handleProspectusUpload() {
+    async function handleProspectusUpload() {
         const fileInput = document.getElementById('prospectus-file');
-        if (!fileInput.files.length) return alert('Please select a file');
+        if (!fileInput.files.length) {
+            alert('Please select a file');
+            return;
+        }
         
-        // Get user data
-        const user = getTelegramUserSync() || {
-            id: Math.floor(Math.random() * 1000000),
-            first_name: "User",
-            last_name: ""
-        };
-        
-        // In a real app, this would upload to your server
-        alert('Prospectus submitted successfully! Our team will review it shortly.');
-        
-        // Reset form and close modal
-        fileInput.value = '';
-        document.getElementById('prospectus-modal').classList.add('hidden');
+        try {
+            const user = await getTelegramUser();
+            const formData = new FormData();
+            formData.append('file', fileInput.files[0]);
+            formData.append('userData', JSON.stringify({
+                id: user.id,
+                name: `${user.first_name} ${user.last_name}`.trim() || "Anonymous User"
+            }));
+            
+            const response = await fetch('/api/service/prospectus', {
+                method: 'POST',
+                body: formData
+            });
+            
+            const result = await response.json();
+            
+            if (result.status === 'success') {
+                alert('✅ Prospectus submitted successfully!');
+                // Reset form and close modal
+                fileInput.value = '';
+                document.getElementById('prospectus-modal').classList.add('hidden');
+            } else {
+                throw new Error(result.message || 'Upload failed');
+            }
+        } catch (error) {
+            console.error('Prospectus upload error:', error);
+            alert(`❌ Error: ${error.message}`);
+        }
     }
 
     // Load reviews
@@ -374,31 +355,36 @@ document.addEventListener('DOMContentLoaded', function() {
             
             // Fetch reviews from API
             const response = await fetch('/api/reviews');
+            
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            
             const result = await response.json();
             
-            if (result.status === 'success') {
+            if (result.status === 'success' && result.reviews && result.reviews.length > 0) {
                 // Render reviews
                 container.innerHTML = result.reviews.map(review => `
                     <div class="bg-gray-700 p-4 rounded-lg">
                         <div class="flex justify-between items-start mb-2">
                             <h4 class="font-bold text-lg">${review.bookTitle}</h4>
-                            <span class="text-sm text-gray-400">${review.date}</span>
+                            <span class="text-sm text-gray-400">${review.date || 'No date'}</span>
                         </div>
                         <div class="flex items-center mb-3">
-                            ${'★'.repeat(review.rating)}${'☆'.repeat(5 - review.rating)}
-                            <span class="ml-2 text-yellow-400">${review.rating}/5</span>
+                            ${'★'.repeat(review.rating || 0)}${'☆'.repeat(5 - (review.rating || 0))}
+                            <span class="ml-2 text-yellow-400">${review.rating || 0}/5</span>
                         </div>
-                        <p class="mb-3"><strong class="text-cyan-300">Summary:</strong> ${review.summary}</p>
+                        <p class="mb-3"><strong class="text-cyan-300">Summary:</strong> ${review.summary || 'No summary available'}</p>
                         <div>
                             <strong class="text-cyan-300">Key Insights:</strong>
                             <ul class="list-disc list-inside mt-1">
-                                ${review.keyInsights.map(insight => `<li>${insight}</li>`).join('')}
+                                ${(review.keyInsights || ['No insights available']).map(insight => `<li>${insight}</li>`).join('')}
                             </ul>
                         </div>
                     </div>
                 `).join('');
             } else {
-                throw new Error(result.error || 'Failed to load reviews');
+                throw new Error(result.error || 'No reviews found');
             }
         } catch (error) {
             console.error('Review loading error:', error);
@@ -407,7 +393,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 container.innerHTML = `
                     <div class="text-center py-8 text-red-400">
                         <i class="fas fa-exclamation-triangle text-2xl mb-2"></i>
-                        <p>Error loading reviews. Please try again.</p>
+                        <p>Error loading reviews: ${error.message}</p>
                         <button class="mt-4 btn-primary px-4 py-2" onclick="loadReviews()">
                             <i class="fas fa-sync-alt mr-2"></i>Retry
                         </button>
@@ -422,29 +408,42 @@ document.addEventListener('DOMContentLoaded', function() {
         try {
             // Fetch roadmaps from API
             const response = await fetch('/api/roadmaps');
+            
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            
             const result = await response.json();
             
-            if (result.status === 'success') {
+            if (result.status === 'success' && result.roadmaps && result.roadmaps.length > 0) {
                 // Create download links
                 const roadmapLinks = result.roadmaps.map(r => 
                     `<li class="mb-3"><a href="${r.url}" class="text-cyan-400 hover:underline font-medium" download>${r.title}</a></li>`
                 ).join('');
                 
-                // Show alert with download links
-                alert(`
-                    <div class="text-left p-4">
-                        <h3 class="text-lg font-bold mb-3">Available Roadmaps:</h3>
+                // Show modal with download links
+                const modal = document.createElement('div');
+                modal.className = 'fixed inset-0 bg-black bg-opacity-70 z-50 flex items-center justify-center p-4';
+                modal.innerHTML = `
+                    <div class="bg-gray-800 rounded-lg w-full max-w-md p-6">
+                        <h3 class="text-xl font-bold mb-4">Available Roadmaps</h3>
                         <ul class="list-disc pl-5">
                             ${roadmapLinks}
                         </ul>
+                        <div class="mt-4 flex justify-end">
+                            <button class="btn-primary px-4 py-2" onclick="this.parentElement.parentElement.parentElement.remove()">
+                                Close
+                            </button>
+                        </div>
                     </div>
-                `);
+                `;
+                document.body.appendChild(modal);
             } else {
-                throw new Error('Failed to load roadmaps');
+                throw new Error(result.error || 'No roadmaps found');
             }
         } catch (error) {
             console.error('Roadmap loading error:', error);
-            alert('Error loading roadmaps. Please try again.');
+            alert(`Error loading roadmaps: ${error.message}`);
         }
     }
 
@@ -453,14 +452,67 @@ document.addEventListener('DOMContentLoaded', function() {
         try {
             const user = await getTelegramUser();
             
-            // In a real app, this would call your API
-            alert('🎉 You have successfully subscribed to our newsletter!');
+            const response = await fetch('/api/service/newsletter', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({
+                    userData: {
+                        id: user.id,
+                        name: `${user.first_name} ${user.last_name}`.trim() || "Anonymous"
+                    }
+                })
+            });
+            
+            const result = await response.json();
+            
+            if (result.status === 'success') {
+                alert('🎉 You have successfully subscribed to our newsletter!');
+            } else {
+                throw new Error(result.message || 'Subscription failed');
+            }
         } catch (error) {
             console.error('Newsletter subscription error:', error);
-            alert('❌ Network error. Please try again.');
+            alert(`❌ Error: ${error.message}`);
         }
     }
 
+    // Group access request
+    async function requestGroupAccess() {
+        try {
+            const user = await getTelegramUser();
+            
+            const response = await fetch('/api/service/group_access', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({
+                    userData: {
+                        id: user.id,
+                        name: `${user.first_name} ${user.last_name}`.trim() || "Anonymous"
+                    }
+                })
+            });
+            
+            const result = await response.json();
+            
+            if (result.status === 'success') {
+                if (result.link) {
+                    window.open(result.link, '_blank');
+                } else {
+                    alert('✅ Group access request received!');
+                }
+            } else {
+                throw new Error(result.message || 'Request failed');
+            }
+        } catch (error) {
+            console.error('Group access error:', error);
+            alert(`❌ Error: ${error.message}`);
+        }
+    }
+
+    // =====================================================
+    // Crypto Functions
+    // =====================================================
+    
     // Fetch live crypto data from CoinGecko
     async function fetchCryptoData() {
         try {
@@ -542,7 +594,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         <div class="flex justify-between items-center mb-3">
                             <div class="text-sm">24h Change</div>
                             <div class="${isUp ? 'price-up' : 'price-down'}">
-                                ${isUp ? '+' : ''}${change.toFixed(2)}% 
+                                ${isUp ? '+' : ''}${change ? change.toFixed(2) : '0.00'}% 
                                 <i class="fas fa-arrow-${isUp ? 'up' : 'down'} ml-1"></i>
                             </div>
                         </div>
