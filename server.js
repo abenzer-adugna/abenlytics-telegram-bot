@@ -6,27 +6,40 @@ const cors = require('cors');
 const path = require('path');
 const fs = require('fs');
 const multer = require('multer');
+const TelegramBot = require('node-telegram-bot-api');
 
 // Initialize Express
 const app = express();
 const PORT = process.env.PORT || 3000;
 const upload = multer({ dest: 'uploads/' });
 
+// Initialize Telegram Bot if token is provided
+let bot;
+if (process.env.TELEGRAM_BOT_TOKEN) {
+    bot = new TelegramBot(process.env.TELEGRAM_BOT_TOKEN);
+    console.log('Telegram bot initialized');
+} else {
+    console.log('No Telegram bot token provided - notifications disabled');
+}
+
 // ======================
 // SECURITY MIDDLEWARE
 // ======================
 app.use(helmet());
 app.use(cors({
-  origin: process.env.FRONTEND_URL || '*'
+    origin: process.env.FRONTEND_URL || '*'
 }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // Rate limiting (100 requests per 15 minutes)
 app.use(rateLimit({
-  windowMs: 15 * 60 * 1000,
-  max: 100,
-  message: { error: 'Too many requests, please try again later.' }
+    windowMs: 15 * 60 * 1000,
+    max: 100,
+    message: JSON.stringify({ 
+        status: 'error',
+        error: 'Too many requests, please try again later.' 
+    })
 }));
 
 // ======================
@@ -166,7 +179,6 @@ app.post('/api/service/group_access', async (req, res) => {
             });
         }
 
-        // In a real app, you would verify user and log this request
         console.log(`Group access request from user: ${userData.id}`);
         
         res.json({ 
@@ -194,7 +206,6 @@ app.post('/api/service/newsletter', async (req, res) => {
             });
         }
 
-        // In a real app, you would save to database here
         console.log(`New newsletter subscriber: ${userData.id}`);
         
         res.json({ 
@@ -229,7 +240,6 @@ app.post('/api/service/prospectus', upload.single('file'), async (req, res) => {
             });
         }
 
-        // In a real app, you would process the file here
         console.log(`Prospectus uploaded by user: ${userData.id}`);
         console.log(`File: ${req.file.originalname} (${req.file.size} bytes)`);
         
@@ -249,32 +259,55 @@ app.post('/api/service/prospectus', upload.single('file'), async (req, res) => {
     }
 });
 
-// 7. 1-on-1 Consultation
+// 7. 1-on-1 Consultation (updated)
 app.post('/api/service/one_on_one', async (req, res) => {
     try {
-        const { telegramUsername, problem, userData } = req.body;
+        const { name, telegramUsername, problem, userData } = req.body;
         
-        if (!telegramUsername || !problem || !userData?.id) {
+        if (!name || !telegramUsername || !problem || !userData?.id) {
             return res.status(400).json({ 
                 status: 'error',
                 error: 'All fields are required' 
             });
         }
 
-        // In a real app, you would save this request to a database
-        console.log(`New consultation request from: ${telegramUsername}`);
-        console.log(`Problem: ${problem}`);
-        console.log(`User ID: ${userData.id}`);
+        // Log the request
+        console.log(`
+        New Consultation Request:
+        -------------------------
+        Name: ${name}
+        Telegram: ${telegramUsername}
+        User ID: ${userData.id}
+        Problem: ${problem}
+        `);
+        
+        // Send Telegram notification if bot is available
+        if (bot && process.env.ADMIN_CHAT_ID) {
+            try {
+                await bot.sendMessage(
+                    process.env.ADMIN_CHAT_ID,
+                    `🆕 *New Consultation Request*\n\n` +
+                    `👤 *Name:* ${name}\n` +
+                    `📱 *Telegram:* @${telegramUsername.replace('@', '')}\n` +
+                    `❓ *Problem:* ${problem}\n\n` +
+                    `🆔 *User ID:* ${userData.id}`,
+                    { parse_mode: 'Markdown' }
+                );
+                console.log('Telegram notification sent to admin');
+            } catch (telegramError) {
+                console.error('Failed to send Telegram notification:', telegramError);
+            }
+        }
         
         res.json({ 
             status: 'success',
-            message: 'Consultation request received'
+            message: 'Help is on the way! We will contact you shortly.'
         });
     } catch (error) {
-        console.error('Consultation error:', error);
+        console.error('Consultation endpoint error:', error);
         res.status(500).json({ 
             status: 'error',
-            error: error.message 
+            error: 'Failed to process request' 
         });
     }
 });
@@ -305,11 +338,14 @@ app.use((err, req, res, next) => {
     console.error(err.stack);
     res.status(500).json({ 
         status: 'error',
-        error: 'Something broke!' 
+        error: 'Internal server error' 
     });
 });
 
 // Server Initialization
 app.listen(PORT, () => {
     console.log(`🚀 Server running on port ${PORT}`);
+    console.log(`📚 Books endpoint: /api/books`);
+    console.log(`🔍 Reviews endpoint: /api/reviews`);
+    console.log(`🗺️ Roadmaps endpoint: /api/roadmaps`);
 });
