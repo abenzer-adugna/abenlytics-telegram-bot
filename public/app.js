@@ -17,6 +17,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const learnMoreBtn = document.getElementById('learn-more-btn');
 const aboutModal = document.getElementById('about-modal');
 const closeAboutModal = document.getElementById('close-about-modal');
+    const modalCloseBtn = document.getElementById('modal-close-btn');
     // =====================================================
     // Initialize Event Listeners
     // =====================================================
@@ -66,16 +67,22 @@ const closeAboutModal = document.getElementById('close-about-modal');
             });
         });
     }
-if (learnMoreBtn && aboutModal) {
+if (learnMoreBtn) {
     learnMoreBtn.addEventListener('click', () => {
         aboutModal.classList.remove('hidden');
+        document.body.style.overflow = 'hidden'; // Prevent scrolling behind modal
     });
 }
-    if (closeAboutModal) {
-    closeAboutModal.addEventListener('click', () => {
-        aboutModal.classList.add('hidden');
-    });
-}
+
+[closeAboutModal, modalCloseBtn].forEach(btn => {
+    if (btn) {
+        btn.addEventListener('click', () => {
+            aboutModal.classList.add('hidden');
+            document.body.style.overflow = ''; // Restore scrolling
+        });
+    }
+});
+
     // Initialize service handlers
     initializeServiceHandlers();
     
@@ -220,16 +227,11 @@ if (learnMoreBtn && aboutModal) {
             });
         });
     }
-document.addEventListener('click', (e) => {
-    const modals = [
-        'about-modal'
-    ];
-    modals.forEach(id => {
-        const modal = document.getElementById(id);
-        if (e.target === modal) {
-            modal.classList.add('hidden');
-        }
-    });
+aboutModal?.addEventListener('click', (e) => {
+    if (e.target === aboutModal) {
+        aboutModal.classList.add('hidden');
+        document.body.style.overflow = '';
+    }
 });
     // Initialize crypto
     function initializeCrypto() {
