@@ -14,7 +14,9 @@ document.addEventListener('DOMContentLoaded', function() {
     const cryptoContainer = document.getElementById('crypto-container');
     const cryptoUpdated = document.getElementById('crypto-updated');
     const consultationSubmitBtn = document.getElementById('consultation-submit');
-    
+    const learnMoreBtn = document.getElementById('learn-more-btn');
+const aboutModal = document.getElementById('about-modal');
+const closeAboutModal = document.getElementById('close-about-modal');
     // =====================================================
     // Initialize Event Listeners
     // =====================================================
@@ -64,7 +66,16 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         });
     }
-
+if (learnMoreBtn && aboutModal) {
+    learnMoreBtn.addEventListener('click', () => {
+        aboutModal.classList.remove('hidden');
+    });
+}
+    if (closeAboutModal) {
+    closeAboutModal.addEventListener('click', () => {
+        aboutModal.classList.add('hidden');
+    });
+}
     // Initialize service handlers
     initializeServiceHandlers();
     
@@ -209,7 +220,17 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         });
     }
-
+document.addEventListener('click', (e) => {
+    const modals = [
+        'about-modal'
+    ];
+    modals.forEach(id => {
+        const modal = document.getElementById(id);
+        if (e.target === modal) {
+            modal.classList.add('hidden');
+        }
+    });
+});
     // Initialize crypto
     function initializeCrypto() {
         updateCryptoPrices();
