@@ -13,11 +13,11 @@ document.addEventListener('DOMContentLoaded', function() {
     const refreshCryptoBtn = document.getElementById('refresh-crypto');
     const cryptoContainer = document.getElementById('crypto-container');
     const cryptoUpdated = document.getElementById('crypto-updated');
-    const consultationSubmitBtn = document.getElementById('consultation-submit');
     const learnMoreBtn = document.getElementById('learn-more-btn');
-const aboutModal = document.getElementById('about-modal');
-const closeAboutModal = document.getElementById('close-about-modal');
+    const aboutModal = document.getElementById('about-modal');
+    const closeAboutModal = document.getElementById('close-about-modal');
     const modalCloseBtn = document.getElementById('modal-close-btn');
+    
     // =====================================================
     // Initialize Event Listeners
     // =====================================================
@@ -28,7 +28,6 @@ const closeAboutModal = document.getElementById('close-about-modal');
             dropdownMenu.classList.toggle('hidden');
         });
         
-        // Close menu when clicking outside
         document.addEventListener('click', (event) => {
             if (!dropdownMenu.contains(event.target) && event.target !== menuBtn) {
                 dropdownMenu.classList.add('hidden');
@@ -67,21 +66,32 @@ const closeAboutModal = document.getElementById('close-about-modal');
             });
         });
     }
-if (learnMoreBtn) {
-    learnMoreBtn.addEventListener('click', () => {
-        aboutModal.classList.remove('hidden');
-        document.body.style.overflow = 'hidden'; // Prevent scrolling behind modal
-    });
-}
 
-[closeAboutModal, modalCloseBtn].forEach(btn => {
-    if (btn) {
-        btn.addEventListener('click', () => {
-            aboutModal.classList.add('hidden');
-            document.body.style.overflow = ''; // Restore scrolling
+    // Learn More button
+    if (learnMoreBtn) {
+        learnMoreBtn.addEventListener('click', () => {
+            aboutModal.classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
         });
     }
-});
+
+    // About modal close buttons
+    [closeAboutModal, modalCloseBtn].forEach(btn => {
+        if (btn) {
+            btn.addEventListener('click', () => {
+                aboutModal.classList.add('hidden');
+                document.body.style.overflow = '';
+            });
+        }
+    });
+
+    // Close about modal when clicking outside
+    aboutModal?.addEventListener('click', (e) => {
+        if (e.target === aboutModal) {
+            aboutModal.classList.add('hidden');
+            document.body.style.overflow = '';
+        }
+    });
 
     // Initialize service handlers
     initializeServiceHandlers();
@@ -109,9 +119,6 @@ if (learnMoreBtn) {
     // Load books function
     async function loadBooks() {
         try {
-            console.log('Loading books...');
-            
-            // Show loading state
             booksContainer.innerHTML = `
                 <div class="books-loading">
                     <i class="fas fa-spinner spinner text-cyan-400 text-3xl mb-4"></i>
@@ -120,7 +127,6 @@ if (learnMoreBtn) {
             `;
             booksContainer.classList.remove('hidden');
             
-            // Fetch books from API
             const response = await fetch('/api/books');
             
             if (!response.ok) {
@@ -129,8 +135,7 @@ if (learnMoreBtn) {
             
             const result = await response.json();
             
-            if (result.status === 'success' && result.books && result.books.length > 0) {
-                // Render books
+            if (result.status === 'success' && result.books?.length > 0) {
                 booksContainer.innerHTML = `
                     <div class="book-grid">
                         ${result.books.map(book => `
@@ -154,7 +159,6 @@ if (learnMoreBtn) {
                 throw new Error(result.error || 'No books found');
             }
             
-            // Update button text
             toggleBooksBtn.innerHTML = '<i class="fas fa-eye-slash mr-2"></i>Hide Books';
         } catch (error) {
             console.error('Book loading failed:', error);
@@ -181,9 +185,8 @@ if (learnMoreBtn) {
                 } else if (serviceType === 'one_on_one') {
                     document.getElementById('consultation-modal').classList.remove('hidden');
                     
-                    // Pre-fill Telegram username if available
                     const user = getTelegramUserSync();
-                    if (user && user.username) {
+                    if (user?.username) {
                         document.getElementById('telegram-username').value = `@${user.username}`;
                     }
                 } else if (serviceType === 'newsletter') {
@@ -197,46 +200,37 @@ if (learnMoreBtn) {
 
     // Initialize modals
     function initializeModals() {
-        // Prospectus modal handling
         document.getElementById('prospectus-submit')?.addEventListener('click', handleProspectusUpload);
         document.getElementById('prospectus-cancel')?.addEventListener('click', () => {
             document.getElementById('prospectus-modal').classList.add('hidden');
         });
         
-        // Consultation modal handling (updated)
-        if (consultationSubmitBtn) {
-            consultationSubmitBtn.addEventListener('click', handleConsultationRequest);
-        }
+        document.getElementById('consultation-submit')?.addEventListener('click', handleConsultationRequest);
         document.getElementById('consultation-cancel')?.addEventListener('click', () => {
             document.getElementById('consultation-modal').classList.add('hidden');
         });
         
-        // Close modal when clicking outside
         document.addEventListener('click', (e) => {
             const modals = [
                 'consultation-modal',
                 'prospectus-modal',
-                'review-modal'
+                'review-modal',
+                'about-modal'
             ];
             
             modals.forEach(id => {
                 const modal = document.getElementById(id);
                 if (e.target === modal) {
                     modal.classList.add('hidden');
+                    document.body.style.overflow = '';
                 }
             });
         });
     }
-aboutModal?.addEventListener('click', (e) => {
-    if (e.target === aboutModal) {
-        aboutModal.classList.add('hidden');
-        document.body.style.overflow = '';
-    }
-});
+
     // Initialize crypto
     function initializeCrypto() {
         updateCryptoPrices();
-        // Refresh crypto prices every 60 seconds
         setInterval(updateCryptoPrices, 60000);
     }
 
@@ -278,7 +272,7 @@ aboutModal?.addEventListener('click', (e) => {
         });
     }
 
-    // Handle consultation request (updated)
+    // Handle consultation request
     async function handleConsultationRequest() {
         const nameInput = document.getElementById('user-name');
         const usernameInput = document.getElementById('telegram-username');
@@ -288,23 +282,19 @@ aboutModal?.addEventListener('click', (e) => {
         const telegramUsername = usernameInput.value.trim();
         const problem = problemInput.value.trim();
         
-        // Validate inputs
         if (!name || !telegramUsername || !problem) {
             alert('Please fill in all fields');
             return;
         }
 
         try {
-            // Show loading state
             const submitBtn = document.getElementById('consultation-submit');
             const originalBtnText = submitBtn.innerHTML;
             submitBtn.disabled = true;
             submitBtn.innerHTML = '<i class="fas fa-spinner spinner"></i> Sending...';
             
-            // Get user data (Telegram or fallback)
             const user = await getTelegramUser();
             
-            // Send to server
             const response = await fetch('/api/service/one_on_one', {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
@@ -322,10 +312,7 @@ aboutModal?.addEventListener('click', (e) => {
             const result = await response.json();
             
             if (result.status === 'success') {
-                // Show success message
-                alert('✅ Help is on the way! Our team will contact you shortly on Telegram.\n\nWe\'re happy to help!');
-                
-                // Reset form
+                alert('✅ Help is on the way! Our team will contact you shortly on Telegram.');
                 nameInput.value = '';
                 usernameInput.value = '';
                 problemInput.value = '';
@@ -337,10 +324,11 @@ aboutModal?.addEventListener('click', (e) => {
             console.error('Consultation error:', error);
             alert(`❌ Error: ${error.message}`);
         } finally {
-            // Reset button state
             const submitBtn = document.getElementById('consultation-submit');
-            submitBtn.disabled = false;
-            submitBtn.innerHTML = 'Get Help';
+            if (submitBtn) {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = 'Submit Request';
+            }
         }
     }
 
@@ -370,7 +358,6 @@ aboutModal?.addEventListener('click', (e) => {
             
             if (result.status === 'success') {
                 alert('✅ Prospectus submitted successfully!');
-                // Reset form and close modal
                 fileInput.value = '';
                 document.getElementById('prospectus-modal').classList.add('hidden');
             } else {
@@ -390,7 +377,6 @@ aboutModal?.addEventListener('click', (e) => {
             
             if (!modal || !container) return;
             
-            // Show loading state
             container.innerHTML = `
                 <div class="text-center py-8">
                     <i class="fas fa-spinner spinner text-cyan-400 text-2xl"></i>
@@ -399,275 +385,7 @@ aboutModal?.addEventListener('click', (e) => {
             `;
             modal.classList.remove('hidden');
             
-            // Fetch reviews from API
             const response = await fetch('/api/reviews');
             
             if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-            
-            const result = await response.json();
-            
-            if (result.status === 'success' && result.reviews && result.reviews.length > 0) {
-                // Render reviews
-                container.innerHTML = result.reviews.map(review => `
-                    <div class="bg-gray-700 p-4 rounded-lg">
-                        <div class="flex justify-between items-start mb-2">
-                            <h4 class="font-bold text-lg">${review.bookTitle}</h4>
-                            <span class="text-sm text-gray-400">${review.date || 'No date'}</span>
-                        </div>
-                        <div class="flex items-center mb-3">
-                            ${'★'.repeat(review.rating || 0)}${'☆'.repeat(5 - (review.rating || 0))}
-                            <span class="ml-2 text-yellow-400">${review.rating || 0}/5</span>
-                        </div>
-                        <p class="mb-3"><strong class="text-cyan-300">Summary:</strong> ${review.summary || 'No summary available'}</p>
-                        <div>
-                            <strong class="text-cyan-300">Key Insights:</strong>
-                            <ul class="list-disc list-inside mt-1">
-                                ${(review.keyInsights || ['No insights available']).map(insight => `<li>${insight}</li>`).join('')}
-                            </ul>
-                        </div>
-                    </div>
-                `).join('');
-            } else {
-                throw new Error(result.error || 'No reviews found');
-            }
-        } catch (error) {
-            console.error('Review loading error:', error);
-            const container = document.getElementById('reviews-container');
-            if (container) {
-                container.innerHTML = `
-                    <div class="text-center py-8 text-red-400">
-                        <i class="fas fa-exclamation-triangle text-2xl mb-2"></i>
-                        <p>Error loading reviews: ${error.message}</p>
-                        <button class="mt-4 btn-primary px-4 py-2" onclick="loadReviews()">
-                            <i class="fas fa-sync-alt mr-2"></i>Retry
-                        </button>
-                    </div>
-                `;
-            }
-        }
-    }
-
-    // Load roadmaps
-    async function loadRoadmaps() {
-        try {
-            // Fetch roadmaps from API
-            const response = await fetch('/api/roadmaps');
-            
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-            
-            const result = await response.json();
-            
-            if (result.status === 'success' && result.roadmaps && result.roadmaps.length > 0) {
-                // Create download links
-                const roadmapLinks = result.roadmaps.map(r => 
-                    `<li class="mb-3"><a href="${r.url}" class="text-cyan-400 hover:underline font-medium" download>${r.title}</a></li>`
-                ).join('');
-                
-                // Show modal with download links
-                const modal = document.createElement('div');
-                modal.className = 'fixed inset-0 bg-black bg-opacity-70 z-50 flex items-center justify-center p-4';
-                modal.innerHTML = `
-                    <div class="bg-gray-800 rounded-lg w-full max-w-md p-6">
-                        <h3 class="text-xl font-bold mb-4">Available Roadmaps</h3>
-                        <ul class="list-disc pl-5">
-                            ${roadmapLinks}
-                        </ul>
-                        <div class="mt-4 flex justify-end">
-                            <button class="btn-primary px-4 py-2" onclick="this.parentElement.parentElement.parentElement.remove()">
-                                Close
-                            </button>
-                        </div>
-                    </div>
-                `;
-                document.body.appendChild(modal);
-            } else {
-                throw new Error(result.error || 'No roadmaps found');
-            }
-        } catch (error) {
-            console.error('Roadmap loading error:', error);
-            alert(`Error loading roadmaps: ${error.message}`);
-        }
-    }
-
-    // Newsletter subscription
-    async function subscribeNewsletter() {
-        try {
-            const user = await getTelegramUser();
-            
-            const response = await fetch('/api/service/newsletter', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({
-                    userData: {
-                        id: user.id,
-                        name: `${user.first_name} ${user.last_name}`.trim() || "Anonymous"
-                    }
-                })
-            });
-            
-            const result = await response.json();
-            
-            if (result.status === 'success') {
-                alert('🎉 You have successfully subscribed to our newsletter!');
-            } else {
-                throw new Error(result.message || 'Subscription failed');
-            }
-        } catch (error) {
-            console.error('Newsletter subscription error:', error);
-            alert(`❌ Error: ${error.message}`);
-        }
-    }
-
-    // Group access request
-    async function requestGroupAccess() {
-        try {
-            const user = await getTelegramUser();
-            
-            const response = await fetch('/api/service/group_access', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({
-                    userData: {
-                        id: user.id,
-                        name: `${user.first_name} ${user.last_name}`.trim() || "Anonymous"
-                    }
-                })
-            });
-            
-            const result = await response.json();
-            
-            if (result.status === 'success') {
-                if (result.link) {
-                    window.open(result.link, '_blank');
-                } else {
-                    alert('✅ Group access request received!');
-                }
-            } else {
-                throw new Error(result.message || 'Request failed');
-            }
-        } catch (error) {
-            console.error('Group access error:', error);
-            alert(`❌ Error: ${error.message}`);
-        }
-    }
-
-    // =====================================================
-    // Crypto Functions
-    // =====================================================
-    
-    // Fetch live crypto data from CoinGecko
-    async function fetchCryptoData() {
-        try {
-            const response = await fetch('https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&ids=bitcoin,ethereum,solana,cardano&per_page=4&sparkline=true');
-            const data = await response.json();
-            return data;
-        } catch (error) {
-            console.error('Crypto data error:', error);
-            return [];
-        }
-    }
-
-    // Generate SVG path from price data
-    function generateSparklinePath(prices) {
-        if (!prices || prices.length < 2) return '';
-        
-        const max = Math.max(...prices);
-        const min = Math.min(...prices);
-        const range = max - min || 1;
-        const height = 80;
-        const width = 300;
-        
-        const points = prices.map((price, i) => {
-            const x = (i / (prices.length - 1)) * width;
-            const y = height - ((price - min) / range) * height;
-            return `${x},${y}`;
-        });
-        
-        return `M${points.join(' L')}`;
-    }
-
-    // Update crypto prices
-    async function updateCryptoPrices() {
-        try {
-            const cryptoData = await fetchCryptoData();
-            
-            if (!cryptoData || cryptoData.length === 0) {
-                cryptoContainer.innerHTML = `
-                    <div class="col-span-4 text-center py-10 text-red-400">
-                        <i class="fas fa-exclamation-triangle text-3xl mb-4"></i>
-                        <p>Failed to load crypto data. Please try again later.</p>
-                    </div>
-                `;
-                return;
-            }
-            
-            cryptoContainer.innerHTML = cryptoData.map(crypto => {
-                const change = crypto.price_change_percentage_24h;
-                const isUp = change >= 0;
-                const iconClass = {
-                    bitcoin: 'fab fa-bitcoin text-yellow-400',
-                    ethereum: 'fab fa-ethereum text-purple-400',
-                    solana: 'fas fa-coins text-cyan-400',
-                    cardano: 'fas fa-chart-line text-blue-400'
-                }[crypto.id] || 'fas fa-coins text-gray-400';
-                
-                // Generate sparkline path
-                const sparklinePath = crypto.sparkline_in_7d?.price 
-                    ? generateSparklinePath(crypto.sparkline_in_7d.price)
-                    : '';
-                    
-                return `
-                    <div class="crypto-card p-5" data-crypto="${crypto.id}">
-                        <div class="flex justify-between items-start mb-4">
-                            <div class="flex items-center">
-                                <div class="w-10 h-10 rounded-full bg-opacity-20 flex items-center justify-center mr-3">
-                                    <i class="${iconClass} text-lg"></i>
-                                </div>
-                                <div>
-                                    <h3 class="font-bold">${crypto.name}</h3>
-                                    <div class="text-sm text-gray-400">${crypto.symbol.toUpperCase()}/USD</div>
-                                </div>
-                            </div>
-                            <div class="${isUp ? 'price-up' : 'price-down'} text-lg font-bold">
-                                $${crypto.current_price.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}
-                            </div>
-                        </div>
-                        
-                        <div class="flex justify-between items-center mb-3">
-                            <div class="text-sm">24h Change</div>
-                            <div class="${isUp ? 'price-up' : 'price-down'}">
-                                ${isUp ? '+' : ''}${change ? change.toFixed(2) : '0.00'}% 
-                                <i class="fas fa-arrow-${isUp ? 'up' : 'down'} ml-1"></i>
-                            </div>
-                        </div>
-                        
-                        <div class="chart-container">
-                            <svg viewBox="0 0 300 80" class="w-full h-full">
-                                <path class="chart-line ${isUp ? 'chart-up' : 'chart-down'}" d="${sparklinePath}"></path>
-                            </svg>
-                        </div>
-                    </div>
-                `;
-            }).join('');
-            
-            // Update timestamp
-            cryptoUpdated.textContent = `Updated: ${new Date().toLocaleTimeString()}`;
-            
-        } catch (error) {
-            console.error('Crypto update error:', error);
-            cryptoContainer.innerHTML = `
-                <div class="col-span-4 text-center py-10 text-red-400">
-                    <i class="fas fa-exclamation-triangle text-3xl mb-4"></i>
-                    <p>Error loading crypto data. Please try again.</p>
-                    <button class="mt-4 btn-primary px-4 py-2" onclick="updateCryptoPrices()">
-                        <i class="fas fa-sync-alt mr-2"></i>Retry
-                    </button>
-                </div>
-            `;
-        }
-    }
-});
+                throw
