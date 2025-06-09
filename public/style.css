@@ -1009,3 +1009,12 @@ button {
         width: 100%;
     }
 }
+/* ==================== */
+/* CUSTOM TEXT STYLES */
+/* ==================== */
+.gradient-text {
+  background: linear-gradient(to right, #06b6d4, #10b981);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  display: inline-block;
+}
