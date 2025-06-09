@@ -1027,3 +1027,10 @@ button {
   text-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
   letter-spacing: 0.5px;
 }
+.gradient-text {
+  background: linear-gradient(to right, #06b6d4, #10b981);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  display: inline-block;
+}
+
