@@ -181,3 +181,10 @@ input:focus, textarea:focus {
   color: transparent;
   -webkit-text-fill-color: transparent;
 }
+.bg-gradient-text {
+  background: linear-gradient(to right, #06b6d4, #10b981);
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  display: inline-block;
+    }
