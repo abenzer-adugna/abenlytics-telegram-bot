@@ -41,6 +41,7 @@ app.use(rateLimit({
         error: 'Too many requests, please try again later.' 
     })
 }));
+app.set('trust proxy', 1);
 
 // ======================
 // API ENDPOINTS
