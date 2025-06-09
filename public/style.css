@@ -1018,3 +1018,12 @@ button {
   -webkit-text-fill-color: transparent;
   display: inline-block;
 }
+.live-heading {
+  font-size: 1.75rem; /* Equivalent to text-2xl */
+  font-weight: 700;
+  color: #ffffff; /* Pure white */
+  text-align: center;
+  margin-bottom: 2rem;
+  text-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+  letter-spacing: 0.5px;
+}
