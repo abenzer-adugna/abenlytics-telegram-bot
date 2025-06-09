@@ -167,3 +167,17 @@ input:focus, textarea:focus {
     text-align: center;
     padding: 2rem 0;
                            }
+/* === Tailwind-like gradient support for existing HTML === */
+.bg-gradient-to-r {
+  background: linear-gradient(to right, #06b6d4, #10b981);
+}
+
+.bg-clip-text {
+  background-clip: text;
+  -webkit-background-clip: text;
+}
+
+.text-transparent {
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+}
