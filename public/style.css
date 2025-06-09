@@ -144,7 +144,7 @@ button {
 }
 
 .nav-link {
-    color: #e2e8f0;
+    color: #ffffff;
     transition: color 0.2s;
     font-weight: 500;
 }
@@ -157,7 +157,7 @@ button {
     display: none;
     background: none;
     border: none;
-    color: #e2e8f0;
+    color: #ffffff;
     font-size: 1.5rem;
 }
 
@@ -282,7 +282,7 @@ button {
 
 .btn-cancel {
     background: transparent;
-    color: #e2e8f0;
+    color: #ffffff;
     border: 1px solid var(--gray-700);
     padding: 0.625rem 1.25rem;
 }
@@ -312,7 +312,7 @@ button {
 
 .hero-subtitle {
     font-size: 1.25rem;
-    color: #e2e8f0;
+    color: #ffffff;
     margin-bottom: 2.5rem;
     max-width: 40rem;
     margin-left: auto;
@@ -338,7 +338,7 @@ button {
 }
 
 .section-description {
-    color: #e2e8f0;
+    color: #ffffff;
     max-width: 48rem;
     margin-left: auto;
     margin-right: auto;
@@ -551,7 +551,7 @@ button {
 }
 
 .service-description {
-    color: #e2e8f0;
+    color: #ffffff;
     margin-bottom: 1.5rem;
 }
 
@@ -610,7 +610,7 @@ button {
 }
 
 .book-description {
-    color: #e2e8f0;
+    color: #ffffff;
     margin-bottom: 1rem;
     font-size: 0.875rem;
 }
@@ -677,7 +677,7 @@ button {
 
 .form-group label {
     display: block;
-    color: #e2e8f0;
+    color: #ffffff;
     margin-bottom: 0.5rem;
     font-size: 0.875rem;
 }
@@ -833,7 +833,7 @@ button {
 
 .cta-description {
     font-size: 1.125rem;
-    color: #e2e8f0;
+    color: #ffffff;
     margin-bottom: 2rem;
     max-width: 40rem;
     margin-left: auto;
@@ -904,7 +904,7 @@ button {
     font-size: 1.125rem;
     font-weight: 600;
     margin-bottom: 1rem;
-    color: #e2e8f0;
+    color: #ffffff;
 }
 
 .footer-links ul {
