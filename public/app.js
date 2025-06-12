@@ -701,7 +701,7 @@ const modalCloseBtn = document.getElementById('modal-close-btn');
         }
     }
 
-// Run this only on login.html
+// Only run this on login.html
 if (window.location.pathname.endsWith("login.html")) {
   document.addEventListener("DOMContentLoaded", () => {
     const loginBtn = document.getElementById("loginBtn");
@@ -709,7 +709,7 @@ if (window.location.pathname.endsWith("login.html")) {
 
     if (loginBtn && codeInput) {
       loginBtn.addEventListener("click", () => {
-        const correctCode = "aben2025";  // Only share with paid users
+        const correctCode = "aben2025";
         const input = codeInput.value;
 
         if (input === correctCode) {
