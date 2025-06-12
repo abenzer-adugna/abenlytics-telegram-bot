@@ -42,7 +42,20 @@ app.use(rateLimit({
     })
 }));
 app.set('trust proxy', 1);
+// Serve login page
+app.get('/login', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'login.html'));
+});
 
+// Redirect root to login
+app.get('/', (req, res) => {
+    res.redirect('/login');
+});
+
+// Existing catch-all route remains the same
+app.get('*', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
 // ======================
 // API ENDPOINTS
 // ======================
