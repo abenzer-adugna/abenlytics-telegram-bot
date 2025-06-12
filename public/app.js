@@ -17,6 +17,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const learnMoreBtn = document.getElementById('learn-more-btn');
 const aboutModal = document.getElementById('about-modal');
 const closeAboutModal = document.getElementById('close-about-modal');
+    const logoutBtn = document.getElementById('logoutBtn');
 
     // =====================================================
     // Initialize Event Listeners
@@ -76,6 +77,12 @@ if (learnMoreBtn && aboutModal) {
 if (closeAboutModal) {
     closeAboutModal.addEventListener('click', () => {
         aboutModal.classList.add('hidden');
+    });
+}
+    if (logoutBtn) {
+    logoutBtn.addEventListener('click', () => {
+        localStorage.removeItem('authenticated');
+        window.location.href = 'login.html';
     });
 }
     // Initialize service handlers
