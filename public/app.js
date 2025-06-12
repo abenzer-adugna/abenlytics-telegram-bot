@@ -1,8 +1,3 @@
-const access = localStorage.getItem("abenlytics_access");
-if (access !== "granted") {
-  alert("Unauthorized access. Redirecting to login.");
-  window.location.href = "login.html";
-}
 
 document.addEventListener('DOMContentLoaded', function() {
     // =====================================================
