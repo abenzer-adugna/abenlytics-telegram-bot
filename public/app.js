@@ -701,7 +701,6 @@ const modalCloseBtn = document.getElementById('modal-close-btn');
         }
     }
 
-    }  // ← This closes updateCryptoPrices
 // Only run this on login.html
 if (window.location.pathname.endsWith("login.html")) {
   document.addEventListener("DOMContentLoaded", () => {
@@ -723,7 +722,6 @@ if (window.location.pathname.endsWith("login.html")) {
     }
   });
 }
-
 
             
           
