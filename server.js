@@ -31,18 +31,17 @@ app.use(cors({
 }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use((req, res, next) => {
-  const auth = { login: 'admin', password: 'yourpassword123' }; // Change this!
-  const b64auth = (req.headers.authorization || '').split(' ')[1] || '';
-  const [login, password] = Buffer.from(b64auth, 'base64').toString().split(':');
-  
-  if (req.path === '/login' || (login && password && login === auth.login && password === auth.password)) {
+const cookieParser = require('cookie-parser');
+app.use(cookieParser());
+ if (req.path === '/login' || req.path.startsWith('/static/')) {
     return next();
   }
-  res.set('WWW-Authenticate', 'Basic realm="401"');
-  res.status(401).send('Authentication required');
+  
+  if (req.cookies.authToken === 'verified') {
+    return next();
+  }
+  res.sendFile(path.join(__dirname, 'public', 'login.html'));
 });
-
 // Rate limiting (100 requests per 15 minutes)
 app.use(rateLimit({
     windowMs: 15 * 60 * 1000,
@@ -53,11 +52,37 @@ app.use(rateLimit({
     })
 }));
 app.set('trust proxy', 1);
-
+app.use((req, res, next) => {
 // ======================
 // API ENDPOINTS
 // ======================
+// ======================
+// Login Route (Add with other API routes)
+// ======================
+app.post('/login', express.urlencoded({ extended: true }), (req, res) => {
+  const { username, password } = req.body;
+  const validCreds = (
+    username === (process.env.AUTH_USER || 'admin') && 
+    password === (process.env.AUTH_PASS || 'yourpassword123')
+  );
 
+  if (validCreds) {
+    res.cookie('authToken', 'verified', {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production', // HTTPS only in production
+      sameSite: 'strict',
+      maxAge: 86400000 // 24 hours
+    });
+    return res.redirect('/');
+  }
+  
+  return res.status(401).sendFile(path.join(__dirname, 'public', 'login.html'), {
+    headers: { 'X-Error': 'Invalid credentials' }
+  });
+});
+    app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
 // 1. Get Books
 app.get('/api/books', (req, res) => {
     try {
@@ -71,6 +96,7 @@ app.get('/api/books', (req, res) => {
         
         const rawData = fs.readFileSync(booksPath, 'utf8');
         const books = JSON.parse(rawData);
+
         
         // Verify each book file exists
         const verifiedBooks = books.map(book => {
@@ -282,7 +308,7 @@ app.post('/api/service/one_on_one', async (req, res) => {
                 error: 'All fields are required' 
             });
         }
-
+app.get('/api/books', (req, res) => { /* ... */ });
         // Log the request
         console.log(`
         New Consultation Request:
@@ -327,6 +353,8 @@ app.post('/api/service/one_on_one', async (req, res) => {
 // ======================
 // STATIC FILE SERVING
 // ======================
+    app.use('/static', express.static(path.join(__dirname, 'public')));
+
 app.use('/books', express.static(path.join(__dirname, 'public', 'books'), {
     setHeaders: (res, path) => {
         if (path.endsWith('.pdf')) {
