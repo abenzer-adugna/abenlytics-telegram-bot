@@ -9,7 +9,12 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  
+  <script>
+    // Check if user is authenticated
+    if (!localStorage.getItem('authenticated')) {
+        window.location.href = 'login.html';
+    }
+</script>
     <div class="candlestick-bg"></div>
   
 
