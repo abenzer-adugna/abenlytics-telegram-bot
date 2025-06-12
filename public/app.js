@@ -701,6 +701,27 @@ const modalCloseBtn = document.getElementById('modal-close-btn');
         }
     }
 
-// ... existing code below ...
+// Run this only on login.html
+if (window.location.pathname.endsWith("login.html")) {
+  document.addEventListener("DOMContentLoaded", () => {
+    const loginBtn = document.getElementById("loginBtn");
+    const codeInput = document.getElementById("codeInput");
+
+    if (loginBtn && codeInput) {
+      loginBtn.addEventListener("click", () => {
+        const correctCode = "aben2025";  // Only share with paid users
+        const input = codeInput.value;
+
+        if (input === correctCode) {
+          localStorage.setItem("abenlytics_access", "granted");
+          window.location.href = "index.html";
+        } else {
+          alert("Wrong code. Try again.");
+        }
+      });
+    }
+  });
+}
+
             
           
