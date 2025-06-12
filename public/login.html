@@ -6,10 +6,10 @@
 <body>
   <h2>Enter Access Code</h2>
   <input type="password" id="codeInput" placeholder="Enter code">
-  <button onclick="checkCode()">Login</button>
+  <button id="loginBtn">Login</button>
 
   <script>
-    function checkCode() {
+    document.getElementById("loginBtn").addEventListener("click", function() {
       const correctCode = "aben2025";
       const input = document.getElementById("codeInput").value;
       if (input === correctCode) {
@@ -18,7 +18,7 @@
       } else {
         alert("Wrong code. Try again.");
       }
-    }
+    });
   </script>
 </body>
 </html>
