@@ -14,6 +14,10 @@ document.addEventListener('DOMContentLoaded', function() {
     const cryptoContainer = document.getElementById('crypto-container');
     const cryptoUpdated = document.getElementById('crypto-updated');
     const consultationSubmitBtn = document.getElementById('consultation-submit');
+    const learnMoreBtn = document.getElementById('learn-more-btn');
+const aboutModal = document.getElementById('about-modal');
+const closeAboutModal = document.getElementById('close-about-modal');
+const modalCloseBtn = document.getElementById('modal-close-btn');
     
     // =====================================================
     // Initialize Event Listeners
@@ -64,6 +68,22 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         });
     }
+    if (learnMoreBtn) {
+    learnMoreBtn.addEventListener('click', () => {
+        aboutModal.classList.remove('hidden');
+        document.body.style.overflow = 'hidden'; // Prevent scrolling behind modal
+    });
+}
+
+[closeAboutModal, modalCloseBtn].forEach(btn => {
+    if (btn) {
+        btn.addEventListener('click', () => {
+            aboutModal.classList.add('hidden');
+            document.body.style.overflow = ''; // Restore scrolling
+        });
+    }
+});
+
 
     // Initialize service handlers
     initializeServiceHandlers();
@@ -209,7 +229,12 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         });
     }
-
+aboutModal?.addEventListener('click', (e) => {
+    if (e.target === aboutModal) {
+        aboutModal.classList.add('hidden');
+        document.body.style.overflow = '';
+    }
+});
     // Initialize crypto
     function initializeCrypto() {
         updateCryptoPrices();
