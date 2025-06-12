@@ -31,17 +31,7 @@ app.use(cors({
 }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-const cookieParser = require('cookie-parser');
-app.use(cookieParser());
- if (req.path === '/login' || req.path.startsWith('/static/')) {
-    return next();
-  }
-  
-  if (req.cookies.authToken === 'verified') {
-    return next();
-  }
-  res.sendFile(path.join(__dirname, 'public', 'login.html'));
-});
+
 // Rate limiting (100 requests per 15 minutes)
 app.use(rateLimit({
     windowMs: 15 * 60 * 1000,
@@ -52,14 +42,8 @@ app.use(rateLimit({
     })
 }));
 app.set('trust proxy', 1);
-app.use((req, res, next) => {
-// ======================
-// API ENDPOINTS
-// ======================
-// ======================
-// Login Route (Add with other API routes)
-// ======================
-app.post('/login', express.urlencoded({ extended: true }), (req, res) => {
+// Login route
+app.post('/login', (req, res) => {
   const { username, password } = req.body;
   const validCreds = (
     username === (process.env.AUTH_USER || 'admin') && 
@@ -69,17 +53,24 @@ app.post('/login', express.urlencoded({ extended: true }), (req, res) => {
   if (validCreds) {
     res.cookie('authToken', 'verified', {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production', // HTTPS only in production
-      sameSite: 'strict',
-      maxAge: 86400000 // 24 hours
+      secure: true,
+      sameSite: 'strict'
     });
     return res.redirect('/');
   }
   
-  return res.status(401).sendFile(path.join(__dirname, 'public', 'login.html'), {
-    headers: { 'X-Error': 'Invalid credentials' }
-  });
+  return res.status(401).send('Invalid credentials');
 });
+
+// Auth middleware
+app.use((req, res, next) => {
+  if (req.cookies.authToken === 'verified') return next();
+  res.sendFile(path.join(__dirname, 'public', 'login.html'));
+});
+// ======================
+// API ENDPOINTS
+// ======================
+
     app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
