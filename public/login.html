@@ -82,5 +82,33 @@
             }
         });
     </script>
+    <!-- ... existing login HTML ... -->
+
+<script>
+    document.getElementById('loginForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        const password = document.getElementById('password').value;
+        const errorElement = document.getElementById('errorMessage');
+        
+        // Replace 'yourpassword123' with your actual password
+        if (password === 'yourpassword123') {
+            console.log('Password correct, setting authentication');
+            // Store session in localStorage
+            localStorage.setItem('authenticated', 'true');
+            // Redirect to main app
+            window.location.href = '/index.html'; // Use absolute path
+        } else {
+            console.log('Incorrect password entered:', password);
+            errorElement.classList.remove('hidden');
+            setTimeout(() => errorElement.classList.add('hidden'), 3000);
+        }
+    });
+
+    // Debugging: Check if authentication exists
+    if (localStorage.getItem('authenticated')) {
+        console.log('Already authenticated, redirecting from login page');
+        window.location.href = '/index.html';
+    }
+</script>
 </body>
 </html>
