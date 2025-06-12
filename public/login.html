@@ -1,19 +1,16 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Abenlytics Login</title>
-  <link rel="stylesheet" href="style.css">
+  <title>Login - Abenlytics</title>
 </head>
 <body>
-  <div class="login-container">
-    <h2>Enter Access Code</h2>
-    <input type="password" id="codeInput" placeholder="Enter access code">
-    <button onclick="checkCode()">Login</button>
-  </div>
+  <h2>Enter Access Code</h2>
+  <input type="password" id="codeInput" placeholder="Enter code">
+  <button onclick="checkCode()">Login</button>
 
   <script>
     function checkCode() {
-      const correctCode = "aben2025"; // Change weekly for paid users
+      const correctCode = "aben2025";
       const input = document.getElementById("codeInput").value;
       if (input === correctCode) {
         localStorage.setItem("abenlytics_access", "granted");
