@@ -42,31 +42,7 @@ app.use(rateLimit({
     })
 }));
 app.set('trust proxy', 1);
-// Login route
-app.post('/login', (req, res) => {
-  const { username, password } = req.body;
-  const validCreds = (
-    username === (process.env.AUTH_USER || 'admin') && 
-    password === (process.env.AUTH_PASS || 'yourpassword123')
-  );
 
-  if (validCreds) {
-    res.cookie('authToken', 'verified', {
-      httpOnly: true,
-      secure: true,
-      sameSite: 'strict'
-    });
-    return res.redirect('/');
-  }
-  
-  return res.status(401).send('Invalid credentials');
-});
-
-// Auth middleware
-app.use((req, res, next) => {
-  if (req.cookies.authToken === 'verified') return next();
-  res.sendFile(path.join(__dirname, 'public', 'login.html'));
-});
 // ======================
 // API ENDPOINTS
 // ======================
