@@ -26,6 +26,12 @@
             box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.2);
         }
     </style>
+    <!-- ... existing head content ... -->
+    <style nonce="{{nonce}}">
+        /* Your inline styles here */
+        body { background-color: #0a0a0a; }
+        /* ... other styles ... */
+    </style>
 </head>
 <body>
     <div class="min-h-screen flex items-center justify-center px-4">
@@ -110,5 +116,6 @@
         window.location.href = '/index.html';
     }
 </script>
+    <script nonce="{{nonce}}" src="/js/login.js"></script>
 </body>
 </html>
