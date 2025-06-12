@@ -31,21 +31,7 @@ app.use(cors({
 }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-// In server.js (less secure alternative)
-app.use((req, res, next) => {
-  res.setHeader(
-    'Content-Security-Policy',
-    "default-src 'self'; " +
-    "script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; " +
-    "style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; " +
-    "img-src 'self' data:; " +
-    "font-src 'self' https://cdnjs.cloudflare.com; " +
-    "connect-src 'self' https://api.binance.com https://api.coingecko.com; " +
-    "frame-src 'none'; " +
-    "object-src 'none'"
-  );
-  next();
-});
+
 
 // Rate limiting (100 requests per 15 minutes)
 app.use(rateLimit({
