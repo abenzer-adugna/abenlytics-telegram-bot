@@ -557,54 +557,81 @@ const modalCloseBtn = document.getElementById('modal-close-btn');
         }
     }
 
+   // ... existing code above ...
+
     // =====================================================
-    // Crypto Functions
+    // Updated Crypto Functions with Free Lifetime Access
     // =====================================================
     
-    // Fetch live crypto data from CoinGecko
+    // Fetch crypto data from Binance (free, no API key needed)
     async function fetchCryptoData() {
         try {
-            const response = await fetch('https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&ids=bitcoin,ethereum,solana,cardano&per_page=4&sparkline=true');
-            const data = await response.json();
-            return data;
-        } catch (error) {
-            console.error('Crypto data error:', error);
-            return [];
+            // First try Binance API (fast and reliable)
+            const response = await fetch(
+                'https://api.binance.com/api/v3/ticker/24hr?symbols=["BTCUSDT","ETHUSDT","SOLUSDT","ADAUSDT"]'
+            );
+            
+            if (!response.ok) {
+                throw new Error(`Binance API error: ${response.status}`);
+            }
+            
+            const binanceData = await response.json();
+            
+            // Map Binance data to match CoinGecko format
+            return binanceData.map(coin => {
+                const symbol = coin.symbol.replace('USDT', '').toLowerCase();
+                return {
+                    id: symbol,
+                    name: symbol.charAt(0).toUpperCase() + symbol.slice(1),
+                    symbol: symbol.toUpperCase(),
+                    current_price: parseFloat(coin.lastPrice),
+                    price_change_percentage_24h: parseFloat(coin.priceChangePercent),
+                    // Add sparkline data from Binance
+                    sparkline_in_7d: {
+                        price: coin.weightedAvgPrice ? 
+                            Array(7).fill(parseFloat(coin.weightedAvgPrice)) : 
+                            Array(7).fill(parseFloat(coin.lastPrice))
+                    }
+                };
+            });
+            
+        } catch (binanceError) {
+            console.warn('Binance failed, trying CoinGecko...', binanceError);
+            
+            try {
+                // Fallback to CoinGecko if Binance fails
+                const geckoResponse = await fetch(
+                    'https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&ids=bitcoin,ethereum,solana,cardano&per_page=4'
+                );
+                
+                if (!geckoResponse.ok) {
+                    throw new Error(`CoinGecko API error: ${geckoResponse.status}`);
+                }
+                
+                return await geckoResponse.json();
+                
+            } catch (geckoError) {
+                console.error('All crypto APIs failed:', geckoError);
+                return [];
+            }
         }
-    }
-
-    // Generate SVG path from price data
-    function generateSparklinePath(prices) {
-        if (!prices || prices.length < 2) return '';
-        
-        const max = Math.max(...prices);
-        const min = Math.min(...prices);
-        const range = max - min || 1;
-        const height = 80;
-        const width = 300;
-        
-        const points = prices.map((price, i) => {
-            const x = (i / (prices.length - 1)) * width;
-            const y = height - ((price - min) / range) * height;
-            return `${x},${y}`;
-        });
-        
-        return `M${points.join(' L')}`;
     }
 
     // Update crypto prices
     async function updateCryptoPrices() {
         try {
+            // Show loading state
+            cryptoContainer.innerHTML = `
+                <div class="col-span-4 text-center py-10">
+                    <i class="fas fa-spinner spinner text-cyan-400 text-3xl mb-4"></i>
+                    <p>Loading crypto data...</p>
+                </div>
+            `;
+            
             const cryptoData = await fetchCryptoData();
             
             if (!cryptoData || cryptoData.length === 0) {
-                cryptoContainer.innerHTML = `
-                    <div class="col-span-4 text-center py-10 text-red-400">
-                        <i class="fas fa-exclamation-triangle text-3xl mb-4"></i>
-                        <p>Failed to load crypto data. Please try again later.</p>
-                    </div>
-                `;
-                return;
+                throw new Error('No crypto data received');
             }
             
             cryptoContainer.innerHTML = cryptoData.map(crypto => {
@@ -631,7 +658,7 @@ const modalCloseBtn = document.getElementById('modal-close-btn');
                                 </div>
                                 <div>
                                     <h3 class="font-bold">${crypto.name}</h3>
-                                    <div class="text-sm text-gray-400">${crypto.symbol.toUpperCase()}/USD</div>
+                                    <div class="text-sm text-gray-400">${crypto.symbol}/USD</div>
                                 </div>
                             </div>
                             <div class="${isUp ? 'price-up' : 'price-down'} text-lg font-bold">
@@ -642,7 +669,7 @@ const modalCloseBtn = document.getElementById('modal-close-btn');
                         <div class="flex justify-between items-center mb-3">
                             <div class="text-sm">24h Change</div>
                             <div class="${isUp ? 'price-up' : 'price-down'}">
-                                ${isUp ? '+' : ''}${change ? change.toFixed(2) : '0.00'}% 
+                                ${isUp ? '+' : ''}${change.toFixed(2)}% 
                                 <i class="fas fa-arrow-${isUp ? 'up' : 'down'} ml-1"></i>
                             </div>
                         </div>
@@ -664,7 +691,7 @@ const modalCloseBtn = document.getElementById('modal-close-btn');
             cryptoContainer.innerHTML = `
                 <div class="col-span-4 text-center py-10 text-red-400">
                     <i class="fas fa-exclamation-triangle text-3xl mb-4"></i>
-                    <p>Error loading crypto data. Please try again.</p>
+                    <p>Error loading crypto data: ${error.message}</p>
                     <button class="mt-4 btn-primary px-4 py-2" onclick="updateCryptoPrices()">
                         <i class="fas fa-sync-alt mr-2"></i>Retry
                     </button>
@@ -672,4 +699,7 @@ const modalCloseBtn = document.getElementById('modal-close-btn');
             `;
         }
     }
-});
+
+// ... existing code below ...
+            
+          
