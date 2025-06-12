@@ -12,6 +12,7 @@ const TelegramBot = require('node-telegram-bot-api');
 const app = express();
 const PORT = process.env.PORT || 3000;
 const upload = multer({ dest: 'uploads/' });
+const crypto = require('crypto');
 
 // Initialize Telegram Bot if token is provided
 let bot;
@@ -31,6 +32,26 @@ app.use(cors({
 }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+// Middleware to generate nonce for CSP
+app.use((req, res, next) => {
+  res.locals.nonce = crypto.randomBytes(16).toString('base64');
+  next();
+});
+// Add CSP header middleware
+app.use((req, res, next) => {
+  res.setHeader(
+    'Content-Security-Policy',
+    `default-src 'self'; 
+     script-src 'self' 'nonce-${res.locals.nonce}' https://cdn.jsdelivr.net; 
+     style-src 'self' 'nonce-${res.locals.nonce}' https://cdn.jsdelivr.net; 
+     img-src 'self' data:; 
+     font-src 'self' https://cdnjs.cloudflare.com; 
+     connect-src 'self' https://api.binance.com https://api.coingecko.com;
+     frame-src 'none';
+     object-src 'none'`
+  );
+  next();
+});
 
 // Rate limiting (100 requests per 15 minutes)
 app.use(rateLimit({
@@ -51,6 +72,14 @@ app.get('/login', (req, res) => {
 app.get('/', (req, res) => {
     res.redirect('/login');
 });
+// Serve login page with nonce
+app.get('/login', (req, res) => {
+    res.render('login', { nonce: res.locals.nonce });
+});
+
+// You'll need to configure a view engine like EJS
+app.set('view engine', 'ejs');
+app.set('views', path.join(__dirname, 'views'));
 
 // Existing catch-all route remains the same
 app.get('*', (req, res) => {
