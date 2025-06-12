@@ -8,17 +8,7 @@
   <input type="password" id="codeInput" placeholder="Enter code">
   <button id="loginBtn">Login</button>
 
-  <script>
-    document.getElementById("loginBtn").addEventListener("click", function() {
-      const correctCode = "aben2025";
-      const input = document.getElementById("codeInput").value;
-      if (input === correctCode) {
-        localStorage.setItem("abenlytics_access", "granted");
-        window.location.href = "index.html";
-      } else {
-        alert("Wrong code. Try again.");
-      }
-    });
-  </script>
+  <!-- Link to your external JS file -->
+  <script src="app.js"></script>
 </body>
 </html>
