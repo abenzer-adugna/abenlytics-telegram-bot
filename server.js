@@ -31,7 +31,17 @@ app.use(cors({
 }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-
+app.use((req, res, next) => {
+  const auth = { login: 'admin', password: 'yourpassword123' }; // Change this!
+  const b64auth = (req.headers.authorization || '').split(' ')[1] || '';
+  const [login, password] = Buffer.from(b64auth, 'base64').toString().split(':');
+  
+  if (req.path === '/login' || (login && password && login === auth.login && password === auth.password)) {
+    return next();
+  }
+  res.set('WWW-Authenticate', 'Basic realm="401"');
+  res.status(401).send('Authentication required');
+});
 
 // Rate limiting (100 requests per 15 minutes)
 app.use(rateLimit({
