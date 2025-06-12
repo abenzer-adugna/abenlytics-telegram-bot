@@ -9,12 +9,17 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <script>
-    // Check if user is authenticated
-    if (!localStorage.getItem('authenticated')) {
-        window.location.href = 'login.html';
-    }
-</script>
+   <script>
+        // Enhanced authentication check
+        const isAuthenticated = localStorage.getItem('authenticated') === 'true';
+        console.log('Authentication status:', isAuthenticated);
+        
+        if (!isAuthenticated) {
+            console.log('Not authenticated, redirecting to login');
+            // Use absolute path
+            window.location.href = '/login.html';
+        }
+    </script>
     <div class="candlestick-bg"></div>
   
 
