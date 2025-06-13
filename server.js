@@ -8,7 +8,6 @@ const fs = require('fs');
 const multer = require('multer');
 const cookieParser = require('cookie-parser');
 const TelegramBot = require('node-telegram-bot-api');
-const crypto = require('crypto');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -21,38 +20,8 @@ if (process.env.TELEGRAM_BOT_TOKEN) {
     console.log('Telegram bot initialized');
 }
 
-// Generate nonce for CSP
-app.use((req, res, next) => {
-    res.locals.nonce = crypto.randomBytes(16).toString('hex');
-    next();
-});
-
-// ======================
-// SECURITY MIDDLEWARE
-// ======================
-app.use(helmet({
-    contentSecurityPolicy: {
-        directives: {
-            defaultSrc: ["'self'"],
-            scriptSrc: [
-                "'self'",
-                (req, res) => `'nonce-${res.locals.nonce}'`,
-                "https://cdn.jsdelivr.net"
-            ],
-            styleSrc: [
-                "'self'",
-                "'unsafe-inline'",
-                "https://cdn.jsdelivr.net",
-                "https://cdnjs.cloudflare.com"
-            ],
-            imgSrc: ["'self'", "data:"],
-            fontSrc: ["'self'", "https://cdnjs.cloudflare.com"],
-            connectSrc: ["'self'", "https://api.binance.com", "https://api.coingecko.com"],
-            objectSrc: ["'none'"]
-        }
-    }
-}));
-
+// Security Middleware
+app.use(helmet());
 app.use(cors({
     origin: process.env.FRONTEND_URL || '*'
 }));
@@ -70,9 +39,7 @@ app.use(rateLimit({
     })
 }));
 
-// ======================
-// AUTHENTICATION SYSTEM
-// ======================
+// Authentication Middleware
 app.use((req, res, next) => {
     const publicPaths = ['/login', '/static', '/auth.js', '/styles.css'];
     if (publicPaths.some(p => req.path.startsWith(p))) return next();
@@ -80,6 +47,7 @@ app.use((req, res, next) => {
     res.sendFile(path.join(__dirname, 'public', 'login.html'));
 });
 
+// Login Endpoint
 app.post('/login', (req, res) => {
     if (req.body.password === process.env.APP_PASSWORD) {
         res.cookie('authToken', 'verified', {
@@ -93,17 +61,7 @@ app.post('/login', (req, res) => {
     res.redirect('/login?error=1');
 });
 
-app.get('/login', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'login.html'));
-});
-
-app.post('/logout', (req, res) => {
-    res.clearCookie('authToken').redirect('/login');
-});
-
-// ======================
-// STATIC FILES
-// ======================
+// Static Files
 app.use('/static', express.static(path.join(__dirname, 'public')));
 app.use('/books', express.static(path.join(__dirname, 'public', 'books'), {
     setHeaders: (res, path) => {
@@ -111,9 +69,53 @@ app.use('/books', express.static(path.join(__dirname, 'public', 'books'), {
             res.set('Content-Type', 'application/pdf');
         }
     }
-});
+}));
 app.use('/roadmaps', express.static(path.join(__dirname, 'public', 'roadmaps')));
 
+// API Endpoints (your existing endpoints go here)
+app.get('/api/books', (req, res) => {
+    try {
+        const booksPath = path.join(__dirname, 'public', 'data', 'books.json');
+        if (!fs.existsSync(booksPath)) {
+            return res.status(404).json({ 
+                status: 'error',
+                error: 'Books file not found'
+            });
+        }
+        
+        const rawData = fs.readFileSync(booksPath, 'utf8');
+        const books = JSON.parse(rawData);
+        
+        const verifiedBooks = books.map(book => {
+            const filePath = path.join(__dirname, 'public', 'books', book.file);
+            if (!fs.existsSync(filePath)) {
+                console.warn(`Missing book file: ${book.file}`);
+                return null;
+            }
+            return {
+                title: book.title,
+                author: book.author || 'Unknown Author',
+                description: book.description || book.note || 'No description available',
+                file: book.file,
+                url: `/books/${encodeURIComponent(book.file)}`
+            };
+        }).filter(Boolean);
+
+        res.json({ 
+            status: 'success',
+            books: verifiedBooks 
+        });
+    } catch (error) {
+        console.error('Books endpoint error:', error);
+        res.status(500).json({ 
+            status: 'error',
+            error: 'Failed to load books',
+            details: error.message 
+        });
+    }
+});
+
+// Add all your other API endpoints here...
 // ======================
 // API ENDPOINTS
 // ======================
@@ -370,10 +372,7 @@ app.post('/api/service/one_on_one', async (req, res) => {
         });
     }
 });
-
-// ======================
-// ERROR HANDLING
-// ======================
+// Error Handling
 app.use((err, req, res, next) => {
     console.error(err.stack);
     res.status(500).json({ 
@@ -382,16 +381,12 @@ app.use((err, req, res, next) => {
     });
 });
 
-// ======================
-// CATCH-ALL ROUTE
-// ======================
+// Catch-all Route
 app.get('*', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
-// ======================
-// SERVER INITIALIZATION
-// ======================
+// Server Initialization
 app.listen(PORT, () => {
     console.log(`🚀 Server running on port ${PORT}`);
     console.log(`🔒 Authentication enabled`);
