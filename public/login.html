@@ -1,28 +1,23 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Login</title>
-  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <title>Login</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
 </head>
-<body class="bg-gray-900 min-h-screen flex items-center justify-center">
-  <div class="bg-gray-800 p-8 rounded-lg max-w-md w-full">
-    <h1 class="text-2xl font-bold text-white mb-6">Login Required</h1>
-    <form method="POST" action="/login" class="space-y-4">
-      <div>
-        <label class="block text-gray-300 mb-2">Password</label>
-        <input type="password" name="password" required
-               class="w-full bg-gray-700 text-white p-2 rounded">
-      </div>
-      <button type="submit" 
-              class="w-full bg-blue-500 hover:bg-blue-600 text-white py-2 rounded">
-        Continue
-      </button>
-    </form>
-    <% if (window.location.search.includes('error=1')) { %>
-      <p class="text-red-400 mt-4">Incorrect password</p>
-    <% } %>
-  </div>
+<body class="bg-gray-900 flex items-center justify-center min-h-screen">
+    <div class="bg-gray-800 p-8 rounded-lg max-w-md w-full">
+        <h1 class="text-2xl font-bold text-white mb-6">Enter Password</h1>
+        <form method="POST" action="/login">
+            <input type="password" name="password" required
+                   class="w-full bg-gray-700 text-white p-2 rounded mb-4">
+            <button type="submit" 
+                   class="w-full bg-blue-500 hover:bg-blue-600 text-white py-2 rounded">
+                Continue
+            </button>
+        </form>
+        <% if (window.location.search.includes('error=1')) { %>
+            <p class="text-red-400 mt-4">Incorrect password</p>
+        <% } %>
+    </div>
 </body>
 </html>
