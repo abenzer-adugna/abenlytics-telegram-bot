@@ -6,9 +6,10 @@ const cors = require('cors');
 const path = require('path');
 const fs = require('fs');
 const multer = require('multer');
+const cookieParser = require('cookie-parser');
 const TelegramBot = require('node-telegram-bot-api');
+const crypto = require('crypto');
 
-// Initialize Express
 const app = express();
 const PORT = process.env.PORT || 3000;
 const upload = multer({ dest: 'uploads/' });
@@ -18,21 +19,48 @@ let bot;
 if (process.env.TELEGRAM_BOT_TOKEN) {
     bot = new TelegramBot(process.env.TELEGRAM_BOT_TOKEN);
     console.log('Telegram bot initialized');
-} else {
-    console.log('No Telegram bot token provided - notifications disabled');
 }
+
+// Generate nonce for CSP
+app.use((req, res, next) => {
+    res.locals.nonce = crypto.randomBytes(16).toString('hex');
+    next();
+});
 
 // ======================
 // SECURITY MIDDLEWARE
 // ======================
-app.use(helmet());
+app.use(helmet({
+    contentSecurityPolicy: {
+        directives: {
+            defaultSrc: ["'self'"],
+            scriptSrc: [
+                "'self'",
+                (req, res) => `'nonce-${res.locals.nonce}'`,
+                "https://cdn.jsdelivr.net"
+            ],
+            styleSrc: [
+                "'self'",
+                "'unsafe-inline'",
+                "https://cdn.jsdelivr.net",
+                "https://cdnjs.cloudflare.com"
+            ],
+            imgSrc: ["'self'", "data:"],
+            fontSrc: ["'self'", "https://cdnjs.cloudflare.com"],
+            connectSrc: ["'self'", "https://api.binance.com", "https://api.coingecko.com"],
+            objectSrc: ["'none'"]
+        }
+    }
+}));
+
 app.use(cors({
     origin: process.env.FRONTEND_URL || '*'
 }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(cookieParser());
 
-// Rate limiting (100 requests per 15 minutes)
+// Rate limiting
 app.use(rateLimit({
     windowMs: 15 * 60 * 1000,
     max: 100,
@@ -41,13 +69,54 @@ app.use(rateLimit({
         error: 'Too many requests, please try again later.' 
     })
 }));
-app.set('trust proxy', 1);
+
+// ======================
+// AUTHENTICATION SYSTEM
+// ======================
+app.use((req, res, next) => {
+    const publicPaths = ['/login', '/static', '/auth.js', '/styles.css'];
+    if (publicPaths.some(p => req.path.startsWith(p))) return next();
+    if (req.cookies.authToken === 'verified') return next();
+    res.sendFile(path.join(__dirname, 'public', 'login.html'));
+});
+
+app.post('/login', (req, res) => {
+    if (req.body.password === process.env.APP_PASSWORD) {
+        res.cookie('authToken', 'verified', {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: 'strict',
+            maxAge: 86400000 // 24 hours
+        });
+        return res.redirect('/');
+    }
+    res.redirect('/login?error=1');
+});
+
+app.get('/login', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'login.html'));
+});
+
+app.post('/logout', (req, res) => {
+    res.clearCookie('authToken').redirect('/login');
+});
+
+// ======================
+// STATIC FILES
+// ======================
+app.use('/static', express.static(path.join(__dirname, 'public')));
+app.use('/books', express.static(path.join(__dirname, 'public', 'books'), {
+    setHeaders: (res, path) => {
+        if (path.endsWith('.pdf')) {
+            res.set('Content-Type', 'application/pdf');
+        }
+    }
+});
+app.use('/roadmaps', express.static(path.join(__dirname, 'public', 'roadmaps')));
 
 // ======================
 // API ENDPOINTS
 // ======================
-
-// 1. Get Books
 app.get('/api/books', (req, res) => {
     try {
         const booksPath = path.join(__dirname, 'public', 'data', 'books.json');
@@ -61,7 +130,6 @@ app.get('/api/books', (req, res) => {
         const rawData = fs.readFileSync(booksPath, 'utf8');
         const books = JSON.parse(rawData);
         
-        // Verify each book file exists
         const verifiedBooks = books.map(book => {
             const filePath = path.join(__dirname, 'public', 'books', book.file);
             if (!fs.existsSync(filePath)) {
@@ -91,7 +159,6 @@ app.get('/api/books', (req, res) => {
     }
 });
 
-// 2. Get Roadmaps
 app.get('/api/roadmaps', (req, res) => {
     try {
         const roadmapsPath = path.join(__dirname, 'public', 'data', 'roadmaps.json');
@@ -105,7 +172,6 @@ app.get('/api/roadmaps', (req, res) => {
         const rawData = fs.readFileSync(roadmapsPath, 'utf8');
         const roadmaps = JSON.parse(rawData);
         
-        // Verify each roadmap file exists
         const verifiedRoadmaps = roadmaps.map(roadmap => {
             const filePath = path.join(__dirname, 'public', 'roadmaps', roadmap.file);
             if (!fs.existsSync(filePath)) {
@@ -134,7 +200,6 @@ app.get('/api/roadmaps', (req, res) => {
     }
 });
 
-// 3. Get Reviews
 app.get('/api/reviews', (req, res) => {
     try {
         const reviewsPath = path.join(__dirname, 'public', 'data', 'reviews.json');
@@ -168,7 +233,6 @@ app.get('/api/reviews', (req, res) => {
     }
 });
 
-// 4. Group Access Service
 app.post('/api/service/group_access', async (req, res) => {
     try {
         const { userData } = req.body;
@@ -195,7 +259,6 @@ app.post('/api/service/group_access', async (req, res) => {
     }
 });
 
-// 5. Newsletter Subscription
 app.post('/api/service/newsletter', async (req, res) => {
     try {
         const { userData } = req.body;
@@ -222,7 +285,6 @@ app.post('/api/service/newsletter', async (req, res) => {
     }
 });
 
-// 6. Prospectus Service
 app.post('/api/service/prospectus', upload.single('file'), async (req, res) => {
     try {
         const userData = JSON.parse(req.body.userData);
@@ -244,7 +306,6 @@ app.post('/api/service/prospectus', upload.single('file'), async (req, res) => {
         console.log(`Prospectus uploaded by user: ${userData.id}`);
         console.log(`File: ${req.file.originalname} (${req.file.size} bytes)`);
         
-        // Clean up the uploaded file
         fs.unlinkSync(req.file.path);
         
         res.json({ 
@@ -260,7 +321,6 @@ app.post('/api/service/prospectus', upload.single('file'), async (req, res) => {
     }
 });
 
-// 7. 1-on-1 Consultation (updated)
 app.post('/api/service/one_on_one', async (req, res) => {
     try {
         const { name, telegramUsername, problem, userData } = req.body;
@@ -272,7 +332,6 @@ app.post('/api/service/one_on_one', async (req, res) => {
             });
         }
 
-        // Log the request
         console.log(`
         New Consultation Request:
         -------------------------
@@ -282,7 +341,6 @@ app.post('/api/service/one_on_one', async (req, res) => {
         Problem: ${problem}
         `);
         
-        // Send Telegram notification if bot is available
         if (bot && process.env.ADMIN_CHAT_ID) {
             try {
                 await bot.sendMessage(
@@ -314,27 +372,8 @@ app.post('/api/service/one_on_one', async (req, res) => {
 });
 
 // ======================
-// STATIC FILE SERVING
+// ERROR HANDLING
 // ======================
-app.use('/books', express.static(path.join(__dirname, 'public', 'books'), {
-    setHeaders: (res, path) => {
-        if (path.endsWith('.pdf')) {
-            res.set('Content-Type', 'application/pdf');
-        }
-    }
-}));
-
-app.use('/roadmaps', express.static(path.join(__dirname, 'public', 'roadmaps')));
-
-// Serve other static files
-app.use(express.static(path.join(__dirname, 'public')));
-
-// Fallback route for SPA
-app.get('*', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'index.html'));
-});
-
-// Error Handling
 app.use((err, req, res, next) => {
     console.error(err.stack);
     res.status(500).json({ 
@@ -343,10 +382,19 @@ app.use((err, req, res, next) => {
     });
 });
 
-// Server Initialization
+// ======================
+// CATCH-ALL ROUTE
+// ======================
+app.get('*', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
+
+// ======================
+// SERVER INITIALIZATION
+// ======================
 app.listen(PORT, () => {
     console.log(`🚀 Server running on port ${PORT}`);
-    console.log(`📚 Books endpoint: /api/books`);
-    console.log(`🔍 Reviews endpoint: /api/reviews`);
-    console.log(`🗺️ Roadmaps endpoint: /api/roadmaps`);
+    console.log(`🔒 Authentication enabled`);
+    console.log(`📚 API endpoints protected`);
+    console.log(`🌐 Static files served from /static`);
 });
