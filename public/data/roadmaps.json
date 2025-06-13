@@ -1,27 +1,27 @@
 [
   {
     "title": "ካፒታል ገበያ 101",
-    "description": "የመጀመሪያው መመሪያ ማዕከል፣ በካፒታል ገበያ መግባትን ያስተምራል።",
+    "description": "module 1።",
     "file": "ካፒታል ገበያ 101.pdf"
   },
   {
     "title": "ካፒታል ገበያ 2",
-    "description": "ካፒታል ገበያ መረዳትን እና የገበያ ዋጋ እንዴት እንደሚቀየር ያስረዳል።",
+    "description": "module 2",
     "file": "ካፒታል ገበያ 2.pdf"
   },
   {
     "title": "ካፒታል ገበያ 3",
-    "description": "የትርፍ መንገዶችን እና ስርዓቱን ያብራራል።",
+    "description": "module 3",
     "file": "ካፒታል ገበያ 3.pdf"
   },
   {
     "title": "ካፒታል ገበያ 4",
-    "description": "የተለያዩ እንቅስቃሴዎችን በገበያ ውስጥ እንዴት እንደሚታወቁ ያስተምራል።",
+    "description": "module 4",
     "file": "ካፒታል ገበያ 4.pdf"
   },
   {
     "title": "ካፒታል ገበያ 5",
-    "description": "ከሞላ ዘመን ማጠናከሪያ፣ ተግባራዊ ምሳሌዎችን ይዟል።",
+    "description": "module 5",
     "file": "ካፒታል ገበያ 5.pdf"
   }
 ]
